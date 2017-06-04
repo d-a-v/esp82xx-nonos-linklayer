@@ -1,0 +1,12 @@
+
+# ESP_HOME must point to esp-open-sdk
+
+LWIP_LIB_RELEASE=liblwip-stable.a
+
+%:
+	make -f makefiles/Makefile.build-lwip2 \
+			SDK=$(ESP_HOME)/sdk \
+			LWIP_LIB=liblwip2.a \
+			LWIP_LIB_RELEASE=$(LWIP_LIB_RELEASE) \
+			TOOLS=$(ESP_HOME)/xtensa-lx106-elf/bin/xtensa-lx106-elf- \
+			$@
