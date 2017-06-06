@@ -77,6 +77,11 @@ extern int os_printf_plus(const char * format, ...) __attribute__ ((format (prin
 
 #define sys_now millis		// arduino wire millis() definition returns 32 bits like sys_now() does
 #define LWIP_RAND r_rand	// old lwip uses this useful undocumented function
+#define IPSTR "%d.%d.%d.%d"
+#define IP2STR(ipaddr) ip4_addr1_16(ipaddr), \
+    ip4_addr2_16(ipaddr), \
+    ip4_addr3_16(ipaddr), \
+    ip4_addr4_16(ipaddr)
 
 // ip_addr / ip_info: do not exist in lwip2 (only in lwip1.4)
 struct ip_addr {
