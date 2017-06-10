@@ -80,3 +80,13 @@ wifi calls    ethernet_input(/ \) XXXXXXXXX
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 -------------------------------------------
 ```
+
+# History
+
+Original [cleaning and port](https://github.com/nekromant/esp8266-frankenstein/tree/master/src/contrib/lwipupdate) of espressif's patch set from lwIP-v1.4 to lwIP-v2 with references to lwIP-git-sha1
+
+[Discussion](https://github.com/kadamski/esp-lwip/issues/8) on how further work could done
+
+[First](https://github.com/d-a-v/esp8266-phy) version of this implementation
+
+[Second](https://github.com/esp8266/Arduino/pull/3206) version for arduino only
