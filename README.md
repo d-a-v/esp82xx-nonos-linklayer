@@ -13,36 +13,31 @@ Currently lwIP-v2 is implemented, other IP stacks could be tried.
 
 # Tested to work so far
 
-* NTPClient
-* WiFiAccessPoint
-* OTA
-* seems to solve some TCP issues
+* arduino NTPClient
+* arduino WiFiAccessPoint
+* arduino OTA
+* has solved some arduino TCP issues
+* Sming Telnet sample
 
 # rebuild
 
 makefiles are working with linux/osx, and maybe with windows (using 'make' included in msys from mingw...)
 
-```
-cd <path-to-your>/esp8266/tools/sdk/lwip2/builder
-```
-
 get lwIP sources
 ```
-./lwip2-update-stable
+git submodule update --init --recursive
 ```
 
-optionnally tune lwIP configuration in tools/sdk/lwip2/builder/glue-lwip2/lwipopts.h
+optionnally tune lwIP configuration in `glue-lwip/lwipopts.h`
 
 build & install
 ```
-make install
+make -f Makefile.<arch> install
 ```
-
-this will overwrite tools/sdk/{lib/liblwip2.a,lwip2/include/}
 
 # about MSS
 
-Remember the MSS footprint: 4*MSS bytes in RAM per tcp connection.
+Remember the MSS footprint: 4\*MSS bytes in RAM per tcp connection.
 The lowest recommanded value is 536 which is the default here.
 
 # How it works
