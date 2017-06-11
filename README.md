@@ -5,11 +5,12 @@ This repo offers a link layer for esp82xx-nonos-sdk-2.
 The original goal is to try and use a recent lwIP version for stability reasons.
 Currently lwIP-v2 is implemented, other IP stacks could be tried.
 
-# Note
+# Notes
 
+* UDP/TCP codes using lwIP-1.4 need some updates - two examples: [arduino](https://github.com/esp8266/Arduino/pull/3129) and [sming](https://github.com/SmingHub/Sming/pull/1147)
 * ipv6 not tried yet
-* tcp is more stable
-* needs testing
+* tcp is more stable ([example1](https://github.com/esp8266/Arduino/issues/3075) and [example2](https://github.com/esp8266/Arduino/issues/2925))
+* needs more testing
 
 # Tested to work so far
 
