@@ -12,15 +12,14 @@ Currently lwIP-v2 is implemented, other IP stacks could be tried.
 * tcp is more stable ([example1](https://github.com/esp8266/Arduino/issues/3075) and [example2](https://github.com/esp8266/Arduino/issues/2925))
 * needs more testing
 
-# Tested to work so far
+# Tested
 
 * arduino NTPClient
 * arduino WiFiAccessPoint
 * arduino OTA
-* has solved some arduino TCP issues
 * Sming Telnet sample
 
-# rebuild
+# Build
 
 makefiles are working with linux/osx, and maybe with windows (using 'make' included in msys from mingw...)
 
@@ -36,7 +35,7 @@ build & install
 make -f Makefile.<arch> install
 ```
 
-# about MSS
+# MSS
 
 Remember the MSS footprint: 4\*MSS bytes in RAM per tcp connection.
 The lowest recommanded value is 536 which is the default here.
