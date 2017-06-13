@@ -3,7 +3,7 @@ OBJ = \
 	$(patsubst %.c,$(BUILD)/%.o,$(wildcard glue/*.c)) \
 	$(patsubst %.c,$(BUILD)/%.o,$(wildcard glue-lwip/*.c)) \
 
-BUILD_INCLUDES = -I$(BUILD) -I$(SDK)/include -Iglue -Iglue-lwip -Ilwip2-src/src/include
+BUILD_INCLUDES = -I$(BUILD) -Iglue -Iglue-lwip -Ilwip2-src/src/include -I$(SDK)/include
 
 include makefiles/Makefile.defs
 include makefiles/Makefile.rules
