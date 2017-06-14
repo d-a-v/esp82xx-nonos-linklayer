@@ -43,7 +43,12 @@ install: $(LWIP_LIB_RELEASE)
 	mkdir -p $(LWIP_INCLUDES_RELEASE)
 	cp -a lwip2-src/src/include/* $(LWIP_INCLUDES_RELEASE)
 	cp -a glue-lwip/lwip-git-hash.h glue-lwip/arch $(LWIP_INCLUDES_RELEASE)
-	(echo "/* this will be overwritten upon lwip2 rebuild */"; cat glue-lwip/lwipopts.h) > $(LWIP_INCLUDES_RELEASE)/lwipopts.h
+	echo "// this file will be overwritten upon lwip2 rebuild" > $(LWIP_INCLUDES_RELEASE)/lwipopts.h
+	echo "#ifndef __CUSTOM_EXTRA_DEFINES__" >> $(LWIP_INCLUDES_RELEASE)/lwipopts.h
+	echo "#define __CUSTOM_EXTRA_DEFINES__" >> $(LWIP_INCLUDES_RELEASE)/lwipopts.h
+	echo "$(CUSTOM_EXTRA_DEFINES)" >> $(LWIP_INCLUDES_RELEASE)/lwipopts.h
+	echo "#endif" >> $(LWIP_INCLUDES_RELEASE)/lwipopts.h
+	cat glue-lwip/lwipopts.h >> $(LWIP_INCLUDES_RELEASE)/lwipopts.h
 	echo "warning: this directory is re/over/written from lwip2 builder upon lwip2 rebuild" > $(LWIP_INCLUDES_RELEASE)/README.md
 	touch $(LWIP_INCLUDES_RELEASE)/espconn.h
 

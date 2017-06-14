@@ -3,7 +3,7 @@
 
 USER_LIBDIR ?= tweaked-
 LWIP_LIB_RELEASE=$(USER_LIBDIR)liblwip2.a
-LWIP_INCLUDES_RELEASE=$(USER_LIBDIR)../include/lwip2
+LWIP_INCLUDES_RELEASE=include
 
 all: install
 
@@ -14,4 +14,5 @@ all: install
 			LWIP_LIB_RELEASE=$(LWIP_LIB_RELEASE) \
 			LWIP_INCLUDES_RELEASE=$(LWIP_INCLUDES_RELEASE) \
 			TOOLS=$(ESP_HOME)/xtensa-lx106-elf/bin/xtensa-lx106-elf- \
+			CUSTOM_EXTRA_DEFINES='#define LWIP_NO_STDINT_H 1' \
 			$@
