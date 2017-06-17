@@ -9,6 +9,7 @@ all: install
 
 %:
 	@make -f makefiles/Makefile.build-lwip2 \
+			target=sming \
 			SDK=$(ESP_HOME)/sdk \
 			LWIP_LIB=liblwip2.a \
 			LWIP_LIB_RELEASE=$(LWIP_LIB_RELEASE) \

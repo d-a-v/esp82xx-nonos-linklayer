@@ -1,7 +1,14 @@
 
+# compiling glue-lwip/
+
+GLUE_LWIP = esp-dhcpserver.c esp-sntp.c lwip-git.c
+ifneq ($(target),arduino)
+	GLUE_LWIP += esp-time.c
+endif
+
 OBJ = \
 	$(patsubst %.c,$(BUILD)/%.o,$(wildcard glue/*.c)) \
-	$(patsubst %.c,$(BUILD)/%.o,$(wildcard glue-lwip/*.c)) \
+	$(patsubst %.c,$(BUILD)/glue-lwip/%.o,$(GLUE_LWIP)) \
 
 BUILD_INCLUDES = -I$(BUILD) -Iglue -Iglue-lwip -Ilwip2-src/src/include -I$(SDK)/include
 

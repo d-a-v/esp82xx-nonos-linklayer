@@ -1,8 +1,15 @@
 
-%:
+LWIP_LIB=liblwip2.a
+
+all: $(LWIP_LIB)
+	@echo "use 'make install' to install this into sdk"
+
+$(LWIP_LIB) %:
 	make -f makefiles/Makefile.build-lwip2 \
-			SDK=../.. \
-			LWIP_LIB=liblwip2.a \
+			target=arduino \
+			SDK=$(abspath ../..) \
+			LWIP_LIB=$(LWIP_LIB) \
 			LWIP_LIB_RELEASE=../../lib/liblwip2.a \
-			TOOLS=../../../xtensa-lx106-elf/bin/xtensa-lx106-elf- \
+			LWIP_INCLUDES_RELEASE=../include \
+			TOOLS=$(abspath ../../../xtensa-lx106-elf/bin/xtensa-lx106-elf-) \
 			$@
