@@ -49,7 +49,7 @@ void sntp_set_system_time (uint32_t t);
 
 #include "mem.h" // useful for os_malloc used in esp-arduino's mDNS
 
-typedef int sys_prot_t;	// not really used
+typedef uint32_t sys_prot_t;	// not really used
 #define SYS_ARCH_DECL_PROTECT(lev)
 #define SYS_ARCH_PROTECT(lev) os_intr_lock()
 #define SYS_ARCH_UNPROTECT(lev) os_intr_unlock()
