@@ -2,9 +2,7 @@
 # compiling glue-lwip/
 
 GLUE_LWIP = esp-dhcpserver.c esp-sntp.c lwip-git.c
-ifneq ($(target),arduino)
-	GLUE_LWIP += esp-time.c
-endif
+GLUE_LWIP += esp-time.c
 ifeq ($(target),esp-open-sdk)
 	GLUE_LWIP += esp-millis.c
 endif

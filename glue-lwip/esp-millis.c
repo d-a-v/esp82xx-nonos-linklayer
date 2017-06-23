@@ -1,5 +1,6 @@
 
 // taken from core_esp8266_wiring.c in esp8266/arduino
+// https://github.com/esp8266/Arduino/blob/master/cores/esp8266/core_esp8266_wiring.c
 
 /* 
  core_esp8266_wiring.c - implementation of Wiring API for esp8266
@@ -33,7 +34,8 @@ static uint32_t micros_overflow_count = 0;
 #define ONCE 0
 #define REPEAT 1
 
-static void micros_overflow_tick(void* arg) {
+void micros_overflow_tick(void* arg) __attribute__((weak));
+void micros_overflow_tick(void* arg) {
     (void) arg;
     uint32_t m = system_get_time();
     if(m < micros_at_last_overflow_tick)
@@ -41,6 +43,7 @@ static void micros_overflow_tick(void* arg) {
     micros_at_last_overflow_tick = m;
 }
 
+uint32_t millis() __attribute__((weak));
 uint32_t millis() {
     static int once = 0;
     if (!once) {
