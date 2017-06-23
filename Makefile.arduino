@@ -1,10 +1,7 @@
 
 LWIP_LIB=liblwip2.a
 
-all: $(LWIP_LIB)
-	@echo "use 'make install' to install this into sdk"
-
-$(LWIP_LIB) %:
+%:
 	make -f makefiles/Makefile.build-lwip2 \
 			target=arduino \
 			SDK=$(abspath ../..) \
