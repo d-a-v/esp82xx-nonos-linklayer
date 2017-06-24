@@ -31,8 +31,6 @@ author: d. gauchard
 // - sdk-2.0.0(656edbf)
 // - sdk-2.1.0(116b762)
 
-// todo: get rid of esp_guess_netif_idx()
-
 #include "arch/cc.h"
 #include "lwip/timers.h"
 #include "lwip/ip_addr.h"
@@ -70,8 +68,8 @@ struct netif *netif_default;
 ///////////////////////////////////////
 // netif
 
-#define netif_sta netif_esp[STATION_IF]		// hardly used
-#define netif_ap  netif_esp[SOFTAP_IF]		// hardly used
+#define netif_sta netif_esp[STATION_IF]
+#define netif_ap  netif_esp[SOFTAP_IF]
 static struct netif* netif_esp[2] = { NULL, NULL };
 
 ///////////////////////////////////////
@@ -311,42 +309,6 @@ err_glue_t glue2esp_linkoutput (int netif_idx, void* ref2save, void* data, size_
 	return esp2glue_err(err);
 }
 
-#if 1
-#define esp_guess_netif_idx(netif) ((netif)->num)
-#else
-int esp_guess_netif_idx (struct netif* netif)
-{
-	struct netif* test_netif_sta = eagle_lwip_getif(STATION_IF);
-	struct netif* test_netif_ap = eagle_lwip_getif(SOFTAP_IF);
-	int ret = netif->num;
-
-	if (test_netif_sta)
-	{
-		uassert(!netif_sta || test_netif_sta == netif_sta);
-		uassert(test_netif_sta->input == ethernet_input);
-		uassert(test_netif_sta->output == etharp_output);
-		if (netif == test_netif_sta)
-			ret = STATION_IF;
-	}
-	
-	if (test_netif_ap)
-	{
-		uassert(!netif_ap || test_netif_ap == netif_ap);
-		uassert(test_netif_ap->input == ethernet_input);
-		uassert(test_netif_ap->output == etharp_output);
-		if (netif == test_netif_ap)
-			ret = SOFTAP_IF;
-	}
-	
-	if (ret < 0 || ret > 1)
-	{
-		uerror(DBG "guess netif: ERROR default STA");
-		ret = STATION_IF;
-	}
-	return ret;
-}
-#endif
-
 ///////////////////////////////////////
 // STUBS / wrappers
 
@@ -356,24 +318,6 @@ void lwip_init (void)
 	esp2glue_lwip_init();
 }
 
-/**
- * Resolve and fill-in Ethernet address header for outgoing IP packet.
- *
- * For IP multicast and broadcast, corresponding Ethernet addresses
- * are selected and the packet is transmitted on the link.
- *
- * For unicast addresses, the packet is submitted to etharp_query(). In
- * case the IP address is outside the local network, the IP address of 
- * the gateway is used.
- *
- * @param netif The lwIP network interface which the IP packet will be sent on.
- * @param q The pbuf(s) containing the IP packet to be sent.
- * @param ipaddr The IP address of the packet destination.  
- *
- * @return
- * - ERR_RTE No route to destination (no gateway to external networks),
- * or the return type of either etharp_query() or etharp_send_ip().
- */
 err_t etharp_output (struct netif* netif, struct pbuf* q, ip_addr_t* ipaddr)
 {
 	(void)netif; (void)q; (void)ipaddr;
@@ -381,17 +325,6 @@ err_t etharp_output (struct netif* netif, struct pbuf* q, ip_addr_t* ipaddr)
 	return ERR_ABRT;
 }
                    
- /**
- * Process received ethernet frames. Using this function instead of directly
- * calling ip_input and passing ARP frames through etharp in ethernetif_input,
- * the ARP cache is protected from concurrent access.
- *
- * @param p the recevied packet, p->payload pointing to the ethernet header
- * @param netif the network interface on which the packet was received
- */
-// this is called maybe through netif->input()
-// maybe we could try to short-circuit netif->input
-// but so far ethernet_input() is fine with AP and STA
 err_t ethernet_input (struct pbuf* p, struct netif* netif)
 {
 	uprint(DBG "received pbuf@%p (pbuf: %dB ref=%d eb=%p) on netif ", p, p->tot_len, p->ref, p->eb);
@@ -475,24 +408,12 @@ err_t dhcp_release (struct netif* netif)
 	return ERR_ABRT;
 }
 
-/**
- * Start DHCP negotiation for a network interface.
- *
- * If no DHCP client instance was attached to this interface,
- * a new client is created first. If a DHCP client instance
- * was already present, it restarts negotiation.
- *
- * @param netif The lwIP network interface
- * @return lwIP error code
- * - ERR_OK - No error
- * - ERR_MEM - Out of memory
- */
 err_t dhcp_start (struct netif* netif)
 {
 	uprint(DBG "dhcp_start ");
 	stub_display_netif(netif);
 
-	return glue2esp_err(esp2glue_dhcp_start(esp_guess_netif_idx(netif)));
+	return glue2esp_err(esp2glue_dhcp_start(netif->num));
 }
 
 void dhcp_stop (struct netif* netif)
@@ -502,21 +423,6 @@ void dhcp_stop (struct netif* netif)
 	STUB(dhcp_stop);
 }
 
-/**
- * Add a network interface to the list of lwIP netifs.
- *
- * @param netif a pre-allocated netif structure
- * @param ipaddr IP address for the new netif
- * @param netmask network mask for the new netif
- * @param gw default gateway IP address for the new netif
- * @param state opaque data passed to the new netif
- * @param init callback function that initializes the interface
- * @param input callback function that is called to pass
- * ingress packets up in the protocol layer stack.
- *
- * @return netif, or NULL if failed.
- */
- 
 static int esp_netif_num = 0;
 static struct netif* esp_netif_list = NULL;
 
@@ -624,11 +530,6 @@ struct netif* netif_add (
 }
 
 
-/**
- * Remove a network interface from the list of lwIP netifs.
- *
- * @param netif the network interface to remove
- */
 void netif_remove (struct netif* netif)
 {
 	(void)netif;
@@ -641,56 +542,32 @@ void netif_remove (struct netif* netif)
 	(void)netif;
 }
 
-/**
- * Change IP address configuration for a network interface (including netmask
- * and default gateway).
- *
- * @param netif the network interface to change
- * @param ipaddr the new IP address
- * @param netmask the new netmask
- * @param gw the new default gateway
- */
 void netif_set_addr (struct netif* netif, ip_addr_t* ipaddr, ip_addr_t* netmask, ip_addr_t* gw)
 {
 	netif->ip_addr.addr = ipaddr->addr;
 	netif->netmask.addr = netmask->addr;
 	netif->gw.addr = gw->addr;
-	int netif_idx = esp_guess_netif_idx(netif);
 
 	// tell blobs
 	struct ip_info set;
 	set.ip.addr = ipaddr->addr;
 	set.netmask.addr = netmask->addr;
 	set.gw.addr = gw->addr;
-	wifi_set_ip_info(netif_idx, &set);
+	wifi_set_ip_info(netif->num, &set);
 
 	uprint(DBG "netif_set_addr ");
 	stub_display_netif(netif);
 	
-	esp2glue_netif_set_addr(netif_idx, ipaddr->addr, netmask->addr, gw->addr);
+	esp2glue_netif_set_addr(netif->num, ipaddr->addr, netmask->addr, gw->addr);
 }
 
-/**
- * Set a network interface as the default network interface
- * (used to output all packets for which no specific route is found)
- *
- * @param netif the default network interface
- */
 void netif_set_default (struct netif* netif)
 {
-	uprint(DBG "netif_set_default %d\n", esp_guess_netif_idx(netif));
+	uprint(DBG "netif_set_default %d\n", netif->num);
 	netif_default = netif;
-	esp2glue_netif_set_default(esp_guess_netif_idx(netif));
+	esp2glue_netif_set_default(netif->num);
 }
 
-/**
- * Bring an interface down, disabling any traffic processing.
- *
- * @note: Enabling DHCP on a down interface will make it come
- * up once configured.
- * 
- * @see dhcp_start()
- */ 
 void netif_set_down (struct netif* netif)
 {
 	uprint(DBG "netif_set_down  ");
@@ -706,55 +583,13 @@ void netif_set_down (struct netif* netif)
 	(void)netif;
 }
 
-/**
- * Bring an interface up, available for processing
- * traffic.
- * 
- * @note: Enabling DHCP on a down interface will make it come
- * up once configured.
- * 
- * @see dhcp_start()
- */ 
 void netif_set_up (struct netif* netif)
 {
-	uerror(DBG "netif_set_up is called??");
 	stub_display_netif(netif);
 
 	netif->flags |= (NETIF_FLAG_UP |  NETIF_FLAG_LINK_UP);
 	esp2glue_netif_set_updown(netif->num, 1);
 }
-
-/**
- * Allocates a pbuf of the given type (possibly a chain for PBUF_POOL type).
- *
- * The actual memory allocated for the pbuf is determined by the
- * layer at which the pbuf is allocated and the requested size
- * (from the size parameter).
- *
- * @param layer flag to define header size
- * @param length size of the pbuf's payload
- * @param type this parameter decides how and where the pbuf
- * should be allocated as follows:
- *
- * - PBUF_RAM: buffer memory for pbuf is allocated as one large
- *             chunk. This includes protocol headers as well.
- * - PBUF_ROM: no buffer memory is allocated for the pbuf, even for
- *             protocol headers. Additional headers must be prepended
- *             by allocating another pbuf and chain in to the front of
- *             the ROM pbuf. It is assumed that the memory used is really
- *             similar to ROM in that it is immutable and will not be
- *             changed. Memory which is dynamic should generally not
- *             be attached to PBUF_ROM pbufs. Use PBUF_REF instead.
- * - PBUF_REF: no buffer memory is allocated for the pbuf, even for
- *             protocol headers. It is assumed that the pbuf is only
- *             being used in a single thread. If the pbuf gets queued,
- *             then pbuf_take should be called to copy the buffer.
- * - PBUF_POOL: the pbuf is allocated as a pbuf chain, with pbufs from
- *              the pbuf pool that is allocated during pbuf_init().
- *
- * @return the allocated pbuf. If multiple pbufs where allocated, this
- * is the first pbuf of a pbuf chain.
- */
 
 struct pbuf* pbuf_alloc (pbuf_layer layer, u16_t length, pbuf_type type)
 {
@@ -809,40 +644,6 @@ struct pbuf* pbuf_alloc (pbuf_layer layer, u16_t length, pbuf_type type)
 	return NULL;
 }
 
-/**
- * Dereference a pbuf chain or queue and deallocate any no-longer-used
- * pbufs at the head of this chain or queue.
- *
- * Decrements the pbuf reference count. If it reaches zero, the pbuf is
- * deallocated.
- *
- * For a pbuf chain, this is repeated for each pbuf in the chain,
- * up to the first pbuf which has a non-zero reference count after
- * decrementing. So, when all reference counts are one, the whole
- * chain is free'd.
- *
- * @param p The pbuf (chain) to be dereferenced.
- *
- * @return the number of pbufs that were de-allocated
- * from the head of the chain.
- *
- * @note MUST NOT be called on a packet queue (Not verified to work yet).
- * @note the reference counter of a pbuf equals the number of pointers
- * that refer to the pbuf (or into the pbuf).
- *
- * @internal examples:
- *
- * Assuming existing chains a->b->c with the following reference
- * counts, calling pbuf_free(a) results in:
- * 
- * 1->2->3 becomes ...1->3
- * 3->3->3 becomes 2->3->3
- * 1->1->2 becomes ......1
- * 2->1->1 becomes 1->1->1
- * 1->1->1 becomes .......
- *
- */
-
 u8_t pbuf_free (struct pbuf *p)
 {
 	//STUB(pbuf_free);
@@ -890,45 +691,19 @@ u8_t pbuf_free (struct pbuf *p)
 	return 0;
 }
 
-/**
- * Increment the reference count of the pbuf.
- *
- * @param p pbuf to increase reference counter of
- *
- */
 void pbuf_ref (struct pbuf *p)
 {
 	uprint(DBG "pbuf_ref(%p) ref=%d->%d\n", p, p->ref, p->ref + 1);
 	++(p->ref);
 }
 
-/**
- * Create a one-shot timer (aka timeout). Timeouts are processed in the
- * following cases:
- * - while waiting for a message using sys_timeouts_mbox_fetch()
- * - by calling sys_check_timeouts() (NO_SYS==1 only)
- *
- * @param msecs time in milliseconds after that the timer should expire
- * @param handler callback function to call when msecs have elapsed
- * @param arg argument to pass to the callback function
- */
-void sys_timeout(u32_t msecs, sys_timeout_handler handler, void *arg)
+void sys_timeout (u32_t msecs, sys_timeout_handler handler, void *arg)
 {
 	(void)msecs; (void)handler; (void)arg;
 	STUB(sys_timeout);
 }
 
-/**
- * Go through timeout list (for this task only) and remove the first matching
- * entry, even though the timeout has not triggered yet.
- *
- * @note This function only works as expected if there is only one timeout
- * calling 'handler' in the list of timeouts.
- *
- * @param handler callback function that would be called by the timeout
- * @param arg callback argument that would be passed to handler
-*/
-void sys_untimeout(sys_timeout_handler handler, void *arg)
+void sys_untimeout (sys_timeout_handler handler, void *arg)
 {
 	(void)handler; (void)arg;
 	STUB(sys_untimeout);

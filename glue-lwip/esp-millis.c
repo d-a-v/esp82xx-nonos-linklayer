@@ -26,6 +26,7 @@
 #include "ets_sys.h"
 #include "osapi.h"
 #include "user_interface.h"
+#include "esp-millis.h"
 
 static os_timer_t micros_overflow_timer;
 static uint32_t micros_at_last_overflow_tick = 0;
@@ -43,8 +44,8 @@ void micros_overflow_tick(void* arg) {
     micros_at_last_overflow_tick = m;
 }
 
-uint32_t millis() __attribute__((weak));
-uint32_t millis() {
+uint32_t millis(void) __attribute__((weak));
+uint32_t millis(void) {
     static int once = 0;
     if (!once) {
         os_timer_setfn(&micros_overflow_timer, (os_timer_func_t*) &micros_overflow_tick, 0);

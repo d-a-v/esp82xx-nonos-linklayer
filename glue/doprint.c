@@ -27,6 +27,9 @@ author: d. gauchard
 
 */
 
+#include "doprint.h"
+
+#if UDEBUG
 
 #include <stdarg.h>
 #include <osapi.h>
@@ -34,25 +37,14 @@ author: d. gauchard
 #include <mem.h>
 #include <ets_sys.h>
 
-#include "doprint.h"
+#if STRING_IN_FLASH
+#include <alloca.h>
+#include <../../../cores/esp8266/pgmspace.h>
+#endif
+
 #include "esp-missing.h"
 
 extern int doprint_allow;
-
-#if 0
-
-// do not bufferize
-
-int doprint (const char* format, ...)
-{
-	va_list ap;
-	va_start(ap, format);
-	int ret = ets_vprintf(ets_putc, format, ap);
-	va_end(ap);
-	return ret;
-}
-
-#else
 
 // bufferize
 
@@ -78,7 +70,9 @@ static int bufputc (int c)
 	return c;
 }
 
-//#define PUTC ets_putc		// no line number
+#if 0				// !0 = print line number
+#define PUTC ets_putc		// no line number
+#else
 #define PUTC nl_putc		// show line number
 
 static int nl_putc (int c);
@@ -100,34 +94,9 @@ static int nl_putc (int c)
 	return c;
 }
 
-extern uint32_t millis (void);
+#endif // nl_putc
 
-#if STRING_IN_FLASH
-// http://marrin.org/2017/01/16/putting-data-in-esp8266-flash-memory/
-// https://github.com/cmarrin/m8rscript/blob/master/esp/core/Esp.{h,cpp}
-static inline uint8_t readRomByte(const uint8_t* addr)
-{
-    uint32_t bytes;
-    bytes = *(uint32_t*)((uint32_t)addr & ~3);
-    return ((uint8_t*)&bytes)[(uint32_t)addr & 3];
-}
-size_t ROMstrlen(const char* s)
-{
-    const char* p;
-    for (p = s; readRomByte((uint8_t*)p) != '\0'; p++) ;
-    return (size_t) (p - s);
-}
-char* ROMCopyString(char* dst, const char* src)
-{
-    uint8_t* s = (uint8_t*) src;
-    char c;
-    while ((c = (char) readRomByte(s++))) {
-        *dst++ = c;
-    }
-    *dst = '\0';
-    return dst;
-}
-#endif
+extern uint32_t millis (void);
 
 int doprint_minus (const char* minus_format, ...)
 {
@@ -157,11 +126,11 @@ int doprint_minus (const char* minus_format, ...)
 		myputc = bufputc;
 
 #if STRING_IN_FLASH
-	size_t fmtlen = ROMstrlen(minus_format);
-	char* format = os_malloc(fmtlen + 1);
-	ROMCopyString(format, minus_format);
+	size_t fmtlen = strlen_P(minus_format);
+	char* format = alloca(fmtlen + 1);
+	strcpy_P(format, minus_format);
 #else
-#define format minus_format
+	const char* format = minus_format;
 #endif
 
 	va_list ap;
@@ -169,11 +138,7 @@ int doprint_minus (const char* minus_format, ...)
 	ret += ets_vprintf(myputc, format, ap);
 	va_end(ap);
 
-#if STRING_IN_FLASH
-	os_free(format);
-#endif
-	
 	return ret;
 }
 
-#endif
+#endif // !REGULAR_PRINTF
