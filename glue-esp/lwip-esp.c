@@ -379,12 +379,6 @@ void dhcps_start (struct ip_info* info)
  	esp2glue_dhcps_start(info);
 }
 
-void dhcps_stop (void)
-{
-	// not implemented yet
-	STUB(dhcps_stop);
-}
-
 void espconn_init (void)
 {
 	// not implemented yet

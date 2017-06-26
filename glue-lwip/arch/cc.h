@@ -111,7 +111,7 @@ extern ip4_addr_t* ntp_servers;
 #define dhcp_start dhcp_start_LWIP2
 #define dhcp_stop dhcp_stop_LWIP2
 #define dhcps_start dhcps_start_LWIP2
-#define dhcps_stop dhcps_stop_LWIP2
+//#define dhcps_stop dhcps_stop_LWIP2				// void(void)
 #define espconn_init espconn_init_LWIP2
 #define etharp_output etharp_output_LWIP2
 #define ethbroadcast ethbroadcast_LWIP2
