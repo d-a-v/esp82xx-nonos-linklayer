@@ -56,7 +56,9 @@ typedef uint32_t sys_prot_t;	// not really used
 
 ///////////////////////////////
 //// DEBUG
-#if 0 // debug 1:on or 0
+#include "gluedebug.h"
+
+#if ULWIPDEBUG // debug 1:on or 0
 
 //#define LWIP_DBG_TYPES_ON		(LWIP_DBG_ON|LWIP_DBG_TRACE|LWIP_DBG_STATE|LWIP_DBG_FRESH|LWIP_DBG_HALT)
 #define LWIP_DBG_TYPES_ON		(LWIP_DBG_ON|LWIP_DBG_TRACE|LWIP_DBG_STATE|LWIP_DBG_FRESH)
@@ -68,9 +70,11 @@ typedef uint32_t sys_prot_t;	// not really used
 extern int os_printf_plus(const char * format, ...) __attribute__ ((format (printf, 1, 2)));
 #define LWIP_PLATFORM_DIAG(x) do { os_printf x;} while(0)
 
-#else
+#endif // ULWIPDEBUG
+
+#if !ULWIPASSERT
 #define LWIP_NOASSERT 1
-#endif // debug
+#endif
 
 ///////////////////////////////
 //// MISSING 

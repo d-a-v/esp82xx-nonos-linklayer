@@ -14,15 +14,11 @@
 
 extern int doprint_allow;
 
-#if !UDEBUG
-
-#define doprint(x...)	printf(x)
-
-#else // UDEBUG
-
 #ifdef ARDUINO
 #define STRING_IN_FLASH 1
 #endif
+
+#if UDEBUG && UDEBUGSTORE
 
 #if STRING_IN_FLASH
 #define doprint(fmt, ...) \
@@ -36,6 +32,10 @@ extern int doprint_allow;
 
 int doprint_minus (const char* format, ...) __attribute__ ((format (printf, 1, 2))); // format in flash
 
-#endif // UDEBUG
+#else // !UDEBUG
+
+#define doprint(x...)	printf(x)
+
+#endif // !UDEBUG
 
 #endif // DOPRINT_H

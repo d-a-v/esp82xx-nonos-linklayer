@@ -35,9 +35,7 @@ author: d. gauchard
 #include "user_interface.h"
 #include "esp-missing.h"
 
-#define UDEBUG	0	// 0 or 1
-#define UDUMP	0	// 0 or 1 (show packets content)
-
+#include "gluedebug.h"
 #include "uprint.h"
 #include "doprint.h"
 

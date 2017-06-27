@@ -29,7 +29,7 @@ author: d. gauchard
 
 #include "doprint.h"
 
-#if UDEBUG
+#if UDEBUG && UDEBUGSTORE
 
 #include <stdarg.h>
 #include <osapi.h>
@@ -70,11 +70,9 @@ static int bufputc (int c)
 	return c;
 }
 
-#if 0				// !0 = print line number
-#define PUTC ets_putc		// no line number
-#else
-#define PUTC nl_putc		// show line number
+#if UDEBUGINDEX			// = print line number
 
+#define PUTC nl_putc		// show line number
 static int nl_putc (int c);
 
 static int doprint_direct (const char* format, ...)
@@ -94,7 +92,9 @@ static int nl_putc (int c)
 	return c;
 }
 
-#endif // nl_putc
+#else // !UDEBUGINDEX
+#define PUTC ets_putc		// no line number
+#endif // !UDEBUGINDEX
 
 extern uint32_t millis (void);
 
@@ -141,4 +141,4 @@ int doprint_minus (const char* minus_format, ...)
 	return ret;
 }
 
-#endif // !REGULAR_PRINTF
+#endif // UDEBUG && UDEBUGSTORE

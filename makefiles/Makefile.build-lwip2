@@ -44,7 +44,7 @@ install: $(LWIP_LIB_RELEASE)
 	rm -rf $(LWIP_INCLUDES_RELEASE)
 	mkdir -p $(LWIP_INCLUDES_RELEASE)
 	cp -a lwip2-src/src/include/* $(LWIP_INCLUDES_RELEASE)
-	cp -a glue-lwip/lwip-git-hash.h glue-lwip/arch $(LWIP_INCLUDES_RELEASE)
+	cp -a glue/gluedebug.h glue-lwip/lwip-git-hash.h glue-lwip/arch $(LWIP_INCLUDES_RELEASE)
 	echo "// this file will be overwritten upon lwip2 rebuild" > $(LWIP_INCLUDES_RELEASE)/lwipopts.h
 	echo "#ifndef __CUSTOM_EXTRA_DEFINES__" >> $(LWIP_INCLUDES_RELEASE)/lwipopts.h
 	echo "#define __CUSTOM_EXTRA_DEFINES__" >> $(LWIP_INCLUDES_RELEASE)/lwipopts.h
