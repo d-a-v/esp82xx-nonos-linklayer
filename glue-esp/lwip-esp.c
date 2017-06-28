@@ -485,7 +485,35 @@ struct netif* netif_add (
 		return NULL;
 	}
 
-	if (esp_netif_num == 2)
+#if 1
+	struct netif* test_netif_sta = eagle_lwip_getif(STATION_IF);
+	struct netif* test_netif_ap = eagle_lwip_getif(SOFTAP_IF);
+	if (netif == test_netif_sta)
+		netif->num = STATION_IF;
+	else if (netif == test_netif_ap)
+		netif->num = SOFTAP_IF;
+	else 
+		uerror("LWIP: esp/netif_add: not AP nor STA netif ???\n");
+	if (netif->num < esp_netif_num)
+		// already added
+		esp2glue_netif_set_addr(netif->num, ipaddr->addr, netmask->addr, gw->addr);
+	else
+	{
+		// check if interfaces are added in the good order
+		uassert(esp_netif_num == netif->num);
+
+		esp_netif_num++;
+		netif->next = esp_netif_list;
+		esp_netif_list = netif;
+
+		uassert(!netif_esp[netif->num]);
+		netif_esp[netif->num] = netif;
+
+		esp2glue_netif_add(netif->num, ipaddr->addr, netmask->addr, gw->addr, netif->hwaddr_len, netif->hwaddr, netif->mtu);
+	}
+#else
+// buggy
+	if (esp_netif_num > 1)
 	{
 		if (netif == netif_sta)
 		{
@@ -498,7 +526,7 @@ struct netif* netif_add (
 			uassert(netif->num == SOFTAP_IF);
 		}
 		else
-			uerror(DBG "esp is messing with me\n");
+			uerror(DBG "esp/netif_add:num=%d (glue has seen $d interfaces)\n", netif->num, esp_netif_num);
 
 		// assume hwaddr has not changed
 		esp2glue_netif_set_addr(netif->num, ipaddr->addr, netmask->addr, gw->addr);
@@ -514,6 +542,7 @@ struct netif* netif_add (
 
 		esp2glue_netif_add(netif->num, ipaddr->addr, netmask->addr, gw->addr, netif->hwaddr_len, netif->hwaddr, netif->mtu);
 	}
+#endif
 
 	//////////////////////////////
 	
