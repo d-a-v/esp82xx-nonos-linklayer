@@ -27,41 +27,15 @@ author: d. gauchard
 
 */
 
-#ifndef GLUE_STUB_H
-#define GLUE_STUB_H
+#ifndef GLUE_H
+#define GLUE_H
+
+#include "gluedebug.h"
 
 #include "ets_sys.h"
 #include "osapi.h"
 #include "user_interface.h"
 #include "esp-missing.h"
-
-#include "gluedebug.h"
-#include "uprint.h"
-#include "doprint.h"
-
-#if UDEBUG
-// buffered printf + line number, needs doprint_allow=1 after Serial.begin
-#warning use 'doprint_allow=1' right after Serial is enabled
-#undef	os_printf
-#define	os_printf		uprint
-#define UPRINTF 		doprint
-#else
-#define UPRINTF 		os_printf
-#ifdef USE_OPTIMIZE_PRINTF // bug in osapi.h (fixed in arduino's sdk-2.1)
-extern int os_printf_plus(const char * format, ...) __attribute__ ((format (printf, 1, 2)));
-#endif
-#endif
-
-#if UDEBUG
-#define uprint(x...)		do { UPRINTF(x); } while (0)
-#else
-#define uprint(x...)		do { (void)0; } while (0)
-#endif
-
-#define uerror(x...)		do { UPRINTF(x); } while (0)
-#define uassert(assertion...)	do { if ((assertion) == 0) { UPRINTF("assert fail: " #assertion " @%s:%d\n", __FILE__, __LINE__); uhalt(); } } while (0)
-#define uhalt()			do { *((char*)0) = 0; } while (0)
-#define nl()			do { uprint("\n"); } while (0)
 
 typedef enum
 {
@@ -101,11 +75,10 @@ err_glue_t	esp2glue_ethernet_input		(int netif_idx, void* glue_pbuf);
 void		esp2glue_alloc_for_recv		(size_t len, void** glue_pbuf, void** glue_data);
 void		esp2glue_pbuf_freed		(void* ref_saved);
 void		esp2glue_netif_set_default	(int netif_idx);
-void		esp2glue_netif_add		(int netif_idx, uint32_t ip, uint32_t mask, uint32_t gw, size_t hwlen, const uint8_t* hwaddr, uint16_t mtu);
-void		esp2glue_netif_set_addr		(int netif_idx, uint32_t ip, uint32_t mask, uint32_t gw);
-void		esp2glue_netif_set_updown	(int netif_idx, int up1_or_down0);
+void		esp2glue_netif_update		(int netif_idx, uint32_t ip, uint32_t mask, uint32_t gw, size_t hwlen, const uint8_t* hwaddr, uint16_t mtu);
+void		esp2glue_netif_set_up1down0	(int netif_idx, int up1_or_down0);
 
 void		glue2esp_ifup			(int netif_idx, uint32_t ip, uint32_t mask, uint32_t gw);
 err_glue_t	glue2esp_linkoutput		(int netif_idx, void* ref2save, void* data, size_t size);
 
-#endif // GLUE_STUB_H
+#endif // GLUE_H

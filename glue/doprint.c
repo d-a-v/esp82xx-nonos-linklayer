@@ -27,9 +27,9 @@ author: d. gauchard
 
 */
 
-#include "doprint.h"
+#include "gluedebug.h"
 
-#if UDEBUG && UDEBUGSTORE
+#if UDEBUG && (UDEBUGINDEX || UDEBUGSTORE)
 
 #include <stdarg.h>
 #include <osapi.h>
@@ -46,13 +46,17 @@ author: d. gauchard
 
 extern int doprint_allow;
 
+
+#if UDEBUGSTORE
+
 // bufferize
 
+#ifndef ROTBUFLEN_BIT
 #define ROTBUFLEN_BIT	10 // 11=2048
+#endif
+
 #define ROTBUFLEN	(1 << (ROTBUFLEN_BIT))
 #define ROTBUFLEN_MASK	((ROTBUFLEN) - 1)
-
-static int nl = 0;
 
 static int rotin = 0;
 static int rotout = 0;
@@ -70,19 +74,14 @@ static int bufputc (int c)
 	return c;
 }
 
+#endif // UDEBUGSTORE
+
 #if UDEBUGINDEX			// = print line number
 
 #define PUTC nl_putc		// show line number
-static int nl_putc (int c);
 
-static int doprint_direct (const char* format, ...)
-{
-	va_list ap;
-	va_start(ap, format);
-	int ret = ets_vprintf(PUTC, format, ap);
-	va_end(ap);
-	return ret;
-}
+static int nl = 0;
+static int nl_putc (int c);
 
 static int nl_putc (int c)
 {
@@ -93,16 +92,31 @@ static int nl_putc (int c)
 }
 
 #else // !UDEBUGINDEX
+
 #define PUTC ets_putc		// no line number
+
 #endif // !UDEBUGINDEX
 
-extern uint32_t millis (void);
+#if UDEBUGSTORE || UDEBUGINDEX
+
+static int doprint_direct (const char* format, ...)
+{
+	va_list ap;
+	va_start(ap, format);
+	int ret = ets_vprintf(PUTC, format, ap);
+	va_end(ap);
+	return ret;
+}
+
+#endif // UDEBUGSTORE || UDEBUGINDEX
 
 int doprint_minus (const char* minus_format, ...)
 {
-	int ret;
-	int (*myputc)(int);
+	int ret = 0;
 	
+#if UDEBUGSTORE
+
+	int (*myputc)(int);
 	if (doprint_allow)
 	{
 		if (rotbuf)
@@ -120,18 +134,30 @@ int doprint_minus (const char* minus_format, ...)
 		
 		myputc = PUTC;
 	}
-	else if (!rotbuf && !(rotbuf = (char*)os_malloc(ROTBUFLEN)))
-		return 0;
 	else
+	{
+		if (!rotbuf && !(rotbuf = (char*)os_malloc(ROTBUFLEN)))
+			return 0;
 		myputc = bufputc;
+	}
+
+#else // !UDEBUGSTORE
+
+	int (* const myputc)(int) = PUTC;
+
+#endif // !UDEBUGSTORE
 
 #if STRING_IN_FLASH
+
 	size_t fmtlen = strlen_P(minus_format);
 	char* format = alloca(fmtlen + 1);
 	strcpy_P(format, minus_format);
-#else
+
+#else // !STRING_IN_FLASH
+
 	const char* format = minus_format;
-#endif
+
+#endif // !STRING_IN_FLASH
 
 	va_list ap;
 	va_start(ap, minus_format);
@@ -141,4 +167,4 @@ int doprint_minus (const char* minus_format, ...)
 	return ret;
 }
 
-#endif // UDEBUG && UDEBUGSTORE
+#endif

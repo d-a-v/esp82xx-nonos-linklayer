@@ -29,6 +29,10 @@ author: d. gauchard
 
 // lwip2(git) side of glue
 
+#include "glue.h"
+#include "uprint.h"
+#include "lwip-helper.h"
+
 #include "lwipopts.h"
 #include "lwip/err.h"
 #include "lwip/init.h"
@@ -41,9 +45,6 @@ author: d. gauchard
 // this is dhcpserver taken from lwip-1.4-espressif
 #include "lwip/apps-esp/dhcpserver.h"
 
-#include "glue.h"
-#include "lwip-helper.h"
-
 #define DBG "GLUE: "
 
 static char hostname[32];
@@ -54,7 +55,7 @@ static char hostname[32];
 struct netif netif_git[2];
 const char netif_name[2][8] = { "station", "soft-ap" };
 
-int doprint_allow = 0; // for doprint()
+int __attribute__((weak)) doprint_allow = 0; // for doprint()
 
 err_t glue2git_err (err_glue_t err)
 {
@@ -108,29 +109,6 @@ err_glue_t git2glue_err (err_t err)
 	}
 };	
 
-u8_t glue2git_netif_flags (glue_netif_flags_t flags)
-{
-
-//XXXFIXME this is the paranoia mode
-// make it simpler in non-debug mode
-
-	glue_netif_flags_t copy = flags;
-	u8_t nf = 0;
-	#define CF(x)	do { if (flags & GLUE_NETIF_FLAG_##x) { nf |= NETIF_FLAG_##x; flags &= ~GLUE_NETIF_FLAG_##x; } } while (0)
-	CF(UP);
-	CF(BROADCAST);
-	//CF(POINTTOPOINT);
-	//CF(DHCP);
-	CF(LINK_UP);
-	CF(ETHARP);
-	//CF(ETHERNET);
-	CF(IGMP);
-	#undef CF
-	if (flags)
-		uerror("ERROR: glue2git_netif_flags: remaining flags not converted (0x%x->0x%x)\n", copy, flags);
-	return nf;
-}
-
 #if UDEBUG
 
 static void new_display_netif_flags (int flags)
@@ -146,20 +124,12 @@ static void new_display_netif_flags (int flags)
 	#undef IFF
 }
 
-static const char* new_netif_name (struct netif* netif)
-{
-	uassert(netif == netif_sta || netif == netif_ap);
-	return netif == netif_ap? "AP": "STA";
-}
-
 static void new_display_netif (struct netif* netif)
 {
-	
-	uprint("lwip-@%p idx=%d %s name=%c%c%d mtu=%d state=%p ",
+	uprint(DBG "lwip-@%p idx=%d(%s) mtu=%d state=%p ",
 		netif,
-		netif == netif_ap? SOFTAP_IF: STATION_IF,
-		new_netif_name(netif),
-		netif->name[0], netif->name[1], netif->num,
+		netif->num,
+		netif_name[netif->num],
 		netif->mtu,
 		netif->state);
 	if (netif->hwaddr_len == 6)
@@ -192,6 +162,9 @@ err_glue_t esp2glue_dhcp_start (int netif_idx)
 {
 	uprint(DBG "dhcp_start netif: ");
 	new_display_netif(&netif_git[netif_idx]);
+	netif_set_link_up(&netif_git[netif_idx]);
+	//netif_set_up(&netif_git[netif_idx]); // unwanted call to netif_sta_status_callback()
+	netif_git[netif_idx].flags |= NETIF_FLAG_UP;
 	err_t err = dhcp_start(&netif_git[netif_idx]);
 	uprint(DBG "new_dhcp_start returns %d\n", err);
 	return git2glue_err(err);
@@ -203,8 +176,14 @@ err_t new_linkoutput (struct netif* netif, struct pbuf* p)
 	#warning ESP netif->linkoutput cannot handle pbuf chains.
 	#error LWIP_NETIF_TX_SINGLE_PBUF must be 1 in lwipopts.h
 	#endif
-	uassert(p->next == NULL);
-	uassert(p->len == p->tot_len);
+	if (p->next)
+	{
+		// should not happen since LWIP_NETIF_TX_SINGLE_PBUF=1
+		// but it does sometimes
+		uerror(DBG "fragmented pbuf (%d!=%d)!\n", p->len, p->tot_len);
+		pbuf_free(p);
+		return ERR_BUF;
+	}
 
 	// protect pbuf, so lwip2(git) won't free it before phy(esp) finishes sending
 	pbuf_ref(p);
@@ -212,7 +191,7 @@ err_t new_linkoutput (struct netif* netif, struct pbuf* p)
 	uassert(netif->num == STATION_IF || netif->num == SOFTAP_IF);
 
 	uprint(DBG "linkoutput: netif@%p (%s)\n", netif, netif_name[netif->num]);
-	uprint(DBG "linkoutput default netif was: %d\n", netif_default? netif_default->num: -1);
+	uprint(DBG "linkoutput default netif: %d\n", netif_default? netif_default->num: -1);
 
 	err_t err = glue2git_err(glue2esp_linkoutput(
 		netif->num,
@@ -220,7 +199,7 @@ err_t new_linkoutput (struct netif* netif, struct pbuf* p)
 
 	if (err != ERR_OK)
 	{
-		pbuf_free(p);
+		pbuf_free(p); // release pbuf_ref() above
 		uprint(DBG "linkoutput error sending pbuf@%p\n", p);
 	}
 
@@ -243,8 +222,16 @@ static err_t new_input (struct pbuf *p, struct netif *inp)
 
 void esp2glue_netif_set_default (int netif_idx)
 {
-	uprint(DBG "netif set default %s\n", netif_name[netif_idx]);
-	netif_set_default(netif_idx == STATION_IF || netif_idx == SOFTAP_IF? &netif_git[netif_idx]: NULL);
+	if (netif_idx == STATION_IF || netif_idx == SOFTAP_IF)
+	{
+		uprint(DBG "netif_set_default %s\n", netif_name[netif_idx]);
+		netif_set_default(&netif_git[netif_idx]);
+	}
+	else
+	{
+		uprint(DBG "netif_set_default NULL\n");
+		netif_set_default(NULL);
+	}
 }
 
 static void netif_sta_status_callback (struct netif* netif)
@@ -255,15 +242,16 @@ static void netif_sta_status_callback (struct netif* netif)
 	if (netif->flags & NETIF_FLAG_LINK_UP)
 	{
 		// tell ESP that link is up
-		glue2esp_ifup(netif == netif_sta? STATION_IF: SOFTAP_IF, netif->ip_addr.addr, netif->netmask.addr, netif->gw.addr);
+		glue2esp_ifup(netif->num, netif->ip_addr.addr, netif->netmask.addr, netif->gw.addr);
 
 		if (netif == netif_sta)
 		{
 			// this is our default route
 			netif_set_default(netif);
 			
-			// start sntp
-			sntp_init();
+			if (netif->ip_addr.addr)
+				// start sntp
+				sntp_init();
 		}
 	}
 }
@@ -280,7 +268,6 @@ static void netif_init_common (struct netif* netif)
 	netif->hostname = hostname;
 	netif->chksum_flags = NETIF_CHECKSUM_ENABLE_ALL;
 	// netif->mtu given by glue
-	//netif->mtu = 1500;//TCP_MSS + 40;
 }
 
 static err_t netif_init_sta (struct netif* netif)
@@ -309,49 +296,45 @@ static err_t netif_init_ap (struct netif* netif)
 	return ERR_OK;
 }
 
-void esp2glue_netif_add (int netif_idx, uint32_t ip, uint32_t mask, uint32_t gw, size_t hwlen, const uint8_t* hwaddr, uint16_t mtu)
+void esp2glue_netif_update (int netif_idx, uint32_t ip, uint32_t mask, uint32_t gw, size_t hwlen, const uint8_t* hwaddr, uint16_t mtu)
 {
-	static int check_idx = 0;
-	uassert(netif_idx == check_idx);
-	check_idx++;
-	
+	uprint(DBG "netif updated:\n");
+
 	struct netif* netif = &netif_git[netif_idx];
-	netif->hwaddr_len = hwlen;
+
 	if (hwlen && hwlen <= sizeof(netif->hwaddr))
+	{
+		netif->hwaddr_len = hwlen;
 		memcpy(netif->hwaddr, hwaddr, netif->hwaddr_len = hwlen);
+	}
+	
 	netif->mtu = mtu;
-
 	ip4_addr_t aip = { ip }, amask = { mask }, agw = { gw };
-	netif_add(
-		&netif_git[netif_idx],
-		&aip, &amask, &agw, /*state*/NULL,
-		netif_idx == STATION_IF? netif_init_sta: netif_init_ap,
-		/*useless input*/NULL);
+	netif_set_addr(&netif_git[netif_idx], &aip, &amask, &agw);
+	esp2glue_netif_set_up1down0(netif_idx, 1);
 
-	//XXX get these through esp2glue~flags() ?
 	netif_git[netif_idx].flags |= NETIF_FLAG_ETHARP;
 	netif_git[netif_idx].flags |= NETIF_FLAG_BROADCAST;
 
-	// this was not done in old lwip and is needed at least for lwip2 dhcp client
-#if 0
-	uprint(DBG "set up now idx=%d\n", netif_idx);
-	netif_set_link_up(&netif_git[netif_idx]);
-	netif_set_up(&netif_git[netif_idx]);
-#else
-	netif_git[netif_idx].flags |= NETIF_FLAG_UP;
-	netif_git[netif_idx].flags |= NETIF_FLAG_LINK_UP;
-#endif
-}
-
-void esp2glue_netif_set_addr (int netif_idx, uint32_t ip, uint32_t mask, uint32_t gw)
-{
-	ip4_addr_t aip = { ip }, amask = { mask }, agw = { gw };
-	netif_set_addr(&netif_git[netif_idx], &aip, &amask, &agw);
+	new_display_netif(&netif_git[netif_idx]);
 }
 
 void esp2glue_lwip_init (void)
 {
+	uprint(DBG "lwip_init\n");
 	lwip_init();
+	
+	// we *must* add new interfaces ourselves so interface index are correct
+	// esp may call netif_add() with idx=1 before idx=0
+	ip4_addr_t aip = { 0 }, amask = { 0 }, agw = { 0 };
+	for (int i = 0; i < 2; i++)
+	{
+		netif_add(&netif_git[i], &aip, &amask, &agw, /*state*/NULL,
+		          i == STATION_IF? netif_init_sta: netif_init_ap,
+		          /*useless input*/NULL);
+		netif_git[i].hwaddr_len = NETIF_MAX_HWADDR_LEN;
+		memset(netif_git[i].hwaddr, 0, NETIF_MAX_HWADDR_LEN);
+	}
 	
 	sntp_servermode_dhcp(1); /* get SNTP server via DHCP */
 	sntp_setoperatingmode(SNTP_OPMODE_POLL);
@@ -382,17 +365,21 @@ void esp2glue_dhcps_start (struct ip_info* info)
 	dhcps_start(info);
 }
 
-void esp2glue_netif_set_updown (int netif_idx, int up1_or_down0)
+void esp2glue_netif_set_up1down0 (int netif_idx, int up1_or_down0)
 {
+	uprint(DBG "netif %d: set %s\n", netif_idx, up1_or_down0? "up": "down");
 	struct netif* netif = &netif_git[netif_idx];
 	if (up1_or_down0)
 	{
 		netif_set_link_up(netif);
-		netif_set_up(netif);
+		//netif_set_up(netif); // unwanted call to netif_sta_status_callback()
+		netif->flags |= NETIF_FLAG_UP;
 	}
 	else
 	{
 		netif_set_link_down(netif);
 		netif_set_down(netif);
+		if (netif_default == &netif_git[netif_idx])
+			netif_set_default(NULL);
 	}
 }

@@ -2,6 +2,7 @@
 // this is from lwip1.4-espressif's sntp.c which was a patched version of a former lwip's sntp
 // patch is extracted for the new lwip2's sntp
 
+#include <sys/time.h>	// time_t
 #include "lwip/apps/sntp.h"
 #include "osapi.h"
 #include "os_type.h"
