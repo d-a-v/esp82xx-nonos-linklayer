@@ -152,7 +152,7 @@ int lwiperr_check (const char* what, err_t err)
 {
 	if (err != ERR_OK)
 	{
-		uerror("ERROR: %s (error %d)\n", what, err);
+		uerror("ERROR: %s (error %d)\n", what, (int)err);
 		return 0;
 	}
 	return 1;

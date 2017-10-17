@@ -5,6 +5,7 @@ LWIP_LIB=liblwip2.a
 	make -f makefiles/Makefile.build-lwip2 \
 			target=arduino \
 			SDK=$(abspath ../..) \
+			LWIP_ESP=$(abspath ../../lwip/include) \
 			LWIP_LIB=$(LWIP_LIB) \
 			LWIP_LIB_RELEASE=../../lib/liblwip2.a \
 			LWIP_INCLUDES_RELEASE=../include \

@@ -2,7 +2,11 @@
 OBJ = \
 	$(patsubst %.c,$(BUILD)/%.o,$(wildcard glue-esp/*.c))
 
-BUILD_INCLUDES = -I$(BUILD) -I$(SDK)/include -Iglue-esp/include-esp -Iglue
+ifeq ($(LWIP_ESP),)
+$(error LWIP_ESP must point to espressif sdk lwip/include)
+endif
+
+BUILD_INCLUDES = -I$(BUILD) -I$(SDK)/include -I$(LWIP_ESP) -Iglue
 
 include makefiles/Makefile.defs
 include makefiles/Makefile.rules
