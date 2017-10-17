@@ -11,12 +11,7 @@ OBJ = \
 
 BUILD_INCLUDES = -I$(BUILD) -I$(SDK)/include -Iinclude -I../../glue -I../../glue-lwip
 
-all: hash $(LWIP_LIB)
-
-hash: ../../glue-lwip/lwip-git-hash.h
-
-../../glue-lwip/lwip-git-hash.h:
-	cd ../..; makefiles/make-lwip-hash
+all: $(LWIP_LIB)
 
 include ../../makefiles/Makefile.defs
 include ../../makefiles/Makefile.rules

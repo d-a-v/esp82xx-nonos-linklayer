@@ -16,9 +16,9 @@ IRAM	+= sntp_time_inc sntp_get_current_timestamp
 IRAM	+= millis
 ####################################
 
-all: lwiperrt $(LWIP_LIB_RELEASE)
+all: auto $(LWIP_LIB_RELEASE)
 
-lwiperrt: glue-lwip/lwip-err-t.h
+auto: glue-lwip/lwip-err-t.h glue-lwip/lwip-git-hash.h
 
 glue-lwip/lwip-err-t.h: $(LWIP_ESP)/arch/cc.h
 	( \
@@ -26,6 +26,9 @@ glue-lwip/lwip-err-t.h: $(LWIP_ESP)/arch/cc.h
 	echo "#define LWIP_NO_STDINT_H 1"; \
 	grep -e LWIP_ERR_T -e ^typedef $< \
 	) > $@
+
+glue-lwip/lwip-git-hash.h:
+	makefiles/make-lwip-hash
 
 $(LWIP_LIB_RELEASE): $(LWIP_LIB)
 	@# according to eagle.app.v6.common.ld:
@@ -49,7 +52,7 @@ section-show:
 		echo  $$i \\t\\t `$(OD) -t $(LWIP_LIB_RELEASE) | grep " F .* $${i}$$"`; \
 	done; true
 
-install: lwiperrt $(LWIP_LIB_RELEASE)
+install: auto $(LWIP_LIB_RELEASE)
 	rm -rf $(LWIP_INCLUDES_RELEASE)
 	mkdir -p $(LWIP_INCLUDES_RELEASE)
 	cp -a lwip2-src/src/include/* $(LWIP_INCLUDES_RELEASE)
