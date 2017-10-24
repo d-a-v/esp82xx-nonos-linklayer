@@ -20,8 +20,16 @@
  */
 
 #include <time.h>
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 #include "sntp.h"
 #include "esp-millis.h"
+#ifdef __cplusplus
+}
+#endif
+
 
 #ifndef _TIMEVAL_DEFINED
 #define _TIMEVAL_DEFINED

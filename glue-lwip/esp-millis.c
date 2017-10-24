@@ -23,10 +23,17 @@
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 #include "ets_sys.h"
 #include "osapi.h"
 #include "user_interface.h"
 #include "esp-millis.h"
+#ifdef __cplusplus
+}
+#endif
 
 static os_timer_t micros_overflow_timer;
 static uint32_t micros_at_last_overflow_tick = 0;

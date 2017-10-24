@@ -56,15 +56,15 @@ void ICACHE_FLASH_ATTR node_insert_to_list(list_node **phead, list_node* pinsert
         *phead = pinsert;
     else {
         plist = *phead;
-        pdhcps_node = pinsert->pnode;
-        pdhcps_pool = plist->pnode;
+        pdhcps_node = (struct dhcps_pool*)pinsert->pnode;
+        pdhcps_pool = (struct dhcps_pool*)plist->pnode;
 
         if(pdhcps_node->ip.addr < pdhcps_pool->ip.addr) {
             pinsert->pnext = plist;
             *phead = pinsert;
         } else {
             while (plist->pnext != NULL) {
-                pdhcps_pool = plist->pnext->pnode;
+                pdhcps_pool = (struct dhcps_pool*)plist->pnext->pnode;
                 if (pdhcps_node->ip.addr < pdhcps_pool->ip.addr) {
                     pinsert->pnext = plist->pnext;
                     plist->pnext = pinsert;
@@ -615,7 +615,7 @@ static void ICACHE_FLASH_ATTR handle_dhcp(void *arg,
         }
         p_dhcps_msg = (u8_t *)pmsg_dhcps;
         tlen = p->tot_len;
-        data = p->payload;
+        data = (u8_t*)p->payload;
 
 #if DHCPS_DEBUG
         os_printf("dhcps: handle_dhcp-> p->tot_len = %d\n", tlen);
@@ -633,7 +633,7 @@ static void ICACHE_FLASH_ATTR handle_dhcp(void *arg,
             os_printf("dhcps: handle_dhcp-> p->next->len = %d\n",p->next->len);
 #endif
 
-            data = p->next->payload;
+            data = (u8_t*)p->next->payload;
             for(i=0; i<p->next->len; i++){
                 p_dhcps_msg[dhcps_msg_cnt++] = data[i];
             }
@@ -911,8 +911,8 @@ static void ICACHE_FLASH_ATTR kill_oldest_dhcps_pool(void)
     minpre = pre;
     minp = p;
     while (p != NULL){
-        pdhcps_pool = p->pnode;
-        pmin_pool = minp->pnode;
+        pdhcps_pool = (struct dhcps_pool*)p->pnode;
+        pmin_pool = (struct dhcps_pool*)minp->pnode;
         if (pdhcps_pool->lease_timer < pmin_pool->lease_timer){
             minp = p;
             minpre = pre;
@@ -935,7 +935,7 @@ void ICACHE_FLASH_ATTR dhcps_coarse_tmr(void)
     struct dhcps_pool *pdhcps_pool = NULL;
     pnode = plist;
     while (pnode != NULL) {
-        pdhcps_pool = pnode->pnode;
+        pdhcps_pool = (struct dhcps_pool*)pnode->pnode;
         if ( pdhcps_pool->type == DHCPS_TYPE_DYNAMIC) {
             pdhcps_pool->lease_timer --;
         }
@@ -1028,7 +1028,7 @@ void ICACHE_FLASH_ATTR wifi_softap_dhcps_client_leave(u8 *bssid, struct ip_addr 
     }
 
     for (pback_node = plist; pback_node != NULL;pback_node = pback_node->pnext) {
-        pdhcps_pool = pback_node->pnode;
+        pdhcps_pool = (struct dhcps_pool*)pback_node->pnode;
         if (os_memcmp(pdhcps_pool->mac, bssid, sizeof(pdhcps_pool->mac)) == 0){
             if (os_memcmp(&pdhcps_pool->ip.addr, &ip->addr, sizeof(pdhcps_pool->ip.addr)) == 0) {
                 if ((pdhcps_pool->type == DHCPS_TYPE_STATIC) || (force)) {
@@ -1081,7 +1081,7 @@ uint32 ICACHE_FLASH_ATTR wifi_softap_dhcps_client_update(u8 *bssid, struct ip_ad
 
     renew = FALSE;
     for (pback_node = plist; pback_node != NULL;pback_node = pback_node->pnext) {
-        pdhcps_pool = pback_node->pnode;
+        pdhcps_pool = (struct dhcps_pool*)pback_node->pnode;
         //os_printf("mac:"MACSTR"bssid:"MACSTR"\r\n",MAC2STR(pdhcps_pool->mac),MAC2STR(bssid));
         if (os_memcmp(pdhcps_pool->mac, bssid, sizeof(pdhcps_pool->mac)) == 0){
             pmac_node = pback_node;
@@ -1121,7 +1121,7 @@ uint32 ICACHE_FLASH_ATTR wifi_softap_dhcps_client_update(u8 *bssid, struct ip_ad
 
     if (pmac_node != NULL) { // update new ip
         if (pip_node != NULL){
-            pdhcps_pool = pip_node->pnode;
+            pdhcps_pool = (struct dhcps_pool*)pip_node->pnode;
 
             if (pip_node != pmac_node) {
                 if(pdhcps_pool->state != DHCPS_STATE_OFFLINE) { // ip is used
@@ -1145,7 +1145,7 @@ uint32 ICACHE_FLASH_ATTR wifi_softap_dhcps_client_update(u8 *bssid, struct ip_ad
             pdhcps_pool->state = DHCPS_STATE_ONLINE;
 
         } else {
-            pdhcps_pool = pmac_node->pnode;
+            pdhcps_pool = (struct dhcps_pool*)pmac_node->pnode;
             if (ip != NULL) {
                 pdhcps_pool->ip.addr = ip->addr;
             } else if (flag == TRUE) {
@@ -1162,7 +1162,7 @@ uint32 ICACHE_FLASH_ATTR wifi_softap_dhcps_client_update(u8 *bssid, struct ip_ad
         }
     } else { // new station
         if (pip_node != NULL) { // maybe ip has used
-            pdhcps_pool = pip_node->pnode;
+            pdhcps_pool = (struct dhcps_pool*)pip_node->pnode;
             if (pdhcps_pool->state != DHCPS_STATE_OFFLINE) {
                 return IPADDR_ANY;
             }

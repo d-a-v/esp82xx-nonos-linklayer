@@ -104,7 +104,7 @@ err_t glue2esp_err (err_glue_t err)
 	}
 };
 
-err_glue_t esp2glue_err (err_glue_t err)
+err_glue_t esp2glue_err (err_t err)
 {
 	switch (err)
 	{

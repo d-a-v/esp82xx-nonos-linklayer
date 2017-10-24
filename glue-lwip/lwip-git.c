@@ -48,7 +48,6 @@ author: d. gauchard
 #define DBG "GLUE: "
 
 static char hostname[32];
-static char hostname[32];
 
 #define netif_sta (&netif_git[STATION_IF])
 #define netif_ap  (&netif_git[SOFTAP_IF])
