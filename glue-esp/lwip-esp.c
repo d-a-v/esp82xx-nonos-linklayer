@@ -406,9 +406,6 @@ void dhcp_stop (struct netif* netif)
 	STUB(dhcp_stop);
 }
 
-static int esp_netif_num = 0;
-static struct netif* esp_netif_list = NULL;
-
 static int netif_is_new (struct netif* netif)
 {
 	struct netif* test_netif_sta = eagle_lwip_getif(STATION_IF);
@@ -429,19 +426,10 @@ static int netif_is_new (struct netif* netif)
 		return 0; // not new
 	}
 	
-	netif->num = goodnum;
-
 	uprint(DBG "NEW netif\n");
 	stub_display_netif(netif);
 
-	// check if interfaces are added in the good order
-	uassert(esp_netif_num == netif->num);
-
-	esp_netif_num++;
-	netif->next = esp_netif_list;
-	esp_netif_list = netif;
-
-	uassert(!netif_esp[netif->num]);
+	netif->next = goodnum == STATION_IF? test_netif_ap: NULL;
 	netif_esp[netif->num] = netif;
 	
 	return 1; // is new
