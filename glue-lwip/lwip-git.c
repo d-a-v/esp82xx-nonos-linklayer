@@ -169,6 +169,42 @@ err_glue_t esp2glue_dhcp_start (int netif_idx)
 	return git2glue_err(err);
 }
 
+#if 1 // pbuf_clone() needed and not yet defined in lwip2 sources
+// this pbuf_clone() below is a copy of lwip2 master repo
+// https://git.savannah.gnu.org/cgit/lwip.git/tree/src/core/pbuf.c
+// it is not present in current 2.0.3 stable
+// its purpose is to make a monolithic pbuf from a fragmented one
+// it can happen even though LWIP_NETIF_TX_SINGLE_PBUF is enabled
+// following this discussion:
+// http://lists.nongnu.org/archive/html/lwip-users/2017-10/msg00059.html
+/**
+ * @ingroup pbuf
+ * Allocates a new pbuf of same length (via pbuf_alloc()) and copies the source
+ * pbuf into this new pbuf (using pbuf_copy()).
+ *
+ * @param layer pbuf_layer of the new pbuf
+ * @param type this parameter decides how and where the pbuf should be allocated
+ *             (@see pbuf_alloc())
+ * @param p the source pbuf
+ *
+ * @return a new pbuf or NULL if allocation fails
+ */
+struct pbuf *
+pbuf_clone(pbuf_layer layer, pbuf_type type, struct pbuf *p)
+{
+  struct pbuf *q;
+  err_t err;
+  q = pbuf_alloc(layer, p->tot_len, type);
+  if (q == NULL) {
+    return NULL;
+  }
+  err = pbuf_copy(q, p);
+  LWIP_UNUSED_ARG(err); /* in case of LWIP_NOASSERT */
+  LWIP_ASSERT("pbuf_copy failed", err == ERR_OK);
+  return q;
+}
+#endif // pbuf_clone() needed and not yet defined in lwip2 sources
+
 err_t new_linkoutput (struct netif* netif, struct pbuf* p)
 {
 	#if !LWIP_NETIF_TX_SINGLE_PBUF
@@ -177,28 +213,39 @@ err_t new_linkoutput (struct netif* netif, struct pbuf* p)
 	#endif
 	if (p->next)
 	{
+#if 0
+	// wip, test with LWIP_NETIF_TX_SINGLE_PBUF=0
+		// make this pbuf monolithic by copying it
+		// https://git.savannah.gnu.org/cgit/lwip.git/tree/src/include/lwip/opt.h#n1593
+		// LWIP_NETIF_TX_SINGLE_PBUF definition's comments (not yet in 2.0.3)
+		struct pbuf* q = pbuf_clone(PBUF_RAW, PBUF_RAM, p);
+		if (q == NULL)
+			return ERR_MEM;
+		p = q; // ATTENTION: do NOT free the old 'p' as the ref belongs to the caller!
+		// old p will be released by caller
+		// new p = q will be released by glue2esp_linkoutput() subsequent callbacks to esp2glue_pbuf_freed()
+#else
 		// should not happen since LWIP_NETIF_TX_SINGLE_PBUF=1
 		// but it does sometimes
 		uerror(DBG "fragmented pbuf (%d!=%d)!\n", p->len, p->tot_len);
-		pbuf_free(p);
+		//not here, it's caller's duty: pbuf_free(p);
 		return ERR_BUF;
+#endif
 	}
+	else
+		// protect pbuf, so lwip2(git) won't free it before phy(esp) finishes sending
+		pbuf_ref(p);
 
-	// protect pbuf, so lwip2(git) won't free it before phy(esp) finishes sending
-	pbuf_ref(p);
-	
 	uassert(netif->num == STATION_IF || netif->num == SOFTAP_IF);
 
 	uprint(DBG "linkoutput: netif@%p (%s)\n", netif, netif_name[netif->num]);
 	uprint(DBG "linkoutput default netif: %d\n", netif_default? netif_default->num: -1);
 
-	err_t err = glue2git_err(glue2esp_linkoutput(
-		netif->num,
-		p, p->payload, p->len));
+	err_t err = glue2git_err(glue2esp_linkoutput(netif->num, p, p->payload, p->len));
 
 	if (err != ERR_OK)
 	{
-		pbuf_free(p); // release pbuf_ref() above
+		pbuf_free(p); // release pbuf_ref() above (or free pbuf_clone()->q->p)
 		uprint(DBG "linkoutput error sending pbuf@%p\n", p);
 	}
 
