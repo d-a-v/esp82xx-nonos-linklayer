@@ -382,7 +382,7 @@ void sntp_time_inc (void)
 
 void sntp_set_system_time (uint32_t t)
 {
-	realtime_stamp = t;
+	realtime_stamp = t + time_zone * 60 * 60;
 	os_timer_disarm(&sntp_timer);
 	os_timer_setfn(&sntp_timer, (os_timer_func_t *)sntp_time_inc, NULL);
 	os_timer_arm(&sntp_timer, 1000, 1);
