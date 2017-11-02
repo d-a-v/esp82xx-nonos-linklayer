@@ -24,7 +24,7 @@ Currently lwIP-v2 is implemented, other IP stacks could be tried.
 
 # Build
 
-makefiles are working with linux/osx, and maybe with windows (using 'make' included in msys from mingw...)
+makefiles are working with linux/osx/windows
 
 get lwIP sources
 ```
