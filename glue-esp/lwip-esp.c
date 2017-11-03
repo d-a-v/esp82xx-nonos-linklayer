@@ -411,16 +411,15 @@ static int netif_is_new (struct netif* netif)
 	struct netif* test_netif_sta = eagle_lwip_getif(STATION_IF);
 	struct netif* test_netif_ap = eagle_lwip_getif(SOFTAP_IF);
 	uprint(DBG "check netif @%p (sta@%p ap@%p)\n", netif, test_netif_sta, test_netif_ap);
-	int goodnum = -1;
+	uassert(netif == test_netif_sta || netif == test_netif_ap);
 	if (netif == test_netif_sta)
-		goodnum = STATION_IF;
-	else if (netif == test_netif_ap)
-		goodnum = SOFTAP_IF;
-	else 
-		uerror(DBG "netif_blorgl: not AP nor STA netif ???\n");
+		netif->num = STATION_IF;
+	else
+		netif->num = SOFTAP_IF;
 
-	netif->num = goodnum;
-	if (netif_esp[goodnum] == eagle_lwip_getif(goodnum))
+	netif->input = ethernet_input;
+
+	if (netif_esp[netif->num] == netif)
 	{
 		uprint(DBG "netif (%d): already added\n", netif->num);
 		return 0; // not new
@@ -429,7 +428,7 @@ static int netif_is_new (struct netif* netif)
 	uprint(DBG "NEW netif\n");
 	stub_display_netif(netif);
 
-	netif->next = goodnum == STATION_IF? test_netif_ap: NULL;
+	netif->next = netif->num == STATION_IF? test_netif_ap: NULL;
 	netif_esp[netif->num] = netif;
 	
 	return 1; // is new
@@ -543,12 +542,17 @@ void netif_set_addr (struct netif* netif, ip_addr_t* ipaddr, ip_addr_t* netmask,
 	netif->gw.addr = gw->addr;
 	uassert(netif->input == ethernet_input);
 
-	// tell blobs
+	// ask blobs
 	struct ip_info set;
-	set.ip.addr = ipaddr->addr;
-	set.netmask.addr = netmask->addr;
-	set.gw.addr = gw->addr;
-	wifi_set_ip_info(netif->num, &set);
+	wifi_get_ip_info(netif->num, &set);
+	if (!(set.ip.addr == ipaddr->addr && set.netmask.addr == netmask->addr && set.gw.addr == gw->addr))
+	{
+		// tell blobs
+		set.ip.addr = ipaddr->addr;
+		set.netmask.addr = netmask->addr;
+		set.gw.addr = gw->addr;
+		wifi_set_ip_info(netif->num, &set);
+	}
 
 	stub_display_netif(netif);
 	
