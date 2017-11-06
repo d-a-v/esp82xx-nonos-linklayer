@@ -41,6 +41,7 @@ author: d. gauchard
 #include "lwip/etharp.h"
 #include "netif/ethernet.h"
 #include "lwip/apps/sntp.h"
+#include "arch/cc.h"
 
 // this is dhcpserver taken from lwip-1.4-espressif
 #include "lwip/apps-esp/dhcpserver.h"
@@ -384,8 +385,8 @@ void esp2glue_lwip_init (void)
 	
 	sntp_servermode_dhcp(1); /* get SNTP server via DHCP */
 	sntp_setoperatingmode(SNTP_OPMODE_POLL);
-	// do not start sntp here, but when we got our address
-	//sntp_init();
+	// start anyway the offline sntp timer
+	sntp_set_system_time(0);
 }
 
 void esp2glue_alloc_for_recv (size_t len, void** pbuf, void** data)
