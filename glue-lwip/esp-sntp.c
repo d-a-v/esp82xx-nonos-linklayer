@@ -8,7 +8,8 @@
 #include "os_type.h"
 
 static uint32 realtime_stamp = 0;
-static sint8 time_zone = 8;
+static uint16 dst = 0;
+static sint8 time_zone = 8; // espressif HQ's default timezone, Let's give Caesar what belongs to Caesar
 static bool sntp_time_flag = false;
 static uint32 sntp_update_delay = SNTP_UPDATE_DELAY;
 static uint8 sntp_receive_time_size = 1;
@@ -371,7 +372,7 @@ void sntp_set_daylight(int daylight)
 	if (sntp_get_timetype()) // always false in espressif's lwip1.4
 		RTC_DST_SET(daylight);
 #else
-	(void)daylight;
+	dst = daylight;
 #endif
 }
 
@@ -382,7 +383,7 @@ void sntp_time_inc (void)
 
 void sntp_set_system_time (uint32_t t)
 {
-	realtime_stamp = t + time_zone * 60 * 60;
+	realtime_stamp = t + time_zone * 60 * 60 + dst;
 	os_timer_disarm(&sntp_timer);
 	os_timer_setfn(&sntp_timer, (os_timer_func_t *)sntp_time_inc, NULL);
 	os_timer_arm(&sntp_timer, 1000, 1);
