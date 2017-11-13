@@ -62,7 +62,7 @@ install: auto $(LWIP_LIB_RELEASE)
 	echo "#define __CUSTOM_EXTRA_DEFINES__" >> $(LWIP_INCLUDES_RELEASE)/lwipopts.h
 	echo "$(CUSTOM_EXTRA_DEFINES)" >> $(LWIP_INCLUDES_RELEASE)/lwipopts.h
 	echo "#endif" >> $(LWIP_INCLUDES_RELEASE)/lwipopts.h
-	cat glue-lwip/lwipopts.h >> $(LWIP_INCLUDES_RELEASE)/lwipopts.h
+	cat glue-lwip/$(target)/lwipopts.h >> $(LWIP_INCLUDES_RELEASE)/lwipopts.h
 	echo "warning: this directory is re/over/written from lwip2 builder upon lwip2 rebuild" > $(LWIP_INCLUDES_RELEASE)/README.md
 	touch $(LWIP_INCLUDES_RELEASE)/espconn.h
 
