@@ -2,8 +2,6 @@
 # compiling glue-lwip/
 
 GLUE_LWIP = esp-dhcpserver.c esp-sntp.c lwip-git.c
-GLUE_LWIP += esp-time.c
-GLUE_LWIP += esp-millis.c
 
 OBJ = \
 	$(patsubst %.c,$(BUILD)/%.o,$(wildcard glue/*.c)) \
