@@ -11,10 +11,14 @@ OBJ = \
 
 BUILD_INCLUDES = -I$(BUILD) -I$(SDK)/include -Iinclude -I../../glue -I../../glue-lwip -I../../glue-lwip/$(target)
 
-all: $(LWIP_LIB)
+all: apps/sntp/sntp.c.patch $(LWIP_LIB)
 
 include ../../makefiles/Makefile.defs
 include ../../makefiles/Makefile.rules
+
+apps/sntp/sntp.c.patch:
+	@echo "\n\n\n#if LWIP_UDP\nvoid sntp_force_request (void)\n{\n\tsntp_request(NULL);\n}\n#endif\n" >> apps/sntp/sntp.c
+	touch apps/sntp/sntp.c.patch
 
 -include $(BUILD)/netif/*.d
 -include $(BUILD)/core/*.d
