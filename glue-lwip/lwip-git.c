@@ -48,8 +48,6 @@ author: d. gauchard
 
 #define DBG "GLUE: "
 
-static char hostname[32];
-
 #define netif_sta (&netif_git[STATION_IF])
 #define netif_ap  (&netif_git[SOFTAP_IF])
 struct netif netif_git[2];
@@ -312,7 +310,7 @@ static void netif_init_common (struct netif* netif)
 	netif->output = etharp_output;
 	netif->linkoutput = new_linkoutput;
 	
-	netif->hostname = hostname;
+	netif->hostname = wifi_station_get_hostname();
 	netif->chksum_flags = NETIF_CHECKSUM_ENABLE_ALL;
 	// netif->mtu given by glue
 }
@@ -343,7 +341,7 @@ static err_t netif_init_ap (struct netif* netif)
 	return ERR_OK;
 }
 
-void esp2glue_netif_update (int netif_idx, uint32_t ip, uint32_t mask, uint32_t gw, size_t hwlen, const uint8_t* hwaddr, uint16_t mtu)
+void esp2glue_netif_update (int netif_idx, uint32_t ip, uint32_t mask, uint32_t gw, size_t hwlen, const uint8_t* hwaddr, uint16_t mtu, const char* hostname)
 {
 	uprint(DBG "netif updated:\n");
 
@@ -356,6 +354,7 @@ void esp2glue_netif_update (int netif_idx, uint32_t ip, uint32_t mask, uint32_t 
 	}
 	
 	netif->mtu = mtu;
+	netif->hostname = hostname;
 	ip4_addr_t aip = { ip }, amask = { mask }, agw = { gw };
 	netif_set_addr(&netif_git[netif_idx], &aip, &amask, &agw);
 	esp2glue_netif_set_up1down0(netif_idx, 1);
