@@ -1045,7 +1045,7 @@
 
 /** DNS maximum host name length supported in the name table. */
 #if !defined DNS_MAX_NAME_LENGTH || defined __DOXYGEN__
-#define DNS_MAX_NAME_LENGTH             48 // 256
+#define DNS_MAX_NAME_LENGTH             128 // 256
 #endif
 
 /** The maximum of DNS servers
