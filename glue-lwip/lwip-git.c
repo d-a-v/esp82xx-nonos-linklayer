@@ -295,8 +295,11 @@ static void netif_sta_status_callback (struct netif* netif)
 			netif_set_default(netif);
 			
 			if (netif->ip_addr.addr)
-				// start sntp
+			{
+				// restart sntp
+				sntp_stop();
 				sntp_init();
+			}
 		}
 	}
 }
