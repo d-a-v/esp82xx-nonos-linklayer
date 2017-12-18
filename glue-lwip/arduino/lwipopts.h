@@ -1307,7 +1307,7 @@
  * TCP_MSS/4: Try to create 4 fragments or less per TCP packet.
  */
 #if !defined TCP_OVERSIZE || defined __DOXYGEN__
-#define TCP_OVERSIZE                    TCP_MSS
+#define TCP_OVERSIZE                    TCP_MSS	// TCP_MSS is STRONGLY SUGGESTED FOR ESP8266 BLOBS !!
 #endif
 
 /**
@@ -1501,7 +1501,7 @@
  * @todo: TCP and IP-frag do not work with this, yet:
  */
 #if !defined LWIP_NETIF_TX_SINGLE_PBUF || defined __DOXYGEN__
-#define LWIP_NETIF_TX_SINGLE_PBUF             1 // MANDATORY FOR ESP8266 BLOBS !! 
+#define LWIP_NETIF_TX_SINGLE_PBUF             1 // 1 is STRONGLY SUGGESTED FOR ESP8266 BLOBS !!
 #endif /* LWIP_NETIF_TX_SINGLE_PBUF */
 
 /**
