@@ -237,7 +237,7 @@ err_t new_linkoutput (struct netif* netif, struct pbuf* p)
 
 	uassert(netif->num == STATION_IF || netif->num == SOFTAP_IF);
 
-	uprint(DBG "linkoutput: netif@%p (%s)\n", netif, netif_name[netif->num]);
+	uprint(DBG "linkoutput: netif@%p (%s) pbuf=%p payload=%p\n", netif, netif_name[netif->num], p, p->payload);
 	uprint(DBG "linkoutput default netif: %d\n", netif_default? netif_default->num: -1);
 
 	err_t err = glue2git_err(glue2esp_linkoutput(netif->num, p, p->payload, p->len));

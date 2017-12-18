@@ -277,10 +277,11 @@ err_glue_t glue2esp_linkoutput (int netif_idx, void* ref2save, void* data, size_
 	p->pbuf.ref = 0;
 	p->ref2save = ref2save;
 
-	uprint(DBG "LINKOUTPUT: real pbuf sent to wilderness (len=%dB esp-pbuf=%p glue-pbuf=%p netifidx=%d)\n",
+	uprint(DBG "LINKOUTPUT: real pbuf sent to wilderness (len=%dB esp-pbuf=%p glue-pbuf=%p payload=%p netifidx=%d)\n",
 		p->pbuf.len,
 		&p->pbuf,
 		ref2save,
+		data,
 		netif_idx);
 	
 	// call blobs
@@ -292,7 +293,7 @@ err_glue_t glue2esp_linkoutput (int netif_idx, void* ref2save, void* data, size_
 	{
 		// blob/phy is exhausted, release memory
 		pbuf_wrapper_release(p);
-		uprint(DBG "glue2esp_linkoutput: error %d\n", err);
+		uprint(DBG "glue2esp_linkoutput: error %d\n", (int)err);
 	}
 	return esp2glue_err(err);
 }
@@ -338,8 +339,11 @@ err_t ethernet_input (struct pbuf* p, struct netif* netif)
 	esp2glue_alloc_for_recv(p->len, &glue_pbuf, &glue_data);
 
 	if (glue_pbuf)
+	{
 		// copy data
 		os_memcpy(glue_data, p->payload, p->len);
+		uprint(DBG "copy esp-payload=%p -> glue-pbuf=%p payload=%p\n", p->payload, glue_pbuf, glue_data);
+	}
 
 	// release blob's buffer asap
 	pbuf_free(p);
