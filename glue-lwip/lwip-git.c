@@ -164,7 +164,7 @@ err_glue_t esp2glue_dhcp_start (int netif_idx)
 	//netif_set_up(&netif_git[netif_idx]); // unwanted call to netif_sta_status_callback()
 	netif_git[netif_idx].flags |= NETIF_FLAG_UP;
 	err_t err = dhcp_start(&netif_git[netif_idx]);
-	uprint(DBG "new_dhcp_start returns %d\n", err);
+	uprint(DBG "new_dhcp_start returns %d\n", (int)err);
 	return git2glue_err(err);
 }
 
