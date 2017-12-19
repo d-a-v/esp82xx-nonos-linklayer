@@ -237,7 +237,10 @@ err_t new_linkoutput (struct netif* netif, struct pbuf* p)
 	err_t err = glue2git_err(glue2esp_linkoutput(netif->num, p, p->payload, p->len));
 
 	if (err != ERR_OK)
+	{
 		uprint(DBG "linkoutput error sending pbuf@%p\n", p);
+		pbuf_free(p); // release pbuf_ref() above (or free pbuf_clone()->q->p)
+	}
 
 	return err;
 }
