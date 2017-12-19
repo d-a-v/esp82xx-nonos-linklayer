@@ -1,7 +1,10 @@
 
 # compiling glue-lwip/
 
-GLUE_LWIP = esp-ping.c esp-dhcpserver.c lwip-git.c
+GLUE_LWIP = lwip-git.c
+GLUE_LWIP += esp-dhcpserver.c
+GLUE_LWIP += esp-ping.c
+GLUE_LWIP += espconn.c espconn_buf.c espconn_tcp.c espconn_udp.c
 
 OBJ = \
 	$(patsubst %.c,$(BUILD)/%.o,$(wildcard glue/*.c)) \

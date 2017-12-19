@@ -43,13 +43,16 @@ author: d. gauchard
 #include "lwip/apps/sntp.h"
 #include "arch/cc.h"
 
+#include "lwip-git.h"
+
 // this is dhcpserver taken from lwip-1.4-espressif
 #include "lwip/apps-esp/dhcpserver.h"
 
 #define DBG "GLUE: "
 
-#define netif_sta (&netif_git[STATION_IF])
-#define netif_ap  (&netif_git[SOFTAP_IF])
+//#define netif_sta (&netif_git[STATION_IF])
+//#define netif_ap  (&netif_git[SOFTAP_IF])
+
 struct netif netif_git[2];
 const char netif_name[2][8] = { "station", "soft-ap" };
 
