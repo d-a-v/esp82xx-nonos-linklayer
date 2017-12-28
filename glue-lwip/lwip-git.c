@@ -429,3 +429,7 @@ void esp2glue_netif_set_up1down0 (int netif_idx, int up1_or_down0)
 			netif_set_default(NULL);
 	}
 }
+
+#define VALUE_TO_STRING(x) #x
+#define VAR_NAME_VALUE(var) "\n\n-------- " #var " = "  VALUE_TO_STRING(var) " --------\n"
+#pragma message VAR_NAME_VALUE(TCP_MSS)

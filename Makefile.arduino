@@ -1,13 +1,26 @@
 
-LWIP_LIB=liblwip2.a
+# stable MSS: 536..896
+# unstable: 1024 1460
 
 %:
 	make -f makefiles/Makefile.build-lwip2 \
 			target=arduino \
 			SDK=$(abspath ../..) \
 			LWIP_ESP=$(abspath ../../lwip/include) \
-			LWIP_LIB=$(LWIP_LIB) \
+			LWIP_LIB=liblwip2.a \
 			LWIP_LIB_RELEASE=../../lib/liblwip2.a \
 			LWIP_INCLUDES_RELEASE=../include \
 			TOOLS=$(abspath ../../../xtensa-lx106-elf/bin/xtensa-lx106-elf-) \
+			TCP_MSS=536 BUILD=build-536 \
+			$@
+
+	make -f makefiles/Makefile.build-lwip2 \
+			target=arduino \
+			SDK=$(abspath ../..) \
+			LWIP_ESP=$(abspath ../../lwip/include) \
+			LWIP_LIB=liblwip2_1460.a \
+			LWIP_LIB_RELEASE=../../lib/liblwip2_1460.a \
+			LWIP_INCLUDES_RELEASE=../include \
+			TOOLS=$(abspath ../../../xtensa-lx106-elf/bin/xtensa-lx106-elf-) \
+			TCP_MSS=1460 BUILD=build-1460 \
 			$@
