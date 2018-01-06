@@ -254,16 +254,23 @@ static void pbuf_wrapper_release (struct pbuf_wrapper* p)
 err_glue_t glue2esp_linkoutput (int netif_idx, void* ref2save, void* data, size_t size)
 {
 	struct netif* netif = netif_esp[netif_idx];
+
 	if (!netif)
 	{
-		uprint(DBG "glue2esp_linkoutput: if %d not initialized\n", netif_idx);
+		uprint(DBG "linkoutput: netif %d not initialized\n", netif_idx);
+		return GLUE_ERR_IF;
+	}
+
+	if (!(netif->flags & NETIF_FLAG_LINK_UP))
+	{
+		uprint(DBG "linkoutput(netif %d): link is not up\n", netif_idx);
 		return GLUE_ERR_IF;
 	}
 
 	struct pbuf_wrapper* p = pbuf_wrapper_get();
 	if (!p)
 	{
-		uprint(DBG "glue2esp_linkoutput(if %d): memory full\n", netif_idx);
+		uprint(DBG "linkoutput(netif %d): memory full\n", netif_idx);
 		return GLUE_ERR_MEM;
 	}
 
@@ -277,7 +284,7 @@ err_glue_t glue2esp_linkoutput (int netif_idx, void* ref2save, void* data, size_
 	p->pbuf.ref = 0;
 	p->ref2save = ref2save;
 
-	uprint(DBG "LINKOUTPUT: real pbuf sent to wilderness (len=%dB esp-pbuf=%p glue-pbuf=%p payload=%p netifidx=%d)\n",
+	uprint(DBG "linkoutput: real pbuf sent to wilderness (len=%dB esp-pbuf=%p glue-pbuf=%p payload=%p netif=%d)\n",
 		p->pbuf.len,
 		&p->pbuf,
 		ref2save,
@@ -293,7 +300,7 @@ err_glue_t glue2esp_linkoutput (int netif_idx, void* ref2save, void* data, size_
 	{
 		// blob/phy is exhausted, release memory
 		pbuf_wrapper_release(p);
-		uprint(DBG "glue2esp_linkoutput: error %d\n", (int)err);
+		uprint(DBG "wifi-output: error %d\n", (int)err);
 	}
 	return esp2glue_err(err);
 }
@@ -384,6 +391,7 @@ void dhcp_cleanup (struct netif* netif)
 {
 	// not implemented yet
 	(void)netif;
+	// message never seen
 	STUB(dhcp_cleanup);
 }
 
@@ -391,6 +399,7 @@ err_t dhcp_release (struct netif* netif)
 {
 	// not implemented yet
 	(void)netif;
+	// message never seen
 	STUB(dhcp_release);
 	return ERR_ABRT;
 }
@@ -400,7 +409,12 @@ err_t dhcp_start (struct netif* netif)
 	uprint(DBG "dhcp_start ");
 	stub_display_netif(netif);
 
-	return glue2esp_err(esp2glue_dhcp_start(netif->num));
+	// NETIF_FLAG_LINK_UP is mandatory for both input and output
+	netif->flags |= NETIF_FLAG_LINK_UP;
+	err_t err = glue2esp_err(esp2glue_dhcp_start(netif->num));
+	if (err != ERR_OK)
+		netif->flags &= ~NETIF_FLAG_LINK_UP;
+	return err;
 }
 
 void dhcp_stop (struct netif* netif)
@@ -505,10 +519,19 @@ struct netif* netif_add (
 	}
 
 	uprint(DBG "netif_add(ip:%x) -> ", (int)ipaddr->addr);
-	netif->flags |= NETIF_FLAG_LINK_UP; // !!!!! mandatory !!!!! (enable reception)
 	netif_set_addr(netif, ipaddr, netmask, gw);
 
 	return netif;
+}
+
+void netif_disable (struct netif* netif)
+{
+	// disabling interface this way seems
+	// to allow it to be reenablable later
+
+	ip_addr_t ip = { 0 }, mask = { 0 }, gw = { 0 };
+	netif_set_addr(netif, &ip, &mask, &gw);
+	netif->flags &= ~NETIF_FLAG_LINK_UP;
 }
 
 void netif_remove (struct netif* netif)
@@ -518,9 +541,9 @@ void netif_remove (struct netif* netif)
 	stub_display_netif(netif);
 	
 	// don't, see netif_set_down()
-	//esp2glue_netif_set_updown(netif->num, 0);
-	//netif->flags &= ~NETIF_FLAG_LINK_UP;
-	(void)netif;
+	//esp2glue_netif_set_up1down0(netif->num, 0);
+	// this seems better:
+	netif_disable(netif);
 }
 
 static err_t voidinit (struct netif* netif)
@@ -557,6 +580,7 @@ void netif_set_addr (struct netif* netif, ip_addr_t* ipaddr, ip_addr_t* netmask,
 		set.gw.addr = gw->addr;
 		wifi_set_ip_info(netif->num, &set);
 	}
+	netif->flags |= NETIF_FLAG_LINK_UP; // mandatory (enable reception)
 
 	stub_display_netif(netif);
 	
@@ -584,7 +608,9 @@ void netif_set_down (struct netif* netif)
 	
 	// netif->flags &= ~(NETIF_FLAG_UP |  NETIF_FLAG_LINK_UP);
 	// esp2glue_netif_set_updown(netif->num, 0);
-	(void)netif;
+
+	// this seems sufficient
+	netif_disable(netif);
 }
 
 void netif_set_up (struct netif* netif)
