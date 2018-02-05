@@ -166,6 +166,7 @@ err_glue_t esp2glue_dhcp_start (int netif_idx)
 	netif_set_link_up(&netif_git[netif_idx]);
 	//netif_set_up(&netif_git[netif_idx]); // unwanted call to netif_sta_status_callback()
 	netif_git[netif_idx].flags |= NETIF_FLAG_UP;
+	netif_git[netif_idx].hostname = wifi_station_get_hostname();
 	err_t err = dhcp_start(&netif_git[netif_idx]);
 	uprint(DBG "new_dhcp_start returns %d\n", (int)err);
 	return git2glue_err(err);
@@ -341,7 +342,7 @@ static err_t netif_init_ap (struct netif* netif)
 	return ERR_OK;
 }
 
-void esp2glue_netif_update (int netif_idx, uint32_t ip, uint32_t mask, uint32_t gw, size_t hwlen, const uint8_t* hwaddr, uint16_t mtu, const char* hostname)
+void esp2glue_netif_update (int netif_idx, uint32_t ip, uint32_t mask, uint32_t gw, size_t hwlen, const uint8_t* hwaddr, uint16_t mtu)
 {
 	uprint(DBG "netif updated:\n");
 
@@ -354,7 +355,7 @@ void esp2glue_netif_update (int netif_idx, uint32_t ip, uint32_t mask, uint32_t 
 	}
 	
 	netif->mtu = mtu;
-	netif->hostname = hostname;
+	netif->hostname = wifi_station_get_hostname();
 	ip4_addr_t aip = { ip }, amask = { mask }, agw = { gw };
 	netif_set_addr(&netif_git[netif_idx], &aip, &amask, &agw);
 	esp2glue_netif_set_up1down0(netif_idx, 1);

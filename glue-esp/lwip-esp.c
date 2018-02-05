@@ -584,7 +584,7 @@ void netif_set_addr (struct netif* netif, ip_addr_t* ipaddr, ip_addr_t* netmask,
 
 	stub_display_netif(netif);
 	
-	esp2glue_netif_update(netif->num, ipaddr->addr, netmask->addr, gw->addr, netif->hwaddr_len, netif->hwaddr, netif->mtu, netif->hostname);
+	esp2glue_netif_update(netif->num, ipaddr->addr, netmask->addr, gw->addr, netif->hwaddr_len, netif->hwaddr, netif->mtu);
 }
 
 void netif_set_default (struct netif* netif)
