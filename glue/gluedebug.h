@@ -17,7 +17,7 @@
 #define ULWIPDEBUG	0	// 0 or 1 (trigger lwip debug)
 #define ULWIPASSERT	0	// 0 or 1 (trigger lwip self-check, 0 saves flash)
 
-#define STRING_IN_FLASH 0	// *print("fmt is stored in flash")
+#define STRING_IN_FLASH 1	// *print("fmt is stored in flash")
 
 #define ROTBUFLEN_BIT	11	// (UDEBUGSTORE=1) doprint()'s buffer: 11=2048B
 

@@ -271,7 +271,8 @@ static err_t new_input (struct pbuf *p, struct netif *inp)
 {
 	(void)p;
 	(void)inp;
-	uerror("internal error, new-netif->input() cannot be called\n");
+	//uerror("internal error, new-netif->input() cannot be called\n");
+	uassert(0);
 	return ERR_ABRT;
 }
 
