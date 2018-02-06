@@ -163,10 +163,22 @@ err_glue_t esp2glue_dhcp_start (int netif_idx)
 {
 	uprint(DBG "dhcp_start netif: ");
 	new_display_netif(&netif_git[netif_idx]);
+
+	// set link and interface up for dhcp client
 	netif_set_link_up(&netif_git[netif_idx]);
 	//netif_set_up(&netif_git[netif_idx]); // unwanted call to netif_sta_status_callback()
 	netif_git[netif_idx].flags |= NETIF_FLAG_UP;
+
+	// Update to latest esp hostname before starting dhcp client,
+	// 	because this name is provided to the dhcp server.
+	// Until proven wrong, dhcp client is the only code
+	// 	needing netif->hostname.
+	// Then obviously user application needs to set hostname
+	// 	before starting wifi station if dhcp is used.
+	// XXX to check: is wifi_station_get_hostname()
+	// 	returning a const pointer once _set_hostname is called?
 	netif_git[netif_idx].hostname = wifi_station_get_hostname();
+
 	err_t err = dhcp_start(&netif_git[netif_idx]);
 	uprint(DBG "new_dhcp_start returns %d\n", (int)err);
 	return git2glue_err(err);
