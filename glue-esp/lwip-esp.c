@@ -30,6 +30,7 @@ author: d. gauchard
 // esp(lwip1.4) side of glue for esp8266
 // - sdk-2.0.0(656edbf)
 // - sdk-2.1.0(116b762)
+// - sdk-2.2.1(cfd48f3)
 
 #include "glue.h"
 #include "uprint.h"
@@ -531,7 +532,6 @@ void netif_disable (struct netif* netif)
 
 	ip_addr_t ip = { 0 }, mask = { 0 }, gw = { 0 };
 	netif_set_addr(netif, &ip, &mask, &gw);
-	netif->flags &= ~NETIF_FLAG_LINK_UP;
 }
 
 void netif_remove (struct netif* netif)
@@ -580,10 +580,19 @@ void netif_set_addr (struct netif* netif, ip_addr_t* ipaddr, ip_addr_t* netmask,
 		set.gw.addr = gw->addr;
 		wifi_set_ip_info(netif->num, &set);
 	}
-	netif->flags |= NETIF_FLAG_LINK_UP; // mandatory (enable reception)
+	if (ipaddr->addr)
+		netif->flags |= NETIF_FLAG_LINK_UP; // mandatory (enable reception)
+	else
+		netif->flags &= ~NETIF_FLAG_LINK_UP;
 
 	stub_display_netif(netif);
 	
+	// esp2glue_netif_update calls
+	//	=> lwip2 netif_set_addr()
+	//	=> lwip2 netif->status_callback()
+	//	=> lwip2 netif_sta_status_callback()
+	//	=> esp   glue2esp_ifup()
+	//	=> blobs's system_station_got_ip_set()
 	esp2glue_netif_update(netif->num, ipaddr->addr, netmask->addr, gw->addr, netif->hwaddr_len, netif->hwaddr, netif->mtu);
 }
 
@@ -599,15 +608,19 @@ void netif_set_down (struct netif* netif)
 	uprint(DBG "netif_set_down  ");
 	stub_display_netif(netif);
 	
+	// this is an old comment and may be wrong
+	// because since then netif handling has improved alot
+	// (keeping it for now)
+	//
 	// dont set down. some esp8266 will:
 	// * esp2glue_netif_set_down(sta)
 	// * restart dhcp-client _without_ netif_set_up.
 	// or:
 	// * esp2glue_netif_set_down(ap)
 	// * restart dhcp-server _without_ netif_set_up.
-	
-	// netif->flags &= ~(NETIF_FLAG_UP |  NETIF_FLAG_LINK_UP);
-	// esp2glue_netif_set_updown(netif->num, 0);
+
+	// netif->flags &= ~(NETIF_FLAG_UP | NETIF_FLAG_LINK_UP);
+	// esp2glue_netif_set_up1down0(netif->num, 0);
 
 	// this seems sufficient
 	netif_disable(netif);
@@ -741,16 +754,19 @@ void glue2esp_ifup (int netif_idx, uint32_t ip, uint32_t mask, uint32_t gw)
 {
 	struct netif* netif = netif_esp[netif_idx];
 
-	// backup old esp ips
+	ualwaysassert(ip != 0);
+
+	// backup old esp IPs
 	ip_addr_t oldip, oldmask, oldgw;
 	oldip = netif->ip_addr;
 	oldmask = netif->netmask;
 	oldgw = netif->gw;
 	        
-	// change ips
+	// change IPs
 	netif->ip_addr.addr = ip;
 	netif->netmask.addr = mask;
 	netif->gw.addr = gw;
+
 	// set up
 	netif->flags |= NETIF_FLAG_UP;
 

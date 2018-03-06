@@ -367,6 +367,15 @@ void esp2glue_netif_update (int netif_idx, uint32_t ip, uint32_t mask, uint32_t 
 		memcpy(netif->hwaddr, hwaddr, netif->hwaddr_len = hwlen);
 	}
 	
+	// properly set netif state according to IP address
+	// (we could pass netif flags though)
+	// so we don't later tell esp that we are up with a bad(=0) IP address
+	// (fixes sdk-2.2.1 disconnection/reconnection bug)
+	if (ip)
+		netif->flags |= NETIF_FLAG_LINK_UP | NETIF_FLAG_UP;
+	else
+		netif->flags &= ~(NETIF_FLAG_LINK_UP | NETIF_FLAG_UP);
+
 	netif->mtu = mtu;
 	netif->hostname = wifi_station_get_hostname();
 	ip4_addr_t aip = { ip }, amask = { mask }, agw = { gw };

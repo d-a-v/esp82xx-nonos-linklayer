@@ -44,8 +44,8 @@ author: d. gauchard
 
 #include "esp-missing.h"
 
+static int doprint_direct (const char* format, ...);
 extern int doprint_allow;
-
 
 #if UDEBUGSTORE
 
