@@ -12,9 +12,9 @@ IRAM	+= glue2git_err git2glue_err new_linkoutput esp2glue_pbuf_freed esp2glue_al
 IRAM	+= sys_timeout_LWIP2
 ####################################
 
-all: auto $(LWIP_LIB_RELEASE)
+AUTO	= glue-lwip/lwip-err-t.h glue-lwip/lwip-git-hash.h
 
-auto: glue-lwip/lwip-err-t.h glue-lwip/lwip-git-hash.h
+all: $(AUTO) $(LWIP_LIB_RELEASE)
 
 glue-lwip/lwip-err-t.h: $(LWIP_ESP)/arch/cc.h
 	( \
@@ -48,7 +48,7 @@ section-show:
 		echo  $$i \\t\\t `$(OD) -t $(LWIP_LIB_RELEASE) | grep " F .* $${i}$$"`; \
 	done; true
 
-install: auto $(LWIP_LIB_RELEASE)
+install: $(AUTO) $(LWIP_LIB_RELEASE)
 	rm -rf $(LWIP_INCLUDES_RELEASE)
 	mkdir -p $(LWIP_INCLUDES_RELEASE)
 	cp -a lwip2-src/src/include/* $(LWIP_INCLUDES_RELEASE)
@@ -63,4 +63,4 @@ install: auto $(LWIP_LIB_RELEASE)
 	touch $(LWIP_INCLUDES_RELEASE)/espconn.h
 
 clean:
-	rm -rf $(BUILD) $(LWIP_LIB)
+	rm -rf $(BUILD) $(LWIP_LIB) $(AUTO)
