@@ -295,7 +295,7 @@ static void netif_sta_status_callback (struct netif* netif)
 	uprint(DBG "netif status callback ");
 	new_display_netif(netif);
 	
-	if (netif->flags & NETIF_FLAG_LINK_UP)
+	if (netif->flags & NETIF_FLAG_UP)
 	{
 		// tell ESP that link is up
 		glue2esp_ifup(netif->num, netif->ip_addr.addr, netif->netmask.addr, netif->gw.addr);
@@ -371,10 +371,14 @@ void esp2glue_netif_update (int netif_idx, uint32_t ip, uint32_t mask, uint32_t 
 	// (we could pass netif flags though)
 	// so we don't later tell esp that we are up with a bad(=0) IP address
 	// (fixes sdk-2.2.1 disconnection/reconnection bug)
+	// TODO: now interface management is working quite better than in old
+	// XXX   times on esp-side, take time and properly propagate netif's
+	// XXX   (UP, LINK_UP) states into here
+	netif->flags |= NETIF_FLAG_LINK_UP;
 	if (ip)
-		netif->flags |= NETIF_FLAG_LINK_UP | NETIF_FLAG_UP;
+		netif->flags |= NETIF_FLAG_UP;
 	else
-		netif->flags &= ~(NETIF_FLAG_LINK_UP | NETIF_FLAG_UP);
+		netif->flags &= ~NETIF_FLAG_UP;
 
 	netif->mtu = mtu;
 	netif->hostname = wifi_station_get_hostname();
