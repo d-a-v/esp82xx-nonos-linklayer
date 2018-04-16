@@ -77,6 +77,7 @@ typedef enum
 void		esp2glue_lwip_init		(void);
 void		esp2glue_dhcps_start		(struct ip_info* info);
 err_glue_t	esp2glue_dhcp_start		(int netif_idx);
+void		esp2glue_dhcp_stop		(int netif_idx);
 void		esp2glue_netif_updated		(int netif_idx, uint32_t ip, uint32_t mask, uint32_t gw, glue_netif_flags_t flags, size_t hwlen, const uint8_t* hw /*, void* state*/);
 err_glue_t	esp2glue_ethernet_input		(int netif_idx, void* glue_pbuf);
 void		esp2glue_alloc_for_recv		(size_t len, void** glue_pbuf, void** glue_data);

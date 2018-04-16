@@ -208,9 +208,9 @@ struct pbuf_wrapper
 	struct pbuf_wrapper* next;	// chain of unused
 };
 
-struct pbuf_wrapper* pbuf_wrapper_head = NULL;	// first free
+static struct pbuf_wrapper* pbuf_wrapper_head = NULL;	// first free
 
-struct pbuf_wrapper* pbuf_wrapper_get (void)
+static struct pbuf_wrapper* pbuf_wrapper_get (void)
 {
 	ets_intr_lock();
 
@@ -318,7 +318,7 @@ void lwip_init (void)
 err_t etharp_output (struct netif* netif, struct pbuf* q, ip_addr_t* ipaddr)
 {
 	(void)netif; (void)q; (void)ipaddr;
-	uerror("ERROR: STUB etharp_output should not be called\n");
+	//uerror("ERROR: STUB etharp_output should not be called\n");
 	return ERR_ABRT;
 }
                    
@@ -392,7 +392,7 @@ void dhcp_cleanup (struct netif* netif)
 {
 	// not implemented yet
 	(void)netif;
-	// message never seen
+	// message yet unseen
 	STUB(dhcp_cleanup);
 }
 
@@ -400,7 +400,7 @@ err_t dhcp_release (struct netif* netif)
 {
 	// not implemented yet
 	(void)netif;
-	// message never seen
+	// message yet unseen
 	STUB(dhcp_release);
 	return ERR_ABRT;
 }
@@ -410,19 +410,15 @@ err_t dhcp_start (struct netif* netif)
 	uprint(DBG "dhcp_start ");
 	stub_display_netif(netif);
 
-	// NETIF_FLAG_LINK_UP is mandatory for both input and output
+	// for lwip-v2: NETIF_FLAG_LINK_UP is mandatory for both input and output
 	netif->flags |= NETIF_FLAG_LINK_UP;
 	err_t err = glue2esp_err(esp2glue_dhcp_start(netif->num));
-	if (err != ERR_OK)
-		netif->flags &= ~NETIF_FLAG_LINK_UP;
 	return err;
 }
 
 void dhcp_stop (struct netif* netif)
 {
-	(void)netif;
-	// not implemented yet
-	STUB(dhcp_stop);
+	esp2glue_dhcp_stop(netif->num);
 }
 
 static int netif_is_new (struct netif* netif)
@@ -500,6 +496,7 @@ struct netif* netif_add (
 	netif->state = state;
 
 	uassert(packet_incoming == ethernet_input);
+	(void)packet_incoming;
 	netif->input = ethernet_input;
 
 		#if LWIP_NETIF_HWADDRHINT
@@ -525,6 +522,7 @@ struct netif* netif_add (
 	return netif;
 }
 
+#if 0
 void netif_disable (struct netif* netif)
 {
 	// disabling interface this way seems
@@ -533,9 +531,14 @@ void netif_disable (struct netif* netif)
 	ip_addr_t ip = { 0 }, mask = { 0 }, gw = { 0 };
 	netif_set_addr(netif, &ip, &mask, &gw);
 }
+#endif
 
 void netif_remove (struct netif* netif)
 {
+#if 1
+	uprint(DBG "netif_remove -> netif_set_down");
+	netif_set_down(netif);
+#else
 	(void)netif;
 	uprint(DBG "trying to remove netif ");
 	stub_display_netif(netif);
@@ -544,6 +547,7 @@ void netif_remove (struct netif* netif)
 	//esp2glue_netif_set_up1down0(netif->num, 0);
 	// this seems better:
 	netif_disable(netif);
+#endif
 }
 
 static err_t voidinit (struct netif* netif)
@@ -619,11 +623,11 @@ void netif_set_down (struct netif* netif)
 	// * esp2glue_netif_set_down(ap)
 	// * restart dhcp-server _without_ netif_set_up.
 
-	// netif->flags &= ~(NETIF_FLAG_UP | NETIF_FLAG_LINK_UP);
-	// esp2glue_netif_set_up1down0(netif->num, 0);
+	netif->flags &= ~(NETIF_FLAG_UP | NETIF_FLAG_LINK_UP);
+	esp2glue_netif_set_up1down0(netif->num, 0);
 
 	// this seems sufficient
-	netif_disable(netif);
+	//netif_disable(netif);
 }
 
 void netif_set_up (struct netif* netif)
@@ -741,12 +745,14 @@ void pbuf_ref (struct pbuf *p)
 void sys_timeout (u32_t msecs, sys_timeout_handler handler, void *arg)
 {
 	(void)msecs; (void)handler; (void)arg;
+	// yet never seen
 	STUB(sys_timeout);
 }
 
 void sys_untimeout (sys_timeout_handler handler, void *arg)
 {
 	(void)handler; (void)arg;
+	// yet never seen
 	STUB(sys_untimeout);
 }
 

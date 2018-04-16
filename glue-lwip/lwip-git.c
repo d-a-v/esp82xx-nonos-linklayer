@@ -184,6 +184,12 @@ err_glue_t esp2glue_dhcp_start (int netif_idx)
 	return git2glue_err(err);
 }
 
+void esp2glue_dhcp_stop (int netif_idx)
+{
+	uprint(DBG "dhcp_stop\n");
+	dhcp_stop(&netif_git[netif_idx]);
+}
+
 // pbuf_clone() needed and not yet defined in lwip2 sources
 // this pbuf_clone() below is a copy of lwip2 master repo
 // https://git.savannah.gnu.org/cgit/lwip.git/tree/src/core/pbuf.c
