@@ -296,7 +296,12 @@ err_glue_t glue2esp_linkoutput (int netif_idx, void* ref2save, void* data, size_
 	// blobs will call pbuf_free() back later
 	// we will retrieve our ref2save and give it back to glue
 
+	phy_capture(netif->num, p->pbuf.payload, p->pbuf.len, /*out*/1, 1);
+
 	err_t err = netif->linkoutput(netif, &p->pbuf);
+
+	//phy_capture(netif->num, p->pbuf.payload, p->pbuf.len, /*out*/1, /*success*/err == ERR_OK);
+
 	if (err != ERR_OK)
 	{
 		// blob/phy is exhausted, release memory
@@ -337,7 +342,6 @@ err_t ethernet_input (struct pbuf* p, struct netif* netif)
 		dump("ethinput", p->payload, p->len);
 	}
 #endif
-
 	// copy esp pbuf to glue pbuf
 
 	void* glue_pbuf;
@@ -345,6 +349,8 @@ err_t ethernet_input (struct pbuf* p, struct netif* netif)
 
 	// ask glue for space to store payload into
 	esp2glue_alloc_for_recv(p->len, &glue_pbuf, &glue_data);
+
+	phy_capture(netif->num, p->payload, p->len, /*out*/0, /*success*/!!glue_pbuf);
 
 	if (glue_pbuf)
 	{

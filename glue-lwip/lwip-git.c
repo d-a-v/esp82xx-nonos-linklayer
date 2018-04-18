@@ -466,3 +466,22 @@ void esp2glue_netif_set_up1down0 (int netif_idx, int up1_or_down0)
 #define VALUE_TO_STRING(x) #x
 #define VAR_NAME_VALUE(var) "\n\n-------- " #var " = "  VALUE_TO_STRING(var) " --------\n"
 #pragma message VAR_NAME_VALUE(TCP_MSS)
+
+LWIP_ERR_T lwip_unhandled_packet (struct pbuf* pbuf, struct netif* netif)
+{
+	// must pbuf_free(pbuf) if packet recognized and managed then return ERR_OK
+	// default: not recognized
+	// this function may be redefined by user
+	(void)pbuf;
+	(void)netif;
+	return ERR_ARG;
+}
+
+void phy_capture (int netif_idx, const char* data, size_t len, int out, int success)
+{
+	(void)netif_idx;
+	(void)data;
+	(void)len;
+	(void)out;
+	(void)success;
+}
