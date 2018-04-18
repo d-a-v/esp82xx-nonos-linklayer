@@ -4,12 +4,19 @@ include makefiles/Makefile.defs
 
 ####################################
 #### list of functions going to IRAM
+# update: This was not working from the beginning:
+#         everything has been in flash and working not so bad
+#         so commenting here, leaving for possibly future
+#         update.
+#         In that case "*(.move2iram.*)" will be needed in
+#         eagle.app.v6.common.ld's "dram0_0_seg :dram0_0_phdr"
+#
 # glue-esp
-IRAM	= glue2esp_err esp2glue_err pbuf_wrapper_get pbuf_wrapper_release glue2esp_linkoutput ethernet_input pbuf_alloc pbuf_free pbuf_ref
+#IRAM	= glue2esp_err esp2glue_err pbuf_wrapper_get pbuf_wrapper_release glue2esp_linkoutput ethernet_input pbuf_alloc pbuf_free pbuf_ref
 # glue-lwip2
-IRAM	+= glue2git_err git2glue_err new_linkoutput esp2glue_pbuf_freed esp2glue_alloc_for_recv esp2glue_ethernet_input
-# lwip2
-IRAM	+= sys_timeout_LWIP2
+#IRAM	+= glue2git_err git2glue_err new_linkoutput esp2glue_pbuf_freed esp2glue_alloc_for_recv esp2glue_ethernet_input
+# lwIP
+#IRAM	+= sys_check_timeouts
 ####################################
 
 AUTO	= glue-lwip/lwip-err-t.h glue-lwip/lwip-git-hash.h
@@ -27,13 +34,11 @@ glue-lwip/lwip-git-hash.h:
 	makefiles/make-lwip-hash
 
 $(LWIP_LIB_RELEASE): $(LWIP_LIB)
-	@# according to eagle.app.v6.common.ld:
-	@# putting symbols into .gnu.linkonce.literal.* instead of (default:).text.*
-	@# will eventually move them in iram: section .text.* instead of .irom0.text.*
-	@# check this with xtensa-lx106-elf-objdump -t <elfresult> | grep <symbol>
+	@# move $(IRAM) symbols to section "move2iram"
+	@# check that symbol's address is 3fff...: readelf -a sketch.elf | grep sys_check_timeouts
 	@( [ ! -r $(LWIP_LIB_RELEASE) ] || [ $(LWIP_LIB) -nt $(LWIP_LIB_RELEASE) ] ) && cp $(LWIP_LIB) $(LWIP_LIB_RELEASE) && for i in $(IRAM); do \
 		echo "---- moving $$i in IRAM"; \
-		$(OC) --rename-section .text.$$i=.gnu.linkonce.literal.$$i $(LWIP_LIB_RELEASE); \
+		$(OC) --rename-section .text.$$i=.move2iram.$$i $(LWIP_LIB_RELEASE); \
 		true; \
 	done || true
 
