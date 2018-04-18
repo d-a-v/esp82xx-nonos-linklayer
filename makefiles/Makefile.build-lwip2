@@ -41,7 +41,7 @@ $(LWIP_LIB_RELEASE): $(LWIP_LIB)
 $(LWIP_LIB):
 	make -f makefiles/Makefile.glue-esp BUILD=$(BUILD) TCP_MSS=$(TCP_MSS)
 	make -f makefiles/Makefile.glue target=$(target) BUILD=$(BUILD) TCP_MSS=$(TCP_MSS)
-	make -C lwip2-src/src -f ../../makefiles/Makefile.lwip2 BUILD=../../$(BUILD) LWIP_LIB=../../$(LWIP_LIB) TCP_MSS=$(TCP_MSS)
+	make -C lwip2-src/src -f ../../makefiles/Makefile.lwip2 BUILD=../../$(BUILD) LWIP_LIB=../../$(LWIP_LIB) SDK=../../$(SDK) TOOLS=../../$(TOOLS) TCP_MSS=$(TCP_MSS)
 
 section-show:
 	@for i in $(IRAM); do \
