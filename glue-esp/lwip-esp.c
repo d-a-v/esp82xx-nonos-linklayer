@@ -296,11 +296,10 @@ err_glue_t glue2esp_linkoutput (int netif_idx, void* ref2save, void* data, size_
 	// blobs will call pbuf_free() back later
 	// we will retrieve our ref2save and give it back to glue
 
-	phy_capture(netif->num, p->pbuf.payload, p->pbuf.len, /*out*/1, 1);
-
 	err_t err = netif->linkoutput(netif, &p->pbuf);
 
-	//phy_capture(netif->num, p->pbuf.payload, p->pbuf.len, /*out*/1, /*success*/err == ERR_OK);
+	if (phy_capture)
+		phy_capture(netif->num, p->pbuf.payload, p->pbuf.len, /*out*/1, /*success*/err == ERR_OK);
 
 	if (err != ERR_OK)
 	{
@@ -350,7 +349,8 @@ err_t ethernet_input (struct pbuf* p, struct netif* netif)
 	// ask glue for space to store payload into
 	esp2glue_alloc_for_recv(p->len, &glue_pbuf, &glue_data);
 
-	phy_capture(netif->num, p->payload, p->len, /*out*/0, /*success*/!!glue_pbuf);
+	if (phy_capture)
+		phy_capture(netif->num, p->payload, p->len, /*out*/0, /*success*/!!glue_pbuf);
 
 	if (glue_pbuf)
 	{
@@ -785,3 +785,5 @@ void glue2esp_ifup (int netif_idx, uint32_t ip, uint32_t mask, uint32_t gw)
 	// tell esp to check it has changed (by giving old ones)
 	system_station_got_ip_set(&oldip, &oldmask, &oldgw);
 }
+
+void (*phy_capture) (int netif_idx, const char* data, size_t len, int out, int success) = NULL;

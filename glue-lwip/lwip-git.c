@@ -476,12 +476,3 @@ LWIP_ERR_T lwip_unhandled_packet (struct pbuf* pbuf, struct netif* netif)
 	(void)netif;
 	return ERR_ARG;
 }
-
-void phy_capture (int netif_idx, const char* data, size_t len, int out, int success)
-{
-	(void)netif_idx;
-	(void)data;
-	(void)len;
-	(void)out;
-	(void)success;
-}
