@@ -528,32 +528,10 @@ struct netif* netif_add (
 	return netif;
 }
 
-#if 0
-void netif_disable (struct netif* netif)
-{
-	// disabling interface this way seems
-	// to allow it to be reenablable later
-
-	ip_addr_t ip = { 0 }, mask = { 0 }, gw = { 0 };
-	netif_set_addr(netif, &ip, &mask, &gw);
-}
-#endif
-
 void netif_remove (struct netif* netif)
 {
-#if 1
 	uprint(DBG "netif_remove -> netif_set_down");
 	netif_set_down(netif);
-#else
-	(void)netif;
-	uprint(DBG "trying to remove netif ");
-	stub_display_netif(netif);
-	
-	// don't, see netif_set_down()
-	//esp2glue_netif_set_up1down0(netif->num, 0);
-	// this seems better:
-	netif_disable(netif);
-#endif
 }
 
 static err_t voidinit (struct netif* netif)
