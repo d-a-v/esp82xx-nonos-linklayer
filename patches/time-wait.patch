@@ -1,0 +1,49 @@
+diff --git a/src/core/tcp.c b/src/core/tcp.c
+index b5144d2..1dfe573 100644
+--- a/src/core/tcp.c
++++ b/src/core/tcp.c
+@@ -281,6 +281,7 @@ tcp_close_shutdown(struct tcp_pcb *pcb, u8_t rst_on_unacked_data)
+         /* move to TIME_WAIT since we close actively */
+         pcb->state = TIME_WAIT;
+         TCP_REG(&tcp_tw_pcbs, pcb);
++        TCP_TW_LIMIT(MEMP_NUM_TCP_PCB_TIME_WAIT);
+       } else {
+         /* CLOSE_WAIT: deallocate the pcb since we already sent a RST for it */
+         if (tcp_input_pcb == pcb) {
+@@ -1523,7 +1524,7 @@ tcp_kill_state(enum tcp_state state)
+  * Kills the oldest connection that is in TIME_WAIT state.
+  * Called from tcp_alloc() if no more connections are available.
+  */
+-static void
++void
+ tcp_kill_timewait(void)
+ {
+   struct tcp_pcb *pcb, *inactive;
+diff --git a/src/core/tcp_in.c b/src/core/tcp_in.c
+index 5e839ff..41c7d43 100644
+--- a/src/core/tcp_in.c
++++ b/src/core/tcp_in.c
+@@ -916,6 +916,7 @@ tcp_process(struct tcp_pcb *pcb)
+         TCP_RMV_ACTIVE(pcb);
+         pcb->state = TIME_WAIT;
+         TCP_REG(&tcp_tw_pcbs, pcb);
++        TCP_TW_LIMIT(MEMP_NUM_TCP_PCB_TIME_WAIT);
+       } else {
+         tcp_ack_now(pcb);
+         pcb->state = CLOSING;
+@@ -934,6 +935,7 @@ tcp_process(struct tcp_pcb *pcb)
+       TCP_RMV_ACTIVE(pcb);
+       pcb->state = TIME_WAIT;
+       TCP_REG(&tcp_tw_pcbs, pcb);
++      TCP_TW_LIMIT(MEMP_NUM_TCP_PCB_TIME_WAIT);
+     }
+     break;
+   case CLOSING:
+@@ -944,6 +946,7 @@ tcp_process(struct tcp_pcb *pcb)
+       TCP_RMV_ACTIVE(pcb);
+       pcb->state = TIME_WAIT;
+       TCP_REG(&tcp_tw_pcbs, pcb);
++      TCP_TW_LIMIT(MEMP_NUM_TCP_PCB_TIME_WAIT);
+     }
+     break;
+   case LAST_ACK:
