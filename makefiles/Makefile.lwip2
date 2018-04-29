@@ -14,7 +14,13 @@ OBJ = \
 BUILD_INCLUDES = -I$(BUILD) -I$(SDK)/include -Iinclude -I../../glue -I../../glue-lwip -I../../glue-lwip/$(target)
 #BUILD_INCLUDES += -I../../lwip2-contrib-src/apps/ping
 
-all: $(LWIP_LIB)
+all: patches $(LWIP_LIB)
+
+patches: .patched
+
+.patched:
+	patch -d .. -p1 < ../../patches/time-wait.patch
+	touch .patched
 
 include ../../makefiles/Makefile.defs
 include ../../makefiles/Makefile.rules
