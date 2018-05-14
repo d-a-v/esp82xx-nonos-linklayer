@@ -744,8 +744,6 @@ void glue2esp_ifup (int netif_idx, uint32_t ip, uint32_t mask, uint32_t gw)
 {
 	struct netif* netif = netif_esp[netif_idx];
 
-	ualwaysassert(ip != 0);
-
 	// backup old esp IPs
 	ip_addr_t oldip, oldmask, oldgw;
 	oldip = netif->ip_addr;

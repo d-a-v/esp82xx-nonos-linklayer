@@ -298,6 +298,8 @@ void esp2glue_netif_set_default (int netif_idx)
 
 static void netif_sta_status_callback (struct netif* netif)
 {
+	// address can be set or reset/any (=0)
+
 	uprint(DBG "netif status callback ");
 	new_display_netif(netif);
 	
