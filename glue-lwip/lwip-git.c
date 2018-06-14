@@ -300,13 +300,14 @@ static void netif_sta_status_callback (struct netif* netif)
 {
 	// address can be set or reset/any (=0)
 
-	uprint(DBG "netif status callback ");
+	uprint(DBG "netif status callback:\n");
 	new_display_netif(netif);
 	
+	// tell ESP that link is updated
+	glue2esp_ifup(netif->num, netif->ip_addr.addr, netif->netmask.addr, netif->gw.addr);
+
 	if (netif->flags & NETIF_FLAG_UP)
 	{
-		// tell ESP that link is up
-		glue2esp_ifup(netif->num, netif->ip_addr.addr, netif->netmask.addr, netif->gw.addr);
 
 		if (netif == netif_sta)
 		{
@@ -458,8 +459,16 @@ void esp2glue_netif_set_up1down0 (int netif_idx, int up1_or_down0)
 	}
 	else
 	{
+		// need to do this and pass it to esp
+		// (through netif_sta_status_callback())
+		// to update users's view of state
+		memset(&netif->ip_addr, 0, sizeof(netif->ip_addr));
+		memset(&netif->netmask, 0, sizeof(netif->netmask));
+		memset(&netif->gw, 0, sizeof(netif->gw));
+
 		netif_set_link_down(netif);
 		netif_set_down(netif);
+
 		if (netif_default == &netif_git[netif_idx])
 			netif_set_default(NULL);
 	}
