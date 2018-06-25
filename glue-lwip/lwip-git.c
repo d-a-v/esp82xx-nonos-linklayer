@@ -166,8 +166,8 @@ err_glue_t esp2glue_dhcp_start (int netif_idx)
 
 	// set link and interface up for dhcp client
 	netif_set_link_up(&netif_git[netif_idx]);
-	//netif_set_up(&netif_git[netif_idx]); // unwanted call to netif_sta_status_callback()
-	netif_git[netif_idx].flags |= NETIF_FLAG_UP;
+	// calls netif_sta_status_callback() - if applicable (STA)
+	netif_set_up(&netif_git[netif_idx]);
 
 	// Update to latest esp hostname before starting dhcp client,
 	// 	because this name is provided to the dhcp server.
