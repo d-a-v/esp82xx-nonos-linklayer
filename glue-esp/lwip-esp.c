@@ -741,7 +741,7 @@ void sys_untimeout (sys_timeout_handler handler, void *arg)
 	STUB(sys_untimeout);
 }
 
-void glue2esp_ifup (int netif_idx, uint32_t ip, uint32_t mask, uint32_t gw)
+void glue2esp_ifupdown (int netif_idx, uint32_t ip, uint32_t mask, uint32_t gw)
 {
 	struct netif* netif = netif_esp[netif_idx];
 
@@ -751,7 +751,7 @@ void glue2esp_ifup (int netif_idx, uint32_t ip, uint32_t mask, uint32_t gw)
 	oldmask = netif->netmask;
 	oldgw = netif->gw;
 	        
-	uprint(DBG "glue2esp_ifup new %d.%d.%d.%d old %ld.%ld.%ld.%ld\n",
+	uprint(DBG "glue2esp_ifupdown new %d.%d.%d.%d old %ld.%ld.%ld.%ld\n",
 		        ip & 0xff,         (ip >> 8) & 0xff,         (ip >> 16) & 0xff,         ip >> 24,
 		oldip.addr & 0xff, (oldip.addr >> 8) & 0xff, (oldip.addr >> 16) & 0xff, oldip.addr >> 24);
 
@@ -760,11 +760,17 @@ void glue2esp_ifup (int netif_idx, uint32_t ip, uint32_t mask, uint32_t gw)
 	netif->netmask.addr = mask;
 	netif->gw.addr = gw;
 
-	// set up
-	netif->flags |= NETIF_FLAG_UP;
-
-	// tell esp to check it has changed (by giving old ones)
-	system_station_got_ip_set(&oldip, &oldmask, &oldgw);
+	if (ip)
+	{
+		// set up
+		netif->flags |= NETIF_FLAG_UP;
+		// tell esp to check IP has changed (by giving old IPs)
+		// only in case ip!=0
+		system_station_got_ip_set(&oldip, &oldmask, &oldgw);
+	}
+	else
+		// or down
+		netif->flags &= ~NETIF_FLAG_UP;
 }
 
 void (*phy_capture) (int netif_idx, const char* data, size_t len, int out, int success) = NULL;

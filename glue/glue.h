@@ -86,7 +86,7 @@ void		esp2glue_netif_set_default	(int netif_idx);
 void		esp2glue_netif_update		(int netif_idx, uint32_t ip, uint32_t mask, uint32_t gw, size_t hwlen, const uint8_t* hwaddr, uint16_t mtu);
 void		esp2glue_netif_set_up1down0	(int netif_idx, int up1_or_down0);
 
-void		glue2esp_ifup			(int netif_idx, uint32_t ip, uint32_t mask, uint32_t gw);
+void		glue2esp_ifupdown		(int netif_idx, uint32_t ip, uint32_t mask, uint32_t gw);
 err_glue_t	glue2esp_linkoutput		(int netif_idx, void* ref2save, void* data, size_t size);
 
 #endif // GLUE_H

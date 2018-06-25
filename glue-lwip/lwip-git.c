@@ -304,22 +304,19 @@ static void netif_sta_status_callback (struct netif* netif)
 	new_display_netif(netif);
 	
 	// tell ESP that link is updated
-	glue2esp_ifup(netif->num, netif->ip_addr.addr, netif->netmask.addr, netif->gw.addr);
+	glue2esp_ifupdown(netif->num, netif->ip_addr.addr, netif->netmask.addr, netif->gw.addr);
 
-	if (netif->flags & NETIF_FLAG_UP)
+	if (   netif->flags & NETIF_FLAG_UP
+	    && netif == netif_sta)
 	{
-
-		if (netif == netif_sta)
-		{
-			// this is our default route
-			netif_set_default(netif);
+		// this is our default route
+		netif_set_default(netif);
 			
-			if (netif->ip_addr.addr)
-			{
-				// restart sntp
-				sntp_stop();
-				sntp_init();
-			}
+		if (netif->ip_addr.addr)
+		{
+			// restart sntp
+			sntp_stop();
+			sntp_init();
 		}
 	}
 }
