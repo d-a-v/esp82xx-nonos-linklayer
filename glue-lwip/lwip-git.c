@@ -190,37 +190,6 @@ void esp2glue_dhcp_stop (int netif_idx)
 	dhcp_stop(&netif_git[netif_idx]);
 }
 
-// pbuf_clone() needed and not yet defined in lwip2 sources
-// this pbuf_clone() below is a copy of lwip2 master repo
-// https://git.savannah.gnu.org/cgit/lwip.git/tree/src/core/pbuf.c
-// it is not present in current 2.0.3 stable
-/**
- * @ingroup pbuf
- * Allocates a new pbuf of same length (via pbuf_alloc()) and copies the source
- * pbuf into this new pbuf (using pbuf_copy()).
- *
- * @param layer pbuf_layer of the new pbuf
- * @param type this parameter decides how and where the pbuf should be allocated
- *             (@see pbuf_alloc())
- * @param p the source pbuf
- *
- * @return a new pbuf or NULL if allocation fails
- */
-struct pbuf *
-pbuf_clone(pbuf_layer layer, pbuf_type type, struct pbuf *p)
-{
-  struct pbuf *q;
-  err_t err;
-  q = pbuf_alloc(layer, p->tot_len, type);
-  if (q == NULL) {
-    return NULL;
-  }
-  err = pbuf_copy(q, p);
-  LWIP_UNUSED_ARG(err); /* in case of LWIP_NOASSERT */
-  LWIP_ASSERT("pbuf_copy failed", err == ERR_OK);
-  return q;
-}
-
 err_t new_linkoutput (struct netif* netif, struct pbuf* p)
 {
 	#if !LWIP_NETIF_TX_SINGLE_PBUF
@@ -233,7 +202,7 @@ err_t new_linkoutput (struct netif* netif, struct pbuf* p)
 		// it can however happen:
 		// see https://git.savannah.gnu.org/cgit/lwip.git/tree/src/include/lwip/opt.h#n1593
 		// see http://lists.nongnu.org/archive/html/lwip-users/2017-10/msg00059.html
-#if 1
+
 		// make a monolithic pbuf from a fragmented one by copying it
 		struct pbuf* q = pbuf_clone(PBUF_LINK, PBUF_RAM, p);
 		if (q == NULL)
@@ -242,10 +211,6 @@ err_t new_linkoutput (struct netif* netif, struct pbuf* p)
 		p = q;
 		// old p will be released by caller
 		// new p = q will be released by glue2esp_linkoutput() subsequent callbacks to esp2glue_pbuf_freed()
-#else
-		uerror(DBG "fragmented pbuf (%d!=%d)!\n", p->len, p->tot_len);
-		return ERR_BUF;
-#endif
 	}
 	else
 		// protect pbuf, so lwip2(git) won't free it before phy(esp) finishes sending
