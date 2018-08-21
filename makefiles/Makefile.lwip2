@@ -8,6 +8,7 @@ OBJ = \
 	$(patsubst %.c,$(BUILD)/%.o,$(wildcard core/ipv6/*.c)) \
 	$(patsubst %.c,$(BUILD)/%.o,$(wildcard api/*.c)) \
 	$(patsubst %.c,$(BUILD)/%.o,$(wildcard apps/sntp/*.c)) \
+	$(patsubst %.c,$(BUILD)/%.o,$(wildcard apps/mdns/*.c)) \
 #	$(subst ../../lwip2-contrib-src/,contrib/, \
 #		$(patsubst %.c,$(BUILD)/%.o,$(wildcard ../../lwip2-contrib-src/apps/ping/*.c)))
 
