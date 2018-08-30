@@ -158,7 +158,7 @@ ping_recv(void *arg, struct raw_pcb *pcb, struct pbuf *p, const ip_addr_t *addr)
 			  uint32 delay = system_relative_time(pingmsg->ping_sent);
 			  delay /= PING_COARSE;
 			  iphdr = (struct ip_hdr*)((u8*)iecho - PBUF_IP_HLEN);
-			  source_ip.addr = iphdr->src.addr;
+			  ip_2_ip4(&source_ip)->addr = iphdr->src.addr;
 			  ipaddr_ntoa_r(&source_ip,ipaddrstr, sizeof(ipaddrstr));
 			  if (pingmsg->ping_opt->recv_function == NULL){
 				  os_printf("recv %s: byte = %d, time = %d ms, seq = %d\n",ipaddrstr, PING_DATA_SIZE, delay, ntohs(iecho->seqno));
