@@ -180,6 +180,10 @@ err_glue_t esp2glue_dhcp_start (int netif_idx)
 	netif_git[netif_idx].hostname = wifi_station_get_hostname();
 
 	err_t err = dhcp_start(&netif_git[netif_idx]);
+#if LWIP_IPV6_DHCP6_STATELESS
+	if (err == ERR_OK)
+		err_t err = dhcp6_enable_stateless(&netif_git[netif_idx]);
+#endif
 	uprint(DBG "new_dhcp_start returns %d\n", (int)err);
 	return git2glue_err(err);
 }
