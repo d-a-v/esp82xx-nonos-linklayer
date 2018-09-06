@@ -2234,7 +2234,7 @@
  * installation that is not yet scope-aware; otherwise it may be too expensive.
  */
 #if !defined LWIP_IPV6_SCOPES_DEBUG || defined __DOXYGEN__
-#define LWIP_IPV6_SCOPES_DEBUG          0
+#define LWIP_IPV6_SCOPES_DEBUG          1
 #endif
 
 /**
@@ -2492,7 +2492,47 @@
  * LWIP_IPV6_DHCP6==1: enable DHCPv6 stateful address autoconfiguration.
  */
 #if !defined LWIP_IPV6_DHCP6 || defined __DOXYGEN__
-#define LWIP_IPV6_DHCP6                 0
+#define LWIP_IPV6_DHCP6                 1
+#endif
+
+/**
+ * LWIP_IPV6_DHCP6_STATEFUL==1: enable DHCPv6 stateful address autoconfiguration.
+ * (not supported, yet!)
+ */
+#if !defined LWIP_IPV6_DHCP6_STATEFUL || defined __DOXYGEN__
+#define LWIP_IPV6_DHCP6_STATEFUL        0
+#endif
+
+/**
+ * LWIP_IPV6_DHCP6_STATELESS==1: enable DHCPv6 stateless address autoconfiguration.
+ */
+#if !defined LWIP_IPV6_DHCP6_STATELESS || defined __DOXYGEN__
+#define LWIP_IPV6_DHCP6_STATELESS       LWIP_IPV6_DHCP6
+#endif
+
+/**
+ * LWIP_DHCP6_GETS_NTP==1: Request NTP servers via DHCPv6. For each
+ * response packet, a callback is called, which has to be provided by the port:
+ * void dhcp6_set_ntp_servers(u8_t num_ntp_servers, ip_addr_t* ntp_server_addrs);
+*/
+#if !defined LWIP_DHCP6_GET_NTP_SRV || defined __DOXYGEN__
+#define LWIP_DHCP6_GET_NTP_SRV          0 // not implemented yet!
+#endif
+
+/**
+ * The maximum of NTP servers requested
+ */
+#if !defined LWIP_DHCP6_MAX_NTP_SERVERS || defined __DOXYGEN__
+#define LWIP_DHCP6_MAX_NTP_SERVERS      1
+#endif
+
+/**
+ * LWIP_DHCP6_MAX_DNS_SERVERS > 0: Request DNS servers via DHCPv6.
+ * DNS servers received in the response are passed to DNS via @ref dns_setserver()
+ * (up to the maximum limit defined here).
+ */
+#if !defined LWIP_DHCP6_MAX_DNS_SERVERS || defined __DOXYGEN__
+#define LWIP_DHCP6_MAX_DNS_SERVERS      DNS_MAX_SERVERS
 #endif
 
 /*
