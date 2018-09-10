@@ -26,6 +26,7 @@ void ets_bzero (void*, size_t);
 int ets_memcmp (const void*, const void*, size_t n);
 void *ets_memset (void *s, int c, size_t n);
 void *ets_memcpy (void *dest, const void *src, size_t n);
+void *ets_memmove(void *dest, const void *src, size_t n);
 
 typedef void ETSTimerFunc(void *timer_arg);
 void ets_timer_disarm (ETSTimer *a);

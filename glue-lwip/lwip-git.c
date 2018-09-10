@@ -43,6 +43,10 @@ author: d. gauchard
 #include "lwip/apps/sntp.h"
 #include "arch/cc.h"
 
+#if LWIP_IPV6
+#include "lwip/dhcp6.h"
+#endif
+
 #include "lwip-git.h"
 
 // this is dhcpserver taken from lwip-1.4-espressif
@@ -180,7 +184,7 @@ err_glue_t esp2glue_dhcp_start (int netif_idx)
 	netif_git[netif_idx].hostname = wifi_station_get_hostname();
 
 	err_t err = dhcp_start(&netif_git[netif_idx]);
-#if LWIP_IPV6_DHCP6_STATELESS
+#if LWIP_IPV6 && LWIP_IPV6_DHCP6_STATELESS
 	if (err == ERR_OK)
 		err = dhcp6_enable_stateless(&netif_git[netif_idx]);
 #endif
@@ -441,8 +445,8 @@ void esp2glue_netif_set_up1down0 (int netif_idx, int up1_or_down0)
 }
 
 #define VALUE_TO_STRING(x) #x
-#define VAR_NAME_VALUE(var) "\n\n-------- " #var " = "  VALUE_TO_STRING(var) " --------\n"
-#pragma message VAR_NAME_VALUE(TCP_MSS)
+#define VAR_NAME_VALUE(var) "-------- " #var " = "  VALUE_TO_STRING(var) " --------\n"
+#pragma message "\n\n" VAR_NAME_VALUE(TCP_MSS) VAR_NAME_VALUE(LWIP_IPV6)
 
 LWIP_ERR_T lwip_unhandled_packet (struct pbuf* pbuf, struct netif* netif)
 {

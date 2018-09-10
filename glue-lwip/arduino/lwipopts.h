@@ -2215,7 +2215,8 @@
  * LWIP_IPV6==1: Enable IPv6
  */
 #if !defined LWIP_IPV6 || defined __DOXYGEN__
-#define LWIP_IPV6                       1
+#error LWIP_IPV6 should be defined by gcc cmdline
+#define LWIP_IPV6                       0
 #endif
 
 /**
@@ -2224,7 +2225,7 @@
  * setting only for single-interface configurations.
  */
 #if !defined LWIP_IPV6_SCOPES || defined __DOXYGEN__
-#define LWIP_IPV6_SCOPES                (LWIP_IPV6 && !LWIP_SINGLE_NETIF)
+#define LWIP_IPV6_SCOPES                0 // XXXX check impact (LWIP_IPV6 && !LWIP_SINGLE_NETIF)
 #endif
 
 /**
@@ -2234,14 +2235,14 @@
  * installation that is not yet scope-aware; otherwise it may be too expensive.
  */
 #if !defined LWIP_IPV6_SCOPES_DEBUG || defined __DOXYGEN__
-#define LWIP_IPV6_SCOPES_DEBUG          1
+#define LWIP_IPV6_SCOPES_DEBUG          0
 #endif
 
 /**
  * LWIP_IPV6_NUM_ADDRESSES: Number of IPv6 addresses per netif.
  */
 #if !defined LWIP_IPV6_NUM_ADDRESSES || defined __DOXYGEN__
-#define LWIP_IPV6_NUM_ADDRESSES         3
+#define LWIP_IPV6_NUM_ADDRESSES         2 // 3
 #endif
 
 /**
@@ -2262,7 +2263,7 @@
  * LWIP_IPV6_REASS==1: reassemble incoming IPv6 packets that fragmented
  */
 #if !defined LWIP_IPV6_REASS || defined __DOXYGEN__
-#define LWIP_IPV6_REASS                 (LWIP_IPV6)
+#define LWIP_IPV6_REASS                 0 // (LWIP_IPV6)
 #endif
 
 /**
@@ -2270,7 +2271,7 @@
  * network startup.
  */
 #if !defined LWIP_IPV6_SEND_ROUTER_SOLICIT || defined __DOXYGEN__
-#define LWIP_IPV6_SEND_ROUTER_SOLICIT   (LWIP_IPV6) // 1
+#define LWIP_IPV6_SEND_ROUTER_SOLICIT   (LWIP_IPV6)
 #endif
 
 /**
@@ -2295,7 +2296,7 @@
  * LWIP_IPV6_DUP_DETECT_ATTEMPTS=[0..7]: Number of duplicate address detection attempts.
  */
 #if !defined LWIP_IPV6_DUP_DETECT_ATTEMPTS || defined __DOXYGEN__
-#define LWIP_IPV6_DUP_DETECT_ATTEMPTS   1
+#define LWIP_IPV6_DUP_DETECT_ATTEMPTS   0 // 1
 #endif
 /**
  * @}
@@ -2342,7 +2343,7 @@
  * indiscriminately pass all inbound IPv6 multicast traffic to lwIP.
  */
 #if !defined LWIP_IPV6_MLD || defined __DOXYGEN__
-#define LWIP_IPV6_MLD                   (LWIP_IPV6)
+#define LWIP_IPV6_MLD                   0 // (LWIP_IPV6)
 #endif
 
 /**
@@ -2352,7 +2353,7 @@
  * applicable, plus any number of groups to be joined on UDP sockets.
  */
 #if !defined MEMP_NUM_MLD6_GROUP || defined __DOXYGEN__
-#define MEMP_NUM_MLD6_GROUP             4
+#define MEMP_NUM_MLD6_GROUP             1 // 4
 #endif
 /**
  * @}
@@ -2368,42 +2369,42 @@
  * is being resolved.
  */
 #if !defined LWIP_ND6_QUEUEING || defined __DOXYGEN__
-#define LWIP_ND6_QUEUEING               (LWIP_IPV6)
+#define LWIP_ND6_QUEUEING               0 // (LWIP_IPV6)
 #endif
 
 /**
  * MEMP_NUM_ND6_QUEUE: Max number of IPv6 packets to queue during MAC resolution.
  */
 #if !defined MEMP_NUM_ND6_QUEUE || defined __DOXYGEN__
-#define MEMP_NUM_ND6_QUEUE              20
+#define MEMP_NUM_ND6_QUEUE              0 // 20
 #endif
 
 /**
  * LWIP_ND6_NUM_NEIGHBORS: Number of entries in IPv6 neighbor cache
  */
 #if !defined LWIP_ND6_NUM_NEIGHBORS || defined __DOXYGEN__
-#define LWIP_ND6_NUM_NEIGHBORS          10
+#define LWIP_ND6_NUM_NEIGHBORS          2 // 10
 #endif
 
 /**
  * LWIP_ND6_NUM_DESTINATIONS: number of entries in IPv6 destination cache
  */
 #if !defined LWIP_ND6_NUM_DESTINATIONS || defined __DOXYGEN__
-#define LWIP_ND6_NUM_DESTINATIONS       10
+#define LWIP_ND6_NUM_DESTINATIONS       2 // 10
 #endif
 
 /**
  * LWIP_ND6_NUM_PREFIXES: number of entries in IPv6 on-link prefixes cache
  */
 #if !defined LWIP_ND6_NUM_PREFIXES || defined __DOXYGEN__
-#define LWIP_ND6_NUM_PREFIXES           5
+#define LWIP_ND6_NUM_PREFIXES           2 // 5
 #endif
 
 /**
  * LWIP_ND6_NUM_ROUTERS: number of entries in IPv6 default router cache
  */
 #if !defined LWIP_ND6_NUM_ROUTERS || defined __DOXYGEN__
-#define LWIP_ND6_NUM_ROUTERS            3
+#define LWIP_ND6_NUM_ROUTERS            1 // 3
 #endif
 
 /**
@@ -2473,7 +2474,7 @@
  * unicast neighbor solicitation messages.
  */
 #if !defined LWIP_ND6_TCP_REACHABILITY_HINTS || defined __DOXYGEN__
-#define LWIP_ND6_TCP_REACHABILITY_HINTS 1
+#define LWIP_ND6_TCP_REACHABILITY_HINTS 0 // 1
 #endif
 
 /**
