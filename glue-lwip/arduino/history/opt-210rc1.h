@@ -1,9 +1,3 @@
-
-#ifndef MYLWIPOPTS_H
-#define MYLWIPOPTS_H
-
-// opt.h version lwip-2.0.3 for esp8266
-
 /**
  * @file
  *
@@ -47,12 +41,15 @@
  * without this, doxygen does not see the actual #define
  */
 
+#if !defined LWIP_HDR_OPT_H
+#define LWIP_HDR_OPT_H
+
 /*
  * Include user defined options first. Anything not defined in these files
  * will be set to standard values. Override anything you don't like!
  */
-//#include "lwip/debug.h"      // done at end of this file
-#include "gluedebug.h"
+#include "lwipopts.h"
+#include "lwip/debug.h"
 
 /**
  * @defgroup lwip_opts Options (lwipopts.h)
@@ -89,7 +86,7 @@
  * lwIP functions/structures from more than one context at a time!)
  */
 #if !defined NO_SYS || defined __DOXYGEN__
-#define NO_SYS                          1
+#define NO_SYS                          0
 #endif
 /**
  * @}
@@ -190,7 +187,7 @@
  * Your system should provide mutexes supporting priority inversion to use this.
  */
 #if !defined LWIP_TCPIP_CORE_LOCKING || defined __DOXYGEN__
-#define LWIP_TCPIP_CORE_LOCKING         0
+#define LWIP_TCPIP_CORE_LOCKING         1
 #endif
 
 /**
@@ -258,7 +255,7 @@
  * already use it.
  */
 #if !defined MEM_LIBC_MALLOC || defined __DOXYGEN__
-#define MEM_LIBC_MALLOC                 1
+#define MEM_LIBC_MALLOC                 0
 #endif
 
 /**
@@ -271,7 +268,7 @@
  * not only for internal pools defined in memp_std.h)!
  */
 #if !defined MEMP_MEM_MALLOC || defined __DOXYGEN__
-#define MEMP_MEM_MALLOC                 1
+#define MEMP_MEM_MALLOC                 0
 #endif
 
 /**
@@ -289,7 +286,7 @@
  *    2 byte alignment -> \#define MEM_ALIGNMENT 2
  */
 #if !defined MEM_ALIGNMENT || defined __DOXYGEN__
-#define MEM_ALIGNMENT                   4
+#define MEM_ALIGNMENT                   1
 #endif
 
 /**
@@ -297,7 +294,7 @@
  * a lot of data that needs to be copied, this should be set high.
  */
 #if !defined MEM_SIZE || defined __DOXYGEN__
-#define unused___MEM_SIZE               1600
+#define MEM_SIZE                        1600
 #endif
 
 /**
@@ -411,7 +408,7 @@
  * this should be set high.
  */
 #if !defined MEMP_NUM_PBUF || defined __DOXYGEN__
-#define MEMP_NUM_PBUF                   10 //16
+#define MEMP_NUM_PBUF                   16
 #endif
 
 /**
@@ -444,7 +441,7 @@
  * (requires the LWIP_TCP option)
  */
 #if !defined MEMP_NUM_TCP_PCB_LISTEN || defined __DOXYGEN__
-#define MEMP_NUM_TCP_PCB_LISTEN         2
+#define MEMP_NUM_TCP_PCB_LISTEN         8
 #endif
 
 /**
@@ -452,7 +449,7 @@
  * (requires the LWIP_TCP option)
  */
 #if !defined MEMP_NUM_TCP_SEG || defined __DOXYGEN__
-#define MEMP_NUM_TCP_SEG                10 // 16
+#define MEMP_NUM_TCP_SEG                16
 #endif
 
 /**
@@ -470,7 +467,7 @@
  * reassembly (whole packets, not fragments!)
  */
 #if !defined MEMP_NUM_REASSDATA || defined __DOXYGEN__
-#define MEMP_NUM_REASSDATA              0 // 5
+#define MEMP_NUM_REASSDATA              5
 #endif
 
 /**
@@ -481,7 +478,7 @@
  * returns.
  */
 #if !defined MEMP_NUM_FRAG_PBUF || defined __DOXYGEN__
-#define MEMP_NUM_FRAG_PBUF              0 // 15
+#define MEMP_NUM_FRAG_PBUF              15
 #endif
 
 /**
@@ -491,7 +488,7 @@
  * (requires the ARP_QUEUEING option)
  */
 #if !defined MEMP_NUM_ARP_QUEUE || defined __DOXYGEN__
-#define MEMP_NUM_ARP_QUEUE              10 // 30
+#define MEMP_NUM_ARP_QUEUE              30
 #endif
 
 /**
@@ -524,7 +521,7 @@
  * (only needed if you use the sequential API, like api_lib.c)
  */
 #if !defined MEMP_NUM_NETBUF || defined __DOXYGEN__
-#define MEMP_NUM_NETBUF                 0 // 2
+#define MEMP_NUM_NETBUF                 2
 #endif
 
 /**
@@ -532,7 +529,7 @@
  * (only needed if you use the sequential API, like api_lib.c)
  */
 #if !defined MEMP_NUM_NETCONN || defined __DOXYGEN__
-#define MEMP_NUM_NETCONN                0 // 4
+#define MEMP_NUM_NETCONN                4
 #endif
 
 /**
@@ -550,7 +547,7 @@
  * (only needed if you use tcpip.c)
  */
 #if !defined MEMP_NUM_TCPIP_MSG_API || defined __DOXYGEN__
-#define MEMP_NUM_TCPIP_MSG_API          4 // 8
+#define MEMP_NUM_TCPIP_MSG_API          8
 #endif
 
 /**
@@ -559,7 +556,7 @@
  * (only needed if you use tcpip.c)
  */
 #if !defined MEMP_NUM_TCPIP_MSG_INPKT || defined __DOXYGEN__
-#define MEMP_NUM_TCPIP_MSG_INPKT        4 // 8
+#define MEMP_NUM_TCPIP_MSG_INPKT        8
 #endif
 
 /**
@@ -575,14 +572,14 @@
  * if DNS_LOCAL_HOSTLIST_IS_DYNAMIC==1.
  */
 #if !defined MEMP_NUM_LOCALHOSTLIST || defined __DOXYGEN__
-#define MEMP_NUM_LOCALHOSTLIST          0 // 1
+#define MEMP_NUM_LOCALHOSTLIST          1
 #endif
 
 /**
  * PBUF_POOL_SIZE: the number of buffers in the pbuf pool.
  */
 #if !defined PBUF_POOL_SIZE || defined __DOXYGEN__
-#define PBUF_POOL_SIZE                  10 // 16
+#define PBUF_POOL_SIZE                  16
 #endif
 
 /** MEMP_NUM_API_MSG: the number of concurrently active calls to various
@@ -891,7 +888,7 @@
  * LWIP_RAW==1: Enable application layer to hook into the IP layer itself.
  */
 #if !defined LWIP_RAW || defined __DOXYGEN__
-#define LWIP_RAW                        1 // 0
+#define LWIP_RAW                        0
 #endif
 
 /**
@@ -918,7 +915,7 @@
  * LWIP_DHCP==1: Enable DHCP module.
  */
 #if !defined LWIP_DHCP || defined __DOXYGEN__
-#define LWIP_DHCP                       1 // 0
+#define LWIP_DHCP                       0
 #endif
 #if !LWIP_IPV4
 /* disable DHCP when IPv4 is disabled */
@@ -930,7 +927,7 @@
  * DHCP_DOES_ARP_CHECK==1: Do an ARP check on the offered address.
  */
 #if !defined DHCP_DOES_ARP_CHECK || defined __DOXYGEN__
-#define DHCP_DOES_ARP_CHECK             0 // (LWIP_DHCP && LWIP_ARP)
+#define DHCP_DOES_ARP_CHECK             (LWIP_DHCP && LWIP_ARP)
 #endif
 
 /**
@@ -956,7 +953,7 @@
  * void dhcp_set_ntp_servers(u8_t num_ntp_servers, ip_addr_t* ntp_server_addrs);
 */
 #if !defined LWIP_DHCP_GET_NTP_SRV || defined __DOXYGEN__
-#define LWIP_DHCP_GET_NTP_SRV           1 // 0
+#define LWIP_DHCP_GET_NTP_SRV           0
 #endif
 
 /**
@@ -1080,7 +1077,7 @@
  * LWIP_IGMP==1: Turn on IGMP module.
  */
 #if !defined LWIP_IGMP || defined __DOXYGEN__
-#define LWIP_IGMP                       1 // 0
+#define LWIP_IGMP                       0
 #endif
 #if !LWIP_IPV4
 #undef LWIP_IGMP
@@ -1105,17 +1102,17 @@
  * transport.
  */
 #if !defined LWIP_DNS || defined __DOXYGEN__
-#define LWIP_DNS                        1 // 0
+#define LWIP_DNS                        0
 #endif
 
 /** DNS maximum number of entries to maintain locally. */
 #if !defined DNS_TABLE_SIZE || defined __DOXYGEN__
-#define DNS_TABLE_SIZE                  3 // 4
+#define DNS_TABLE_SIZE                  4
 #endif
 
 /** DNS maximum host name length supported in the name table. */
 #if !defined DNS_MAX_NAME_LENGTH || defined __DOXYGEN__
-#define DNS_MAX_NAME_LENGTH             128 // 256
+#define DNS_MAX_NAME_LENGTH             256
 #endif
 
 /** The maximum of DNS servers
@@ -1133,7 +1130,7 @@
 
 /** DNS do a name checking between the query and the response. */
 #if !defined DNS_DOES_NAME_CHECK || defined __DOXYGEN__
-#define DNS_DOES_NAME_CHECK             0 // 1
+#define DNS_DOES_NAME_CHECK             1
 #endif
 
 /** LWIP_DNS_SECURE: controls the security level of the DNS implementation
@@ -1141,7 +1138,7 @@
  * This is overridable but should only be needed by very small targets
  * or when using against non standard DNS servers. */
 #if !defined LWIP_DNS_SECURE || defined __DOXYGEN__
-#define LWIP_DNS_SECURE 0 // (LWIP_DNS_SECURE_RAND_XID | LWIP_DNS_SECURE_NO_MULTIPLE_OUTSTANDING | LWIP_DNS_SECURE_RAND_SRC_PORT)
+#define LWIP_DNS_SECURE (LWIP_DNS_SECURE_RAND_XID | LWIP_DNS_SECURE_NO_MULTIPLE_OUTSTANDING | LWIP_DNS_SECURE_RAND_SRC_PORT)
 #endif
 
 /* A list of DNS security features follows */
@@ -1170,7 +1167,7 @@
 /** Set this to 1 to enable querying ".local" names via mDNS
  *  using a One-Shot Multicast DNS Query */
 #if !defined LWIP_DNS_SUPPORT_MDNS_QUERIES || defined __DOXYGEN__
-#define LWIP_DNS_SUPPORT_MDNS_QUERIES   1 // 0
+#define LWIP_DNS_SUPPORT_MDNS_QUERIES   0
 #endif
 /**
  * @}
@@ -1278,7 +1275,7 @@
  * LWIP_TCP_SACK_OUT==1: TCP will support sending selective acknowledgements (SACKs).
  */
 #if !defined LWIP_TCP_SACK_OUT || defined __DOXYGEN__
-#define LWIP_TCP_SACK_OUT               1 // 0
+#define LWIP_TCP_SACK_OUT               0
 #endif
 
 /**
@@ -1292,7 +1289,7 @@
  * The amount of memory used to store SACK ranges is LWIP_TCP_MAX_SACK_NUM * 8 bytes for each TCP PCB.
  */
 #if !defined LWIP_TCP_MAX_SACK_NUM || defined __DOXYGEN__
-#define LWIP_TCP_MAX_SACK_NUM           2 // 4
+#define LWIP_TCP_MAX_SACK_NUM           4
 #endif
 
 /**
@@ -1303,7 +1300,7 @@
  * an upper limit on the MSS advertised by the remote host.
  */
 #if !defined TCP_MSS || defined __DOXYGEN__
-//#define TCP_MSS                         536
+#define TCP_MSS                         536
 #endif
 
 /**
@@ -1359,7 +1356,7 @@
  * Only valid for TCP_QUEUE_OOSEQ==1.
  */
 #if !defined TCP_OOSEQ_MAX_BYTES || defined __DOXYGEN__
-#define TCP_OOSEQ_MAX_BYTES             TCP_MSS // 0
+#define TCP_OOSEQ_MAX_BYTES             0
 #endif
 
 /**
@@ -1382,7 +1379,7 @@
  * Only valid for TCP_QUEUE_OOSEQ==1.
  */
 #if !defined TCP_OOSEQ_MAX_PBUFS || defined __DOXYGEN__
-#define TCP_OOSEQ_MAX_PBUFS             1 // 0
+#define TCP_OOSEQ_MAX_PBUFS             0
 #endif
 
 /**
@@ -1430,7 +1427,7 @@
  * TCP_MSS/4: Try to create 4 fragments or less per TCP packet.
  */
 #if !defined TCP_OVERSIZE || defined __DOXYGEN__
-#define TCP_OVERSIZE                    TCP_MSS // TCP_MSS required for esp8266
+#define TCP_OVERSIZE                    TCP_MSS
 #endif
 
 /**
@@ -1545,7 +1542,7 @@
  * for an additional encapsulation header before ethernet headers (e.g. 802.11)
  */
 #if !defined PBUF_LINK_ENCAPSULATION_HLEN || defined __DOXYGEN__
-#define PBUF_LINK_ENCAPSULATION_HLEN    36 // 0u # 36 is EP_OFFSET from original esp implementation
+#define PBUF_LINK_ENCAPSULATION_HLEN    0
 #endif
 
 /**
@@ -1583,7 +1580,7 @@
  * small real-life targets. Some code like routing etc. can be left out.
  */
 #if !defined LWIP_SINGLE_NETIF || defined __DOXYGEN__
-#define LWIP_SINGLE_NETIF               0 // AP, STA, spi ethernet...
+#define LWIP_SINGLE_NETIF               0
 #endif
 
 /**
@@ -1591,7 +1588,7 @@
  * field.
  */
 #if !defined LWIP_NETIF_HOSTNAME || defined __DOXYGEN__
-#define LWIP_NETIF_HOSTNAME             1 // 0
+#define LWIP_NETIF_HOSTNAME             0
 #endif
 
 /**
@@ -1606,7 +1603,7 @@
  * changes its up/down status (i.e., due to DHCP IP acquisition)
  */
 #if !defined LWIP_NETIF_STATUS_CALLBACK || defined __DOXYGEN__
-#define LWIP_NETIF_STATUS_CALLBACK      1 // 0
+#define LWIP_NETIF_STATUS_CALLBACK      0
 #endif
 
 /**
@@ -1664,7 +1661,7 @@
  *   }
  */
 #if !defined LWIP_NETIF_TX_SINGLE_PBUF || defined __DOXYGEN__
-#define LWIP_NETIF_TX_SINGLE_PBUF       1 // needed by esp8266 physical layer
+#define LWIP_NETIF_TX_SINGLE_PBUF       0
 #endif /* LWIP_NETIF_TX_SINGLE_PBUF */
 
 /**
@@ -1895,7 +1892,7 @@
  * LWIP_NETCONN==1: Enable Netconn API (require to use api_lib.c)
  */
 #if !defined LWIP_NETCONN || defined __DOXYGEN__
-#define LWIP_NETCONN                    0 // 1
+#define LWIP_NETCONN                    1
 #endif
 
 /** LWIP_TCPIP_TIMEOUT==1: Enable tcpip_timeout/tcpip_untimeout to create
@@ -1948,7 +1945,7 @@
  * LWIP_SOCKET==1: Enable Socket API (require to use sockets.c)
  */
 #if !defined LWIP_SOCKET || defined __DOXYGEN__
-#define LWIP_SOCKET                     0 // 1
+#define LWIP_SOCKET                     1
 #endif
 
 /**
@@ -1987,7 +1984,7 @@
  * in seconds. (does not require sockets.c, and will affect tcp.c)
  */
 #if !defined LWIP_TCP_KEEPALIVE || defined __DOXYGEN__
-#define LWIP_TCP_KEEPALIVE              1 // 0
+#define LWIP_TCP_KEEPALIVE              0
 #endif
 
 /**
@@ -2046,7 +2043,7 @@
  * SO_REUSE==1: Enable SO_REUSEADDR option.
  */
 #if !defined SO_REUSE || defined __DOXYGEN__
-#define SO_REUSE                        1 // 0
+#define SO_REUSE                        0
 #endif
 
 /**
@@ -2105,7 +2102,7 @@
  * LWIP_STATS==1: Enable statistics collection in lwip_stats.
  */
 #if !defined LWIP_STATS || defined __DOXYGEN__
-#define LWIP_STATS                      0 // 1
+#define LWIP_STATS                      1
 #endif
 
 #if LWIP_STATS
@@ -2281,7 +2278,7 @@
  * ATTENTION: if enabled, the CHECKSUM_GEN_* and CHECKSUM_CHECK_* defines must be enabled!
  */
 #if !defined LWIP_CHECKSUM_CTRL_PER_NETIF || defined __DOXYGEN__
-#define LWIP_CHECKSUM_CTRL_PER_NETIF    1 // 0
+#define LWIP_CHECKSUM_CTRL_PER_NETIF    0
 #endif
 
 /**
@@ -3061,7 +3058,7 @@
  * Payload points to ethernet header!
  */
 #ifdef __DOXYGEN__
-#define LWIP_HOOK_UNKNOWN_ETH_PROTOCOL(pbuf, netif) lwip_unhandled_packet((pbuf), (netif))
+#define LWIP_HOOK_UNKNOWN_ETH_PROTOCOL(pbuf, netif)
 #endif
 
 /**
@@ -3513,72 +3510,4 @@
  * @}
  */
 
-/*
-   --------------------------------------------------
-   ------------- End of original lwipopts -----------
-   --------------------------------------------------
-*/
-
-/*
-   --------------------------------------------------
-   ------------------ SNTP options ------------------
-   --------------------------------------------------
-*/
-#define SNTP_SERVER_DNS			1				// SNTP support DNS names through sntp_setservername / sntp_getservername
-// if SNTP_SERVER_ADDRESS is defined, it always overrides user's config
-// so we do not define it. sntp server can come from dhcp server, or by
-// user.
-//#define SNTP_SERVER_ADDRESS	"pool.ntp.org"			// default
-#define SNTP_GET_SERVERS_FROM_DHCP	3
-#define SNTP_SET_SYSTEM_TIME_US(t,us)	do { struct timeval tv = { t, us }; settimeofday(&tv, NULL); } while (0)
-
-/*
-   --------------------------------------------------
-   ------------------- LOCAL FIXES ------------------
-   --------------------------------------------------
-*/
-
-#include "lwip/debug.h"
-#include "arch/cc.h"
-#include "lwip-git-hash.h"
-#include <sys/time.h> // settimeofday() + struct timeval
-
-// allow to handle special packets (user redefinable)
-struct pbuf;
-struct netif;
-#ifndef LWIP_ERR_T
-#define LWIP_ERR_T s8
-#endif
-LWIP_ERR_T lwip_unhandled_packet (struct pbuf* pbuf, struct netif* netif) __attribute__((weak));
-
-/*
-   --------------------------------------------------
-   ----------------- TIME-WAIT tweak ----------------
-   --------------------------------------------------
-   port @me-no-dev time-wait tweak
-   https://github.com/esp8266/Arduino/commit/07f4d4c241df2c552899857f39a4295164f686f2#diff-f8258e71e25fb9985ca3799e3d8b88ecR399
-*/
-
-void tcp_kill_timewait (void);
-#define TCP_TW_LIMIT(l)                \
-  if (l) do {                          \
-    u32_t count_plus_1 = 1;            \
-    struct tcp_pcb* tmp = tcp_tw_pcbs; \
-    if (tmp)                           \
-      while ((tmp = tmp->next))        \
-        ++count_plus_1;                \
-    while (--count_plus_1 > (l))       \
-      /* kill the oldest */            \
-      /* pcb in TW state */            \
-      tcp_kill_timewait();             \
-  } while (0)
-
-/**
- * MEMP_NUM_TCP_PCB_TIME_WAIT: the number of TCP pcbs in TIME_WAIT state.
- * (requires the LWIP_TCP option, 0 = disabled)
- */
-#ifndef MEMP_NUM_TCP_PCB_TIME_WAIT
-#define MEMP_NUM_TCP_PCB_TIME_WAIT       5
-#endif
-
-#endif // MYLWIPOPTS_H
+#endif /* LWIP_HDR_OPT_H */

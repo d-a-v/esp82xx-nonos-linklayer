@@ -1,0 +1,4 @@
+grep ^#define lwipopts-203.h | grep -v DEBUG > lwipopts-203.h.tmp
+grep ^#define opt-203.h | grep -v DEBUG > opt-203.h.tmp
+diff -U 1 opt-203.h.tmp lwipopts-203.h.tmp | grep '^[\+\-]'
+rm -f *.tmp
