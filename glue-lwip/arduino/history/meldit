@@ -1,4 +1,0 @@
-./compare203 | grep '\+' > def203.meld
-./compare210rc1 | grep '\+' > def210rc1.meld
-meld def203.meld def210rc1.meld
-rm -f *.meld

@@ -2,7 +2,7 @@
 #ifndef MYLWIPOPTS_H
 #define MYLWIPOPTS_H
 
-// opt.h version lwip-2.0.3 for esp8266
+// opt.h version lwip-2.1.0rc1 for esp8266
 
 /**
  * @file
@@ -190,7 +190,7 @@
  * Your system should provide mutexes supporting priority inversion to use this.
  */
 #if !defined LWIP_TCPIP_CORE_LOCKING || defined __DOXYGEN__
-#define LWIP_TCPIP_CORE_LOCKING         0
+#define LWIP_TCPIP_CORE_LOCKING         0 // 1
 #endif
 
 /**
@@ -258,7 +258,7 @@
  * already use it.
  */
 #if !defined MEM_LIBC_MALLOC || defined __DOXYGEN__
-#define MEM_LIBC_MALLOC                 1
+#define MEM_LIBC_MALLOC                 1 // 0
 #endif
 
 /**
@@ -271,7 +271,7 @@
  * not only for internal pools defined in memp_std.h)!
  */
 #if !defined MEMP_MEM_MALLOC || defined __DOXYGEN__
-#define MEMP_MEM_MALLOC                 1
+#define MEMP_MEM_MALLOC                 0
 #endif
 
 /**
@@ -289,7 +289,7 @@
  *    2 byte alignment -> \#define MEM_ALIGNMENT 2
  */
 #if !defined MEM_ALIGNMENT || defined __DOXYGEN__
-#define MEM_ALIGNMENT                   4
+#define MEM_ALIGNMENT                   4 // 1
 #endif
 
 /**
@@ -297,7 +297,7 @@
  * a lot of data that needs to be copied, this should be set high.
  */
 #if !defined MEM_SIZE || defined __DOXYGEN__
-#define unused___MEM_SIZE               1600
+#define MEM_SIZE                        1600
 #endif
 
 /**
@@ -444,7 +444,7 @@
  * (requires the LWIP_TCP option)
  */
 #if !defined MEMP_NUM_TCP_PCB_LISTEN || defined __DOXYGEN__
-#define MEMP_NUM_TCP_PCB_LISTEN         2
+#define MEMP_NUM_TCP_PCB_LISTEN         2 // 8
 #endif
 
 /**
@@ -1303,7 +1303,7 @@
  * an upper limit on the MSS advertised by the remote host.
  */
 #if !defined TCP_MSS || defined __DOXYGEN__
-//#define TCP_MSS                         536
+//#define TCP_MSS                         536  defined at compile time
 #endif
 
 /**
@@ -1545,7 +1545,7 @@
  * for an additional encapsulation header before ethernet headers (e.g. 802.11)
  */
 #if !defined PBUF_LINK_ENCAPSULATION_HLEN || defined __DOXYGEN__
-#define PBUF_LINK_ENCAPSULATION_HLEN    36 // 0u # 36 is EP_OFFSET from original esp implementation
+#define PBUF_LINK_ENCAPSULATION_HLEN    36 // required for esp8266 (36 is EP_OFFSET from original esp implementation)
 #endif
 
 /**
