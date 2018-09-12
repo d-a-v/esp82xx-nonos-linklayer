@@ -745,7 +745,7 @@
  * via IP_FRAG.
  */
 #if !defined IP_REASSEMBLY || defined __DOXYGEN__
-#define IP_REASSEMBLY                   1
+#define IP_REASSEMBLY                   0 // 1
 #endif
 
 /**
@@ -754,7 +754,7 @@
  * controlled via IP_REASSEMBLY.
  */
 #if !defined IP_FRAG || defined __DOXYGEN__
-#define IP_FRAG                         1
+#define IP_FRAG                         0 // 1
 #endif
 
 #if !LWIP_IPV4
