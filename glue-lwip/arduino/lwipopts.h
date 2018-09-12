@@ -271,7 +271,7 @@
  * not only for internal pools defined in memp_std.h)!
  */
 #if !defined MEMP_MEM_MALLOC || defined __DOXYGEN__
-#define MEMP_MEM_MALLOC                 1
+#define MEMP_MEM_MALLOC                 1 // 0
 #endif
 
 /**
