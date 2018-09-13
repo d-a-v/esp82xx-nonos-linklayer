@@ -2379,10 +2379,6 @@
  * LWIP_IPV6==1: Enable IPv6
  */
 #if !defined LWIP_IPV6 || defined __DOXYGEN__
-<<<<<<< HEAD
-#error LWIP_IPV6 should be defined by gcc cmdline
-#define LWIP_IPV6                       0
-=======
 #define LWIP_IPV6                       1 // 0
 #endif
 
@@ -2393,7 +2389,6 @@
  */
 #if !defined IPV6_REASS_MAXAGE || defined __DOXYGEN__
 #define IPV6_REASS_MAXAGE               60
->>>>>>> b42f83695bf513b2528484d558a8ef3e4303f076
 #endif
 
 /**
@@ -2402,7 +2397,7 @@
  * setting only for single-interface configurations.
  */
 #if !defined LWIP_IPV6_SCOPES || defined __DOXYGEN__
-#define LWIP_IPV6_SCOPES                0 // XXXX check impact (LWIP_IPV6 && !LWIP_SINGLE_NETIF)
+#define LWIP_IPV6_SCOPES                (LWIP_IPV6 && !LWIP_SINGLE_NETIF)
 #endif
 
 /**
@@ -2440,11 +2435,7 @@
  * LWIP_IPV6_REASS==1: reassemble incoming IPv6 packets that fragmented
  */
 #if !defined LWIP_IPV6_REASS || defined __DOXYGEN__
-<<<<<<< HEAD
-#define LWIP_IPV6_REASS                 0 // (LWIP_IPV6)
-=======
 #define LWIP_IPV6_REASS                 0 // LWIP_IPV6
->>>>>>> b42f83695bf513b2528484d558a8ef3e4303f076
 #endif
 
 /**
@@ -2452,11 +2443,7 @@
  * network startup.
  */
 #if !defined LWIP_IPV6_SEND_ROUTER_SOLICIT || defined __DOXYGEN__
-<<<<<<< HEAD
-#define LWIP_IPV6_SEND_ROUTER_SOLICIT   (LWIP_IPV6)
-=======
 #define LWIP_IPV6_SEND_ROUTER_SOLICIT   1
->>>>>>> b42f83695bf513b2528484d558a8ef3e4303f076
 #endif
 
 /**
@@ -2481,7 +2468,7 @@
  * LWIP_IPV6_DUP_DETECT_ATTEMPTS=[0..7]: Number of duplicate address detection attempts.
  */
 #if !defined LWIP_IPV6_DUP_DETECT_ATTEMPTS || defined __DOXYGEN__
-#define LWIP_IPV6_DUP_DETECT_ATTEMPTS   0 // 1
+#define LWIP_IPV6_DUP_DETECT_ATTEMPTS   1
 #endif
 /**
  * @}
@@ -2528,11 +2515,7 @@
  * indiscriminately pass all inbound IPv6 multicast traffic to lwIP.
  */
 #if !defined LWIP_IPV6_MLD || defined __DOXYGEN__
-<<<<<<< HEAD
-#define LWIP_IPV6_MLD                   0 // (LWIP_IPV6)
-=======
 #define LWIP_IPV6_MLD                   LWIP_IPV6
->>>>>>> b42f83695bf513b2528484d558a8ef3e4303f076
 #endif
 
 /**
@@ -2542,7 +2525,7 @@
  * applicable, plus any number of groups to be joined on UDP sockets.
  */
 #if !defined MEMP_NUM_MLD6_GROUP || defined __DOXYGEN__
-#define MEMP_NUM_MLD6_GROUP             1 // 4
+#define MEMP_NUM_MLD6_GROUP             4
 #endif
 /**
  * @}
@@ -2558,58 +2541,42 @@
  * is being resolved.
  */
 #if !defined LWIP_ND6_QUEUEING || defined __DOXYGEN__
-<<<<<<< HEAD
-#define LWIP_ND6_QUEUEING               0 // (LWIP_IPV6)
-=======
 #define LWIP_ND6_QUEUEING               0 // LWIP_IPV6
->>>>>>> b42f83695bf513b2528484d558a8ef3e4303f076
 #endif
 
 /**
  * MEMP_NUM_ND6_QUEUE: Max number of IPv6 packets to queue during MAC resolution.
  */
 #if !defined MEMP_NUM_ND6_QUEUE || defined __DOXYGEN__
-#define MEMP_NUM_ND6_QUEUE              0 // 20
+#define MEMP_NUM_ND6_QUEUE              20
 #endif
 
 /**
  * LWIP_ND6_NUM_NEIGHBORS: Number of entries in IPv6 neighbor cache
  */
 #if !defined LWIP_ND6_NUM_NEIGHBORS || defined __DOXYGEN__
-<<<<<<< HEAD
-#define LWIP_ND6_NUM_NEIGHBORS          2 // 10
-=======
 #define LWIP_ND6_NUM_NEIGHBORS          4 // 10
->>>>>>> b42f83695bf513b2528484d558a8ef3e4303f076
 #endif
 
 /**
  * LWIP_ND6_NUM_DESTINATIONS: number of entries in IPv6 destination cache
  */
 #if !defined LWIP_ND6_NUM_DESTINATIONS || defined __DOXYGEN__
-<<<<<<< HEAD
-#define LWIP_ND6_NUM_DESTINATIONS       2 // 10
-=======
 #define LWIP_ND6_NUM_DESTINATIONS       5 // 10
->>>>>>> b42f83695bf513b2528484d558a8ef3e4303f076
 #endif
 
 /**
  * LWIP_ND6_NUM_PREFIXES: number of entries in IPv6 on-link prefixes cache
  */
 #if !defined LWIP_ND6_NUM_PREFIXES || defined __DOXYGEN__
-#define LWIP_ND6_NUM_PREFIXES           2 // 5
+#define LWIP_ND6_NUM_PREFIXES           5
 #endif
 
 /**
  * LWIP_ND6_NUM_ROUTERS: number of entries in IPv6 default router cache
  */
 #if !defined LWIP_ND6_NUM_ROUTERS || defined __DOXYGEN__
-<<<<<<< HEAD
-#define LWIP_ND6_NUM_ROUTERS            1 // 3
-=======
 #define LWIP_ND6_NUM_ROUTERS            2 // 3
->>>>>>> b42f83695bf513b2528484d558a8ef3e4303f076
 #endif
 
 /**
@@ -2679,7 +2646,7 @@
  * unicast neighbor solicitation messages.
  */
 #if !defined LWIP_ND6_TCP_REACHABILITY_HINTS || defined __DOXYGEN__
-#define LWIP_ND6_TCP_REACHABILITY_HINTS 0 // 1
+#define LWIP_ND6_TCP_REACHABILITY_HINTS 1
 #endif
 
 /**
@@ -2703,11 +2670,7 @@
  * LWIP_IPV6_DHCP6==1: enable DHCPv6 stateful/stateless address autoconfiguration.
  */
 #if !defined LWIP_IPV6_DHCP6 || defined __DOXYGEN__
-<<<<<<< HEAD
-#define LWIP_IPV6_DHCP6                 1
-=======
 #define LWIP_IPV6_DHCP6                 1 // 0
->>>>>>> b42f83695bf513b2528484d558a8ef3e4303f076
 #endif
 
 /**
@@ -2731,27 +2694,7 @@
  * void dhcp6_set_ntp_servers(u8_t num_ntp_servers, ip_addr_t* ntp_server_addrs);
 */
 #if !defined LWIP_DHCP6_GET_NTP_SRV || defined __DOXYGEN__
-<<<<<<< HEAD
-#define LWIP_DHCP6_GET_NTP_SRV          0 // not implemented yet!
-#endif
-
-/**
- * The maximum of NTP servers requested
- */
-#if !defined LWIP_DHCP6_MAX_NTP_SERVERS || defined __DOXYGEN__
-#define LWIP_DHCP6_MAX_NTP_SERVERS      1
-#endif
-
-/**
- * LWIP_DHCP6_MAX_DNS_SERVERS > 0: Request DNS servers via DHCPv6.
- * DNS servers received in the response are passed to DNS via @ref dns_setserver()
- * (up to the maximum limit defined here).
- */
-#if !defined LWIP_DHCP6_MAX_DNS_SERVERS || defined __DOXYGEN__
-#define LWIP_DHCP6_MAX_DNS_SERVERS      DNS_MAX_SERVERS
-=======
 #define LWIP_DHCP6_GET_NTP_SRV          1 // 0
->>>>>>> b42f83695bf513b2528484d558a8ef3e4303f076
 #endif
 
 /**
