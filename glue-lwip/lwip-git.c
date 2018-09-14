@@ -44,6 +44,7 @@ author: d. gauchard
 #include "arch/cc.h"
 
 #if LWIP_IPV6
+#include "lwip/ethip6.h"
 #include "lwip/dhcp6.h"
 #endif
 
@@ -302,6 +303,11 @@ static void netif_init_common (struct netif* netif)
 	// meaningfull:
 	netif->output = etharp_output;
 	netif->linkoutput = new_linkoutput;
+
+#if LWIP_IPV6
+	netif->output_ip6 = ethip6_output;
+	netif->ip6_autoconfig_enabled = 1;
+#endif
 	
 	netif->hostname = wifi_station_get_hostname();
 	netif->chksum_flags = NETIF_CHECKSUM_ENABLE_ALL;
@@ -368,6 +374,10 @@ void esp2glue_netif_update (int netif_idx, uint32_t ip, uint32_t mask, uint32_t 
 	netif_git[netif_idx].flags |= NETIF_FLAG_ETHARP;
 	netif_git[netif_idx].flags |= NETIF_FLAG_BROADCAST;
 
+#if LWIP_IPV6
+	netif_git[netif_idx].flags |= NETIF_FLAG_MLD6;
+	netif_create_ip6_linklocal_address(&netif_git[netif_idx], 1/*from mac*/);
+#endif
 	new_display_netif(&netif_git[netif_idx]);
 }
 
