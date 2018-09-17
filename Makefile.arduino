@@ -1,7 +1,4 @@
 
-# stable MSS: 536..896
-# unstable: 1024 1460
-
 %:
 	for v6 in 0 1; do \
 	for mss in 536 1460; do \
