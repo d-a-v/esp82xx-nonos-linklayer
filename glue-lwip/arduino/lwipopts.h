@@ -2414,14 +2414,14 @@
  * LWIP_IPV6_NUM_ADDRESSES: Number of IPv6 addresses per netif.
  */
 #if !defined LWIP_IPV6_NUM_ADDRESSES || defined __DOXYGEN__
-#define LWIP_IPV6_NUM_ADDRESSES         2 // 3
+#define LWIP_IPV6_NUM_ADDRESSES         4 // 3
 #endif
 
 /**
  * LWIP_IPV6_FORWARD==1: Forward IPv6 packets across netifs
  */
 #if !defined LWIP_IPV6_FORWARD || defined __DOXYGEN__
-#define LWIP_IPV6_FORWARD               1 // 0
+#define LWIP_IPV6_FORWARD               0 // 0
 #endif
 
 /**
@@ -2655,7 +2655,7 @@
  * servers to the DNS module.
  */
 #if !defined LWIP_ND6_RDNSS_MAX_DNS_SERVERS || defined __DOXYGEN__
-#define LWIP_ND6_RDNSS_MAX_DNS_SERVERS  1 // 0
+#define LWIP_ND6_RDNSS_MAX_DNS_SERVERS  0 // 0
 #endif
 /**
  * @}
