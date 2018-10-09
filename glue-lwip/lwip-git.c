@@ -43,6 +43,11 @@ author: d. gauchard
 #include "lwip/apps/sntp.h"
 #include "arch/cc.h"
 
+#if LWIP_IPV6
+#include "lwip/ethip6.h"
+#include "lwip/dhcp6.h"
+#endif
+
 #include "lwip-git.h"
 
 // this is dhcpserver taken from lwip-1.4-espressif
@@ -180,6 +185,10 @@ err_glue_t esp2glue_dhcp_start (int netif_idx)
 	netif_git[netif_idx].hostname = wifi_station_get_hostname();
 
 	err_t err = dhcp_start(&netif_git[netif_idx]);
+#if LWIP_IPV6 && LWIP_IPV6_DHCP6_STATELESS
+	if (err == ERR_OK)
+		err = dhcp6_enable_stateless(&netif_git[netif_idx]);
+#endif
 	uprint(DBG "new_dhcp_start returns %d\n", (int)err);
 	return git2glue_err(err);
 }
@@ -269,7 +278,7 @@ static void netif_sta_status_callback (struct netif* netif)
 	new_display_netif(netif);
 	
 	// tell ESP that link is updated
-	glue2esp_ifupdown(netif->num, netif->ip_addr.addr, netif->netmask.addr, netif->gw.addr);
+	glue2esp_ifupdown(netif->num, ip_2_ip4(&netif->ip_addr)->addr, ip_2_ip4(&netif->netmask)->addr, ip_2_ip4(&netif->gw)->addr);
 
 	if (   netif->flags & NETIF_FLAG_UP
 	    && netif == netif_sta)
@@ -277,7 +286,7 @@ static void netif_sta_status_callback (struct netif* netif)
 		// this is our default route
 		netif_set_default(netif);
 			
-		if (netif->ip_addr.addr)
+		if (ip_2_ip4(&netif->ip_addr)->addr)
 		{
 			// restart sntp
 			sntp_stop();
@@ -294,6 +303,11 @@ static void netif_init_common (struct netif* netif)
 	// meaningfull:
 	netif->output = etharp_output;
 	netif->linkoutput = new_linkoutput;
+
+#if LWIP_IPV6
+	netif->output_ip6 = ethip6_output;
+	netif->ip6_autoconfig_enabled = 1;
+#endif
 	
 	netif->hostname = wifi_station_get_hostname();
 	netif->chksum_flags = NETIF_CHECKSUM_ENABLE_ALL;
@@ -360,6 +374,10 @@ void esp2glue_netif_update (int netif_idx, uint32_t ip, uint32_t mask, uint32_t 
 	netif_git[netif_idx].flags |= NETIF_FLAG_ETHARP;
 	netif_git[netif_idx].flags |= NETIF_FLAG_BROADCAST;
 
+#if LWIP_IPV6
+	netif_git[netif_idx].flags |= NETIF_FLAG_MLD6;
+	netif_create_ip6_linklocal_address(&netif_git[netif_idx], 1/*from mac*/);
+#endif
 	new_display_netif(&netif_git[netif_idx]);
 }
 
@@ -437,8 +455,8 @@ void esp2glue_netif_set_up1down0 (int netif_idx, int up1_or_down0)
 }
 
 #define VALUE_TO_STRING(x) #x
-#define VAR_NAME_VALUE(var) "\n\n-------- " #var " = "  VALUE_TO_STRING(var) " --------\n"
-#pragma message VAR_NAME_VALUE(TCP_MSS)
+#define VAR_NAME_VALUE(var) "-------- " #var " = "  VALUE_TO_STRING(var) " --------\n"
+#pragma message "\n\n" VAR_NAME_VALUE(TCP_MSS) VAR_NAME_VALUE(LWIP_FEATURES) VAR_NAME_VALUE(LWIP_IPV6)
 
 LWIP_ERR_T lwip_unhandled_packet (struct pbuf* pbuf, struct netif* netif)
 {

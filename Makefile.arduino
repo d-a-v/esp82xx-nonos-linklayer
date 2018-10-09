@@ -1,8 +1,9 @@
 
 %:
-	for v6 in 0; do \
-	for feat in 0 1; do \
+	for v6 in 0 1; do \
 	for mss in 536 1460; do \
+	for feat in 0 1; do \
+		test \( $$feat = 0 \) -a \( $$v6 = 1 \) && continue; \
 		featname= ;\
 		test $$feat = 1 && featname=-feat ;\
 		make -f makefiles/Makefile.build-lwip2 \

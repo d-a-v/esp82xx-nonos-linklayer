@@ -20,7 +20,7 @@ all: patches $(LWIP_LIB)
 patches: .patched
 
 .patched:
-	patch -d .. -p1 < ../../patches/time-wait.patch
+	for p in ../../patches/*.patch; do patch -d .. -p1 < $$p; done
 	touch .patched
 
 include ../../makefiles/Makefile.defs
