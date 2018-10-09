@@ -8,10 +8,6 @@ CC			= $(TOOLS)gcc
 BUILD_FLAGS 		+= -std=gnu99
 endif
 
-ifeq ($(LWIP_IPV6),)
-LWIP_IPV6		= 0
-endif
-
 AR			= $(TOOLS)ar
 OC			= $(TOOLS)objcopy
 OD			= $(TOOLS)objdump
