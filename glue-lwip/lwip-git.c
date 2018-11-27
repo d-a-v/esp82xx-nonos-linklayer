@@ -43,6 +43,11 @@ author: d. gauchard
 #include "lwip/apps/sntp.h"
 #include "arch/cc.h"
 
+#if LWIP_IPV6
+#include "lwip/ethip6.h"
+#include "lwip/dhcp6.h"
+#endif
+
 #include "lwip-git.h"
 
 // this is dhcpserver taken from lwip-1.4-espressif
@@ -180,6 +185,10 @@ err_glue_t esp2glue_dhcp_start (int netif_idx)
 	netif_git[netif_idx].hostname = wifi_station_get_hostname();
 
 	err_t err = dhcp_start(&netif_git[netif_idx]);
+#if LWIP_IPV6 && LWIP_IPV6_DHCP6_STATELESS
+	if (err == ERR_OK)
+		err = dhcp6_enable_stateless(&netif_git[netif_idx]);
+#endif
 	uprint(DBG "new_dhcp_start returns %d\n", (int)err);
 	return git2glue_err(err);
 }
@@ -188,37 +197,6 @@ void esp2glue_dhcp_stop (int netif_idx)
 {
 	uprint(DBG "dhcp_stop\n");
 	dhcp_stop(&netif_git[netif_idx]);
-}
-
-// pbuf_clone() needed and not yet defined in lwip2 sources
-// this pbuf_clone() below is a copy of lwip2 master repo
-// https://git.savannah.gnu.org/cgit/lwip.git/tree/src/core/pbuf.c
-// it is not present in current 2.0.3 stable
-/**
- * @ingroup pbuf
- * Allocates a new pbuf of same length (via pbuf_alloc()) and copies the source
- * pbuf into this new pbuf (using pbuf_copy()).
- *
- * @param layer pbuf_layer of the new pbuf
- * @param type this parameter decides how and where the pbuf should be allocated
- *             (@see pbuf_alloc())
- * @param p the source pbuf
- *
- * @return a new pbuf or NULL if allocation fails
- */
-struct pbuf *
-pbuf_clone(pbuf_layer layer, pbuf_type type, struct pbuf *p)
-{
-  struct pbuf *q;
-  err_t err;
-  q = pbuf_alloc(layer, p->tot_len, type);
-  if (q == NULL) {
-    return NULL;
-  }
-  err = pbuf_copy(q, p);
-  LWIP_UNUSED_ARG(err); /* in case of LWIP_NOASSERT */
-  LWIP_ASSERT("pbuf_copy failed", err == ERR_OK);
-  return q;
 }
 
 err_t new_linkoutput (struct netif* netif, struct pbuf* p)
@@ -233,7 +211,7 @@ err_t new_linkoutput (struct netif* netif, struct pbuf* p)
 		// it can however happen:
 		// see https://git.savannah.gnu.org/cgit/lwip.git/tree/src/include/lwip/opt.h#n1593
 		// see http://lists.nongnu.org/archive/html/lwip-users/2017-10/msg00059.html
-#if 1
+
 		// make a monolithic pbuf from a fragmented one by copying it
 		struct pbuf* q = pbuf_clone(PBUF_LINK, PBUF_RAM, p);
 		if (q == NULL)
@@ -242,10 +220,6 @@ err_t new_linkoutput (struct netif* netif, struct pbuf* p)
 		p = q;
 		// old p will be released by caller
 		// new p = q will be released by glue2esp_linkoutput() subsequent callbacks to esp2glue_pbuf_freed()
-#else
-		uerror(DBG "fragmented pbuf (%d!=%d)!\n", p->len, p->tot_len);
-		return ERR_BUF;
-#endif
 	}
 	else
 		// protect pbuf, so lwip2(git) won't free it before phy(esp) finishes sending
@@ -304,7 +278,7 @@ static void netif_sta_status_callback (struct netif* netif)
 	new_display_netif(netif);
 	
 	// tell ESP that link is updated
-	glue2esp_ifupdown(netif->num, netif->ip_addr.addr, netif->netmask.addr, netif->gw.addr);
+	glue2esp_ifupdown(netif->num, ip_2_ip4(&netif->ip_addr)->addr, ip_2_ip4(&netif->netmask)->addr, ip_2_ip4(&netif->gw)->addr);
 
 	if (   netif->flags & NETIF_FLAG_UP
 	    && netif == netif_sta)
@@ -312,7 +286,7 @@ static void netif_sta_status_callback (struct netif* netif)
 		// this is our default route
 		netif_set_default(netif);
 			
-		if (netif->ip_addr.addr)
+		if (ip_2_ip4(&netif->ip_addr)->addr)
 		{
 			// restart sntp
 			sntp_stop();
@@ -329,6 +303,11 @@ static void netif_init_common (struct netif* netif)
 	// meaningfull:
 	netif->output = etharp_output;
 	netif->linkoutput = new_linkoutput;
+
+#if LWIP_IPV6
+	netif->output_ip6 = ethip6_output;
+	netif->ip6_autoconfig_enabled = 1;
+#endif
 	
 	netif->hostname = wifi_station_get_hostname();
 	netif->chksum_flags = NETIF_CHECKSUM_ENABLE_ALL;
@@ -395,6 +374,10 @@ void esp2glue_netif_update (int netif_idx, uint32_t ip, uint32_t mask, uint32_t 
 	netif_git[netif_idx].flags |= NETIF_FLAG_ETHARP;
 	netif_git[netif_idx].flags |= NETIF_FLAG_BROADCAST;
 
+#if LWIP_IPV6
+	netif_git[netif_idx].flags |= NETIF_FLAG_MLD6;
+	netif_create_ip6_linklocal_address(&netif_git[netif_idx], 1/*from mac*/);
+#endif
 	new_display_netif(&netif_git[netif_idx]);
 }
 
@@ -472,8 +455,8 @@ void esp2glue_netif_set_up1down0 (int netif_idx, int up1_or_down0)
 }
 
 #define VALUE_TO_STRING(x) #x
-#define VAR_NAME_VALUE(var) "\n\n-------- " #var " = "  VALUE_TO_STRING(var) " --------\n"
-#pragma message VAR_NAME_VALUE(TCP_MSS)
+#define VAR_NAME_VALUE(var) "-------- " #var " = "  VALUE_TO_STRING(var) " --------\n"
+#pragma message "\n\n" VAR_NAME_VALUE(TCP_MSS) VAR_NAME_VALUE(LWIP_FEATURES) VAR_NAME_VALUE(LWIP_IPV6)
 
 LWIP_ERR_T lwip_unhandled_packet (struct pbuf* pbuf, struct netif* netif)
 {

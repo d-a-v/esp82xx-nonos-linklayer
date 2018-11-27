@@ -26,14 +26,15 @@ void ets_bzero (void*, size_t);
 int ets_memcmp (const void*, const void*, size_t n);
 void *ets_memset (void *s, int c, size_t n);
 void *ets_memcpy (void *dest, const void *src, size_t n);
+void *ets_memmove(void *dest, const void *src, size_t n);
 
 typedef void ETSTimerFunc(void *timer_arg);
 void ets_timer_disarm (ETSTimer *a);
 void ets_timer_arm_new (ETSTimer *a, int b, int c, int isMstimer);
 void ets_timer_setfn (ETSTimer *t, ETSTimerFunc *fn, void *parg);
 
-struct ip_addr;
-void wifi_softap_set_station_info (uint8_t* mac, struct ip_addr*);
+struct ipv4_addr;
+void wifi_softap_set_station_info (uint8_t* mac, struct ipv4_addr*);
 
 #define os_intr_lock	ets_intr_lock
 #define os_intr_unlock	ets_intr_unlock
