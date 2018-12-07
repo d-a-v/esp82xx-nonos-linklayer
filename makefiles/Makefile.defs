@@ -1,14 +1,23 @@
 
+V ?= 0
+ifeq ($(V), 0)
+VERBC = @echo "C  $@";
+VERBAR = @echo "AR $@";
+else
+VERBC =
+VERBAR = 
+endif
+
 # (0,0):g++ otherwise gcc
 ifeq (1,0)
 CC			= $(TOOLS)g++
 BUILD_FLAGS 		+= -std=c++11 -DTRUE=true -DFALSE=false
 else
-CC			= $(TOOLS)gcc
+CC			= $(VERBC) $(TOOLS)gcc
 BUILD_FLAGS 		+= -std=gnu99
 endif
 
-AR			= $(TOOLS)ar
+AR			= $(VERBAR) $(TOOLS)ar
 OC			= $(TOOLS)objcopy
 OD			= $(TOOLS)objdump
 
