@@ -140,7 +140,7 @@ static uint8_t* ICACHE_FLASH_ATTR add_offer_options(uint8_t *optptr)
 {
         struct ipv4_addr ipadd;
 
-        ipadd.addr = *( (uint32_t *) &server_address);
+        ipadd.addr = server_address.addr;
 
         struct ip_info if_ip;
         os_bzero(&if_ip, sizeof(struct ip_info));
@@ -466,7 +466,7 @@ static uint8_t ICACHE_FLASH_ATTR parse_options(uint8_t *optptr, sint16_t len)
         bool is_dhcp_parse_end = false;
         struct dhcps_state s;
 
-        client.addr = *( (uint32_t *) &client_address);// Ҫ�����DHCP�ͻ��˵�IP
+        client.addr = client_address.addr;
 
         u8_t *end = optptr + len;
         u16_t type = 0;

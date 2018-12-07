@@ -4,6 +4,7 @@
 
 #include <stdarg.h>
 #include <stdint.h>
+#include <ipv4_addr.h>
 
 // these declarations are missing from sdk and used by lwip1.4 from sdk2.0.0
 
