@@ -144,7 +144,7 @@ ping_recv(void *arg, struct raw_pcb *pcb, struct pbuf *p, const ip_addr_t *addr)
 
     if ((iecho->id == PING_ID) && (iecho->seqno == htons(ping_seq_num)) && iecho->type == ICMP_ER) {
       LWIP_DEBUGF( PING_DEBUG, ("ping: recv "));
-      ip_addr_debug_print(PING_DEBUG, addr);
+      //ip_addr_debug_print(PING_DEBUG, addr);
       LWIP_DEBUGF( PING_DEBUG, (" %"U32_F" ms\n", (sys_now()-ping_time)));
 	  if (iecho->seqno != seqno){
 		  /* do some ping result processing */
@@ -153,12 +153,12 @@ ping_recv(void *arg, struct raw_pcb *pcb, struct pbuf *p, const ip_addr_t *addr)
 			  char ipaddrstr[16];
 			  ip_addr_t source_ip;
 			  sys_untimeout(ping_timeout, pingmsg);
-			  os_bzero(&source_ip, sizeof(ip_addr_t));
+			  os_bzero(&source_ip, sizeof(source_ip));
 			  os_bzero(ipaddrstr, sizeof(ipaddrstr));
 			  uint32 delay = system_relative_time(pingmsg->ping_sent);
 			  delay /= PING_COARSE;
 			  iphdr = (struct ip_hdr*)((u8*)iecho - PBUF_IP_HLEN);
-			  ip_2_ip4(&source_ip)->addr = iphdr->src.addr;
+			  ip_addr_copy_from_ip4(source_ip, iphdr->src);
 			  ipaddr_ntoa_r(&source_ip,ipaddrstr, sizeof(ipaddrstr));
 			  if (pingmsg->ping_opt->recv_function == NULL){
 				  os_printf("recv %s: byte = %d, time = %d ms, seq = %d\n",ipaddrstr, PING_DATA_SIZE, delay, ntohs(iecho->seqno));
@@ -199,14 +199,14 @@ ping_recv(void *arg, struct raw_pcb *pcb, struct pbuf *p, const ip_addr_t *addr)
 }
 
 static void ICACHE_FLASH_ATTR
-ping_send(struct raw_pcb *raw, ip_addr_t *addr)
+ping_send(struct raw_pcb *raw, ipv4_addr_t *addr)
 {
   struct pbuf *p = NULL;
   struct icmp_echo_hdr *iecho = NULL;
   size_t ping_size = sizeof(struct icmp_echo_hdr) + PING_DATA_SIZE;
 
   LWIP_DEBUGF( PING_DEBUG, ("ping: send "));
-  ip_addr_debug_print(PING_DEBUG, addr);
+  //ip_addr_debug_print(PING_DEBUG, addr);
   LWIP_DEBUGF( PING_DEBUG, ("\n"));
   LWIP_ASSERT("ping_size <= 0xffff", ping_size <= 0xffff);
 
@@ -219,7 +219,9 @@ ping_send(struct raw_pcb *raw, ip_addr_t *addr)
 
     ping_prepare_echo(iecho, (u16_t)ping_size);
 
-    raw_sendto(raw, p, addr);
+    ip_addr_t a;
+    ip_addr_copy_from_ip4(a, *addr);
+    raw_sendto(raw, p, &a);
     ping_time = sys_now();
   }
   pbuf_free(p);
@@ -231,7 +233,7 @@ ping_coarse_tmr(void *arg)
 	struct ping_msg *pingmsg = (struct ping_msg*)arg;
 	struct ping_option *ping_opt= NULL;
 	struct ping_resp pingresp;
-	ip_addr_t ping_target;
+	ipv4_addr_t ping_target;
 
 	LWIP_ASSERT("ping_timeout: no pcb given!", pingmsg != NULL);
 	ping_target.addr = pingmsg->ping_opt->ip;
@@ -271,7 +273,7 @@ ping_raw_init(struct ping_msg *pingmsg)
 	if (pingmsg == NULL)
 		return false;
 
-	ip_addr_t ping_target;
+	ipv4_addr_t ping_target;
 	pingmsg->ping_pcb = raw_new(IP_PROTO_ICMP);
 	LWIP_ASSERT("ping_pcb != NULL", pingmsg->ping_pcb != NULL);
 

@@ -560,7 +560,7 @@ extern sint8 espconn_get_keepalive(struct espconn *espconn, uint8 level, void *o
  * Description  : Resolve a hostname (string) into an IP address.
  * Parameters   : pespconn -- espconn to resolve a hostname
  *                hostname -- the hostname that is to be queried
- *                addr -- pointer to a ip_addr_t where to store the address if 
+ *                addr -- pointer to a ipv4_addr_t where to store the address if 
  *                        it is already cached in the dns_table (only valid if
  *                        ESPCONN_OK is returned!)
  *                found -- a callback function to be called on success, failure
@@ -573,7 +573,7 @@ extern sint8 espconn_get_keepalive(struct espconn *espconn, uint8 level, void *o
  *                - ESPCONN_ARG: dns client not initialized or invalid hostname
 *******************************************************************************/
 
-extern err_t espconn_gethostbyname(struct espconn *pespconn, const char *name, ip_addr_t *addr, dns_found_callback found);
+extern err_t espconn_gethostbyname(struct espconn *pespconn, const char *name, ipv4_addr_t *addr, dns_found_callback found);
 
 /******************************************************************************
  * FunctionName : espconn_igmp_join
@@ -582,7 +582,7 @@ extern err_t espconn_gethostbyname(struct espconn *pespconn, const char *name, i
  * 				  multicast_ip -- multicast ip given by user
  * Returns      : none
 *******************************************************************************/
-extern sint8 espconn_igmp_join(ip_addr_t *host_ip, ip_addr_t *multicast_ip);
+extern sint8 espconn_igmp_join(ipv4_addr_t *host_ip, ipv4_addr_t *multicast_ip);
 
 /******************************************************************************
  * FunctionName : espconn_igmp_leave
@@ -591,7 +591,7 @@ extern sint8 espconn_igmp_join(ip_addr_t *host_ip, ip_addr_t *multicast_ip);
  * 				  multicast_ip -- multicast ip given by user
  * Returns      : none
 *******************************************************************************/
-extern sint8 espconn_igmp_leave(ip_addr_t *host_ip, ip_addr_t *multicast_ip);
+extern sint8 espconn_igmp_leave(ipv4_addr_t *host_ip, ipv4_addr_t *multicast_ip);
 
 /******************************************************************************
  * FunctionName : espconn_mdns_init
@@ -673,15 +673,15 @@ extern void espconn_mdns_enable(void);
  * 			      dnsserver -- IP address of the DNS server to set
  *  Returns     : none
 *******************************************************************************/
-extern void espconn_dns_setserver(u8_t numdns, ip_addr_t *dnsserver);
+extern void espconn_dns_setserver(u8_t numdns, ipv4_addr_t *dnsserver);
 /******************************************************************************
  * FunctionName : espconn_dns_getserver
  * Description  : get dns server.
  * Parameters   : numdns -- the index of the DNS server ,must
  * 				  be < DNS_MAX_SERVERS = 2
- *  Returns     : dnsserver -- struct ip_addr_t
+ *  Returns     : dnsserver -- struct ipv4_addr_t
 *******************************************************************************/
-extern ip_addr_t espconn_dns_getserver(u8_t numdns);
+extern ipv4_addr_t espconn_dns_getserver(u8_t numdns);
 
 
 void ICACHE_FLASH_ATTR espconn_pbuf_delete(espconn_buf **phead, espconn_buf* pdelete);

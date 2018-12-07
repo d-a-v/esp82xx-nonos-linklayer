@@ -188,8 +188,8 @@ void ICACHE_FLASH_ATTR espconn_pbuf_delete(espconn_buf **phead, espconn_buf* pde
 bool ICACHE_FLASH_ATTR espconn_find_connection(struct espconn *pespconn, espconn_msg **pnode)
 {
 	espconn_msg *plist = NULL;
-	struct ip_addr ip_remot;
-	struct ip_addr ip_list;
+	struct ipv4_addr ip_remot;
+	struct ipv4_addr ip_list;
 
     if (pespconn == NULL)
 		return false;
@@ -261,7 +261,7 @@ espconn_get_acticve_num(uint8 type)
 sint8 ICACHE_FLASH_ATTR
 espconn_connect(struct espconn *espconn)
 {
-	struct ip_addr ipaddr;
+	struct ipv4_addr ipaddr;
 	struct ip_info ipinfo;
 	uint8 connect_status = 0;
 	sint8 value = ESPCONN_OK;
@@ -1340,7 +1340,7 @@ espconn_port(void)
  * Description  : Resolve a hostname (string) into an IP address.
  * Parameters   : pespconn -- espconn to resolve a hostname
  *                hostname -- the hostname that is to be queried
- *                addr -- pointer to a ip_addr_t where to store the address if 
+ *                addr -- pointer to a ipv4_addr_t where to store the address if 
  *                        it is already cached in the dns_table (only valid if
  *                        ESPCONN_OK is returned!)
  *                found -- a callback function to be called on success, failure
@@ -1353,9 +1353,18 @@ espconn_port(void)
  *                - ESPCONN_ARG: dns client not initialized or invalid hostname
 *******************************************************************************/
 err_t ICACHE_FLASH_ATTR
-espconn_gethostbyname(struct espconn *pespconn, const char *hostname, ip_addr_t *addr, dns_found_callback found)
+espconn_gethostbyname(struct espconn *pespconn, const char *hostname, ipv4_addr_t *addr, dns_found_callback found)
 {
-    return dns_gethostbyname(hostname, addr, found, pespconn);
+    ip_addr_t a;
+    err_t err = dns_gethostbyname(hostname, &a, found, pespconn);
+    if (err == ERR_OK)
+    {
+        if (IP_IS_V4_VAL(a))
+            ip4_addr_copy(*addr, *ip_2_ip4(&a));
+        else
+            err = ERR_TIMEOUT;
+    }
+    return err;
 }
 
 /******************************************************************************
@@ -1367,8 +1376,10 @@ espconn_gethostbyname(struct espconn *pespconn, const char *hostname, ip_addr_t 
  *  Returns     : none
 *******************************************************************************/
 void ICACHE_FLASH_ATTR
-espconn_dns_setserver(u8_t numdns, ip_addr_t *dnsserver)
+espconn_dns_setserver(u8_t numdns, ipv4_addr_t *dnsserver)
 {
-	dns_setserver(numdns,dnsserver);
+	ip_addr_t a;
+	ip_addr_copy_from_ip4(a, *dnsserver);
+	dns_setserver(numdns,&a);
 }
 

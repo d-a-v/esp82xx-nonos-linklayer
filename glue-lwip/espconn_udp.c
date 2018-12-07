@@ -127,7 +127,7 @@ espconn_udp_sent(void *arg, uint8 *psent, uint16 length)
     }
 
     upcb->remote_port = pudp_sent->pespconn->proto.udp->remote_port;
-    IP4_ADDR(&upcb->remote_ip, pudp_sent->pespconn->proto.udp->remote_ip[0],
+    IP4_ADDR(ip_2_ip4(&upcb->remote_ip), pudp_sent->pespconn->proto.udp->remote_ip[0],
     		pudp_sent->pespconn->proto.udp->remote_ip[1],
     		pudp_sent->pespconn->proto.udp->remote_ip[2],
     		pudp_sent->pespconn->proto.udp->remote_ip[3]);
@@ -193,7 +193,7 @@ espconn_udp_sendto(void *arg, uint8 *psent, uint16 length)
     struct udp_pcb *upcb = pudp_sent->pcommon.pcb;
     struct espconn *pespconn = pudp_sent->pespconn;
     struct pbuf *p, *q ,*p_temp;
-    ip_addr_t dst_ip;
+    ipv4_addr_t dst_ip;
     u16_t dst_port;
     u8_t *data = NULL;
     u16_t cnt = 0;
@@ -255,12 +255,17 @@ espconn_udp_sendto(void *arg, uint8 *psent, uint16 length)
 			  return ESPCONN_ARG;
 		  }
 		  netif_set_default(sta_netif);
-		  err = udp_sendto(upcb, p_temp, &dst_ip, dst_port);
+		  ip_addr_t a;
+		  ip_addr_copy_from_ip4(a, dst_ip);
+		  err = udp_sendto(upcb, p_temp, &a, dst_port);
 		  pbuf_free(p_temp);
 		  netif_set_default(ap_netif);
 		}
 	}
-    err = udp_sendto(upcb, p, &dst_ip, dst_port);
+
+    ip_addr_t aa;
+    ip_addr_copy_from_ip4(aa, dst_ip);
+    err = udp_sendto(upcb, p, &aa, dst_port);
 
     if (p->ref != 0) {
     	pbuf_free(p);
@@ -300,17 +305,17 @@ espconn_udp_recv(void *arg, struct udp_pcb *upcb, struct pbuf *p,
 
     LWIP_DEBUGF(ESPCONN_UDP_DEBUG, ("espconn_udp_server_recv %d %p\n", __LINE__, upcb));
 
-    precv->pcommon.remote_ip[0] = ip4_addr1_16(addr);
-    precv->pcommon.remote_ip[1] = ip4_addr2_16(addr);
-    precv->pcommon.remote_ip[2] = ip4_addr3_16(addr);
-    precv->pcommon.remote_ip[3] = ip4_addr4_16(addr);
+    precv->pcommon.remote_ip[0] = ip4_addr1_16(ip_2_ip4(addr));
+    precv->pcommon.remote_ip[1] = ip4_addr2_16(ip_2_ip4(addr));
+    precv->pcommon.remote_ip[2] = ip4_addr3_16(ip_2_ip4(addr));
+    precv->pcommon.remote_ip[3] = ip4_addr4_16(ip_2_ip4(addr));
     precv->pcommon.remote_port = port;
     precv->pcommon.pcb = upcb;
 
 	if (wifi_get_opmode() != 1) {
 		wifi_get_ip_info(1, &ipconfig);
 
-		if (!ip_addr_netcmp(addr, &ipconfig.ip, &ipconfig.netmask)) {
+		if (!ip4_addr_netcmp(ip_2_ip4(addr), &ipconfig.ip, &ipconfig.netmask)) {
 			wifi_get_ip_info(0, &ipconfig);
 		}
 	} else {
@@ -402,7 +407,7 @@ espconn_udp_server(struct espconn *pespconn)
  * Returns      : none
 *******************************************************************************/
 sint8 ICACHE_FLASH_ATTR
-espconn_igmp_leave(ip_addr_t *host_ip, ip_addr_t *multicast_ip)
+espconn_igmp_leave(ipv4_addr_t *host_ip, ipv4_addr_t *multicast_ip)
 {
     if (igmp_leavegroup(host_ip, multicast_ip) != ERR_OK) {
         LWIP_DEBUGF(ESPCONN_UDP_DEBUG, ("udp_leave_multigrup failed!\n"));
@@ -420,7 +425,7 @@ espconn_igmp_leave(ip_addr_t *host_ip, ip_addr_t *multicast_ip)
  * Returns      : none
 *******************************************************************************/
 sint8 ICACHE_FLASH_ATTR
-espconn_igmp_join(ip_addr_t *host_ip, ip_addr_t *multicast_ip)
+espconn_igmp_join(ipv4_addr_t *host_ip, ipv4_addr_t *multicast_ip)
 {
     if (igmp_joingroup(host_ip, multicast_ip) != ERR_OK) {
         LWIP_DEBUGF(ESPCONN_UDP_DEBUG, ("udp_join_multigrup failed!\n"));

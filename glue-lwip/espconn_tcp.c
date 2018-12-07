@@ -195,26 +195,26 @@ struct tcp_pcb *ICACHE_FLASH_ATTR espconn_find_current_pcb(espconn_msg *pcurrent
 		if (local_ip == 0|| local_port == 0) return pcurrent_msg->pcommon.pcb;
 
 		for (find_pcb = tcp_active_pcbs; find_pcb != NULL; find_pcb = find_pcb->next){
-			if ((find_pcb->remote_port == remote_port) && (find_pcb->remote_ip.addr == remote_ip) &&
-				(find_pcb->local_port == local_port) && (find_pcb->local_ip.addr == local_ip))
+			if ((find_pcb->remote_port == remote_port) && (ip_2_ip4(&find_pcb->remote_ip)->addr == remote_ip) &&
+				(find_pcb->local_port == local_port) && (ip_2_ip4(&find_pcb->local_ip)->addr == local_ip))
 				return find_pcb;
 		}
 
 		for (find_pcb = tcp_tw_pcbs; find_pcb != NULL; find_pcb = find_pcb->next){
-			if ((find_pcb->remote_port == remote_port) && (find_pcb->remote_ip.addr == remote_ip) &&
-				(find_pcb->local_port == local_port) && (find_pcb->local_ip.addr == local_ip))
+			if ((find_pcb->remote_port == remote_port) && (ip_2_ip4(&find_pcb->remote_ip)->addr == remote_ip) &&
+				(find_pcb->local_port == local_port) && (ip_2_ip4(&find_pcb->local_ip)->addr == local_ip))
 				return find_pcb;
 		}
 	} else {/*Find the client's TCP block*/
 		if (remote_ip == 0|| remote_port == 0) return pcurrent_msg->pcommon.pcb;
 
 		for (find_pcb = tcp_active_pcbs; find_pcb != NULL; find_pcb = find_pcb->next){
-			if ((find_pcb->remote_port == remote_port) && (find_pcb->remote_ip.addr == remote_ip))
+			if ((find_pcb->remote_port == remote_port) && (ip_2_ip4(&find_pcb->remote_ip)->addr == remote_ip))
 				return find_pcb;
 		}
 
 		for (find_pcb = tcp_tw_pcbs; find_pcb != NULL; find_pcb = find_pcb->next){
-			if ((find_pcb->remote_port == remote_port) && (find_pcb->remote_ip.addr == remote_ip))
+			if ((find_pcb->remote_port == remote_port) && (ip_2_ip4(&find_pcb->remote_ip)->addr == remote_ip))
 				return find_pcb;
 		}
 	}
@@ -916,12 +916,12 @@ espconn_client_connect(void *arg, struct tcp_pcb *tpcb, err_t err)
 		pcon->pcommon.err = err;
 		pcon->pcommon.pcb = tpcb;
 		pcon->pcommon.local_port = tpcb->local_port;
-		pcon->pcommon.local_ip = tpcb->local_ip.addr;
+		pcon->pcommon.local_ip = ip_2_ip4(&tpcb->local_ip)->addr;
 		pcon->pcommon.remote_port = tpcb->remote_port;
-		pcon->pcommon.remote_ip[0] = ip4_addr1_16(&tpcb->remote_ip);
-		pcon->pcommon.remote_ip[1] = ip4_addr2_16(&tpcb->remote_ip);
-		pcon->pcommon.remote_ip[2] = ip4_addr3_16(&tpcb->remote_ip);
-		pcon->pcommon.remote_ip[3] = ip4_addr4_16(&tpcb->remote_ip);
+		pcon->pcommon.remote_ip[0] = ip4_addr1_16(ip_2_ip4(&tpcb->remote_ip));
+		pcon->pcommon.remote_ip[1] = ip4_addr2_16(ip_2_ip4(&tpcb->remote_ip));
+		pcon->pcommon.remote_ip[2] = ip4_addr3_16(ip_2_ip4(&tpcb->remote_ip));
+		pcon->pcommon.remote_ip[3] = ip4_addr4_16(ip_2_ip4(&tpcb->remote_ip));
 		pcon->pcommon.write_flag = true;
 		tcp_arg(tpcb, (void *) pcon);
 
@@ -962,7 +962,7 @@ sint8 ICACHE_FLASH_ATTR
 espconn_tcp_client(struct espconn *espconn)
 {
     struct tcp_pcb *pcb = NULL;
-    ip_addr_t ipaddr;
+    ipv4_addr_t ipaddr;
     espconn_msg *pclient = NULL;
 
     /*Creates a new client control message*/
@@ -1009,7 +1009,9 @@ espconn_tcp_client(struct espconn *espconn)
 #endif
         /*Establish the connection*/
     	pclient->espconn_mode = ESPCONN_TCPCLIENT_MODE;
-        pclient->pcommon.err = tcp_connect(pcb, &ipaddr,
+    	ip_addr_t a;
+    	ip_addr_copy_from_ip4(a, ipaddr);
+        pclient->pcommon.err = tcp_connect(pcb, &a,
         		pclient->pespconn->proto.tcp->remote_port, espconn_client_connect);
         if (pclient->pcommon.err == ERR_RTE){
 			/*remove the node from the client's active connection list*/
@@ -1337,10 +1339,10 @@ espconn_tcp_accept(void *arg, struct tcp_pcb *pcb, err_t err)
 	paccept->pcommon.pcb = pcb;
 
 	paccept->pcommon.remote_port = pcb->remote_port;
-	paccept->pcommon.remote_ip[0] = ip4_addr1_16(&pcb->remote_ip);
-	paccept->pcommon.remote_ip[1] = ip4_addr2_16(&pcb->remote_ip);
-	paccept->pcommon.remote_ip[2] = ip4_addr3_16(&pcb->remote_ip);
-	paccept->pcommon.remote_ip[3] = ip4_addr4_16(&pcb->remote_ip);
+	paccept->pcommon.remote_ip[0] = ip4_addr1_16(ip_2_ip4(&pcb->remote_ip));
+	paccept->pcommon.remote_ip[1] = ip4_addr2_16(ip_2_ip4(&pcb->remote_ip));
+	paccept->pcommon.remote_ip[2] = ip4_addr3_16(ip_2_ip4(&pcb->remote_ip));
+	paccept->pcommon.remote_ip[3] = ip4_addr4_16(ip_2_ip4(&pcb->remote_ip));
 	paccept->pcommon.write_flag = true;
 
 	os_memcpy(espconn->proto.tcp->remote_ip, paccept->pcommon.remote_ip, 4);
