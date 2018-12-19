@@ -588,7 +588,11 @@ void netif_set_default (struct netif* netif)
 {
 	uprint(DBG "netif_set_default %d\n", netif->num);
 	netif_default = netif;
-	esp2glue_netif_set_default(netif->num);
+	
+	// do not let sdk control lwip2's default interface
+	// (softAP setting it to AP interface breaks routing,
+	//  lwIP knows how to route)
+	//no: esp2glue_netif_set_default(netif->num);
 }
 
 void netif_set_down (struct netif* netif)
