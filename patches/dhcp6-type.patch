@@ -1,0 +1,12 @@
+diff --git a/src/core/ipv6/dhcp6.c b/src/core/ipv6/dhcp6.c
+index 7cf98a52..411ad4a5 100644
+--- a/src/core/ipv6/dhcp6.c
++++ b/src/core/ipv6/dhcp6.c
+@@ -537,6 +537,7 @@ dhcp6_handle_config_reply(struct netif *netif, struct pbuf *p_msg_in)
+         return;
+       }
+       ip6_addr_assign_zone(dns_addr6, IP6_UNKNOWN, netif);
++      dns_addr.type = IPADDR_TYPE_V6;
+       /* @todo: do we need a different offset than DHCP(v4)? */
+       dns_setserver(n, &dns_addr);
+     }
