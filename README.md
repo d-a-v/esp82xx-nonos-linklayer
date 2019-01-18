@@ -5,7 +5,7 @@ This repo offers a link layer for esp82xx-nonos-sdk-2.
 The original goal is to try and use a recent lwIP version for stability reasons.
 Currently lwIP-v2 is implemented, other IP stacks could be tried.
 
-current lwIP link: [STABLE_2.0.3](http://git.savannah.nongnu.org/cgit/lwip.git/tree/?h=STABLE-2_0_3_RELEASE)
+current lwIP link: [STABLE_2.1.2](http://git.savannah.nongnu.org/cgit/lwip.git/tree/?h=STABLE-2_1_2_RELEASE)
 
 # Status
 
