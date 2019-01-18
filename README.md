@@ -10,19 +10,12 @@ current lwIP link: [STABLE_2.0.3](http://git.savannah.nongnu.org/cgit/lwip.git/t
 # Status
 
 * UDP/TCP codes using lwIP-1.4 need some updates - two examples: [arduino](https://github.com/esp8266/Arduino/pull/3129) and [sming](https://github.com/SmingHub/Sming/pull/1147)
-* ipv6 not tried yet
+* ipv6 working in Arduino
 * tcp is more stable ([example1](https://github.com/esp8266/Arduino/issues/3075) and [example2](https://github.com/esp8266/Arduino/issues/2925))
-* needs users / testing
+* used by default in esp8266 arduino core
 * accepted pull request in [esp8266/arduino](https://github.com/esp8266/Arduino/pull/3783)
-* pull request in [sming](https://github.com/SmingHub/Sming/pull/1147)
-* pull request in [esp-open-sdk](https://github.com/pfalcon/esp-open-sdk/pull/271)
-
-# Tested
-
-* arduino NTPClient
-* arduino WiFiAccessPoint
-* arduino OTA
-* Sming Telnet sample
+* (WIP) [sming](https://github.com/SmingHub/Sming/pull/1147)
+* (WIP) [esp-open-sdk](https://github.com/pfalcon/esp-open-sdk/pull/271)
 
 # Build
 
