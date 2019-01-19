@@ -286,7 +286,8 @@ static void netif_sta_status_callback (struct netif* netif)
 		// this is our default route
 		netif_set_default(netif);
 			
-		if (ip_2_ip4(&netif->ip_addr)->addr)
+		// If we have a valid address of any type restart SNTP
+		if (ip_addr_isany(&netif->ip_addr))
 		{
 			// restart sntp
 			sntp_stop();
