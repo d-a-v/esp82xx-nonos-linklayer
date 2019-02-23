@@ -3,8 +3,6 @@
 # this is needed for esp-open-sdk
 # this script changes '#include "lwip/xxx"' into '#include <lwip/xxx>'
 
-set -e
-
 {
 echo "patch-non-local-includes"
 
