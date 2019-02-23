@@ -33,7 +33,7 @@ fi
 if ! [[ -f "$1/ip_addr.h.orig" ]]; then
 cp "$1/ip_addr.h" "$1/ip_addr.h.orig";
 
-cat > "$1/ip_addr.h" <<EOF
+cat <<"EOF" > "$1/ip_addr.h"
 #ifndef __IP_ADDR_H__
 #define __IP_ADDR_H__
 
@@ -91,7 +91,7 @@ fi
 ################################################################################
 
 ################################# ipv4_addr.h ##################################
-cat > "$1/ipv4_addr.h" <<EOF
+cat <<"EOF" > "$1/ipv4_addr.h"
 #ifndef __IPV4_ADDR_H__
 #define __IPV4_ADDR_H__
 
