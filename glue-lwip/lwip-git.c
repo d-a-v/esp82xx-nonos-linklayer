@@ -409,7 +409,16 @@ void esp2glue_lwip_init (void)
 	sntp_servermode_dhcp(1); /* get SNTP server via DHCP */
 	sntp_setoperatingmode(SNTP_OPMODE_POLL);
 	// start anyway the offline sntp timer
+#if ARDUINO
 	SNTP_SET_SYSTEM_TIME_US(0,0);
+#else
+	sntp_set_system_time(0);
+#endif
+}
+
+void esp2glue_espconn_init(void)
+{
+	espconn_init();
 }
 
 void esp2glue_alloc_for_recv (size_t len, void** pbuf, void** data)
