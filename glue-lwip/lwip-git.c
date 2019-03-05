@@ -52,6 +52,8 @@ author: d. gauchard
 
 // this is dhcpserver taken from lwip-1.4-espressif
 #include "lwip/apps-esp/dhcpserver.h"
+// this is espconn taken from lwip-1.4-espressif
+#include "lwip/apps-esp/espconn.h"
 
 #define DBG "GLUE: "
 

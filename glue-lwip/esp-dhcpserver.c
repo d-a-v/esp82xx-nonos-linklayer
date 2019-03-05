@@ -706,7 +706,7 @@ static void ICACHE_FLASH_ATTR handle_dhcp(void *arg,
                  os_printf("dhcps: handle_dhcp-> DHCPD_STATE_ACK\n");
 #endif
                  send_ack(pmsg_dhcps);
-                 wifi_softap_set_station_info(pmsg_dhcps->chaddr, &client_address.addr);
+                 wifi_softap_set_station_info(pmsg_dhcps->chaddr, &client_address);
                  break;
             case DHCPS_STATE_NAK://4
 #if DHCPS_DEBUG            

@@ -686,6 +686,7 @@ extern ipv4_addr_t espconn_dns_getserver(u8_t numdns);
 
 
 void ICACHE_FLASH_ATTR espconn_pbuf_delete(espconn_buf **phead, espconn_buf* pdelete);
+void ICACHE_FLASH_ATTR espconn_init (void);
 
 #endif
 
