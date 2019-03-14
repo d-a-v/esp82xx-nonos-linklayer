@@ -143,9 +143,9 @@ static void new_display_netif (struct netif* netif)
 	if (netif->hwaddr_len == 6)
 		display_mac(netif->hwaddr);
 	new_display_netif_flags(netif->flags);
-	display_ip32(" ip=", netif->ip_addr.u_addr.ip4.addr);
-	display_ip32(" mask=", netif->netmask.u_addr.ip4.addr);
-	display_ip32(" gw=", netif->gw.u_addr.ip4.addr);
+	display_ip32(" ip=", ip_2_ip4(&netif->ip_addr)->addr);
+	display_ip32(" mask=", ip_2_ip4(&netif->ip_addr)->addr);
+	display_ip32(" gw=", ip_2_ip4(&netif->ip_addr)->addr);
 	uprint("\n");
 }
 
