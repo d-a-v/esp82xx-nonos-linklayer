@@ -3529,6 +3529,12 @@
 #error LWIP_FEATURES must be defined
 #endif
 
+
+/**
+ * TCP_RANDOM_PORT: randomize port instead of simply increasing
+ */
+#define TCP_RANDOM_PORT 1
+
 /*
    --------------------------------------------------
    ------------------ SNTP options ------------------
