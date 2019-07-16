@@ -102,4 +102,13 @@ void		esp2glue_netif_set_up1down0	(int netif_idx, int up1_or_down0);
 void		glue2esp_ifupdown		(int netif_idx, uint32_t ip, uint32_t mask, uint32_t gw);
 err_glue_t	glue2esp_linkoutput		(int netif_idx, void* ref2save, void* data, size_t size);
 
+// fixed definitions from esp8266/arduino
+// renamed with lwip_ to avoid name collision
+// reference and credits: https://github.com/esp8266/Arduino/pull/6301
+#ifndef __STRINGIFY
+#define __STRINGIFY(a) #a
+#endif
+#define lwip_xt_rsil(level) (__extension__({uint32_t state; __asm__ __volatile__("rsil %0," __STRINGIFY(level) : "=a" (state) :: "memory"); state;}))
+#define lwip_xt_wsr_ps(state)  __asm__ __volatile__("wsr %0,ps; isync" :: "a" (state) : "memory")
+
 #endif // GLUE_H

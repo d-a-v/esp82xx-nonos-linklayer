@@ -212,14 +212,14 @@ static struct pbuf_wrapper* pbuf_wrapper_head = NULL;	// first free
 
 static struct pbuf_wrapper* pbuf_wrapper_get (void)
 {
-	ets_intr_lock();
+	uint32_t saved_ps = lwip_xt_rsil(15);
 
 	if (!pbuf_wrapper_head)
 	{
 		struct pbuf_wrapper* p = (struct pbuf_wrapper*)os_malloc(sizeof(struct pbuf_wrapper) * PBUF_WRAPPER_BLOCK);
 		if (!p)
 		{
-			ets_intr_unlock();
+			lwip_xt_wsr_ps(saved_ps);
 			return NULL;
 		}
 		for (int i = 0; i < PBUF_WRAPPER_BLOCK; i++)
@@ -236,7 +236,7 @@ static struct pbuf_wrapper* pbuf_wrapper_get (void)
 	struct pbuf_wrapper* ret = pbuf_wrapper_head;
 	pbuf_wrapper_head = pbuf_wrapper_head->next;
 
-	ets_intr_unlock();
+	lwip_xt_wsr_ps(saved_ps);
 
 	return ret;
 }
@@ -244,12 +244,12 @@ static struct pbuf_wrapper* pbuf_wrapper_get (void)
 static void pbuf_wrapper_release (struct pbuf_wrapper* p)
 {
 	// make it the new head in the chain of unused
-	ets_intr_lock();
+	uint32_t saved_ps = lwip_xt_rsil(15);
 
 	p->next = pbuf_wrapper_head;
 	pbuf_wrapper_head = p;
 
-	ets_intr_unlock();
+	lwip_xt_wsr_ps(saved_ps);
 }
 
 err_glue_t glue2esp_linkoutput (int netif_idx, void* ref2save, void* data, size_t size)

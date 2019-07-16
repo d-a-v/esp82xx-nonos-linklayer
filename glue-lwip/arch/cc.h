@@ -58,13 +58,9 @@ void sntp_set_system_time (uint32_t t);
 
 #include "mem.h" // useful for os_malloc used in esp-arduino's mDNS
 
-// fixed definitions from esp8266/arduino
-// renamed with lwip_ to avoid name collisision
-// reference and credits: https://github.com/esp8266/Arduino/pull/6301
-#define lwip_xt_rsil(level) (__extension__({uint32_t state; __asm__ __volatile__("rsil %0," __STRINGIFY(level) : "=a" (state) :: "memory"); state;}))
-#define lwip_xt_wsr_ps(state)  __asm__ __volatile__("wsr %0,ps; isync" :: "a" (state) : "memory")
-typedef uint32_t sys_prot_t;	// not really used
-#define SYS_ARCH_DECL_PROTECT(lev) sys_prot_t lev;
+#include "glue.h" // include assembly locking macro used below
+typedef uint32_t sys_prot_t;
+#define SYS_ARCH_DECL_PROTECT(lev) sys_prot_t lev
 #define SYS_ARCH_PROTECT(lev) lev = lwip_xt_rsil(15)
 #define SYS_ARCH_UNPROTECT(lev) lwip_xt_wsr_ps(lev)
 

@@ -49,6 +49,8 @@ void ets_timer_setfn (ETSTimer *t, ETSTimerFunc *fn, void *parg);
 struct ipv4_addr;
 void wifi_softap_set_station_info (uint8_t* mac, struct ipv4_addr*);
 
+struct ip_info;
+
 #define os_intr_lock	ets_intr_lock
 #define os_intr_unlock	ets_intr_unlock
 #define os_bzero	ets_bzero
