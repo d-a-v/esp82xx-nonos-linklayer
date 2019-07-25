@@ -1,47 +1,16 @@
-
-This patch is against lwip-2.0.3
-extracted from https://github.com/jonask1337/esp-lwip
-TODO
-
-diff --git a/README.md b/README.md
-new file mode 100644
-index 00000000..ac237ac9
---- /dev/null
-+++ b/README.md
-@@ -0,0 +1,20 @@
-+# ESP-IDF lwIP library with NAT 
-+
-+A version of the ESP-IDF lwIP library with NAT support.
-+To use it just replace the lwIP library from the lwIP component of the ESP-IDF with this one. To do this change to the `esp-idf/components/lwip` directory and rename or delete the existing *lwip* folder. Then clone this repository and either move it to `esp-idf/components/lwip` and rename it to *lwip* or create a symlink.
-+
-+The NAPT functionality can be enabled with the IP_NAPT and IP_FORWARD options in `esp-lwip/src/include/lwip/opt.h`.
-+
-+In order for the NAT feature to work the option "Enable copy between Layer2 and Layer3 packets" must be enabled in the ESP-IDF project configuration.
-+An ESP-IDF project can be configured by calling `make menuconfig`. In the configuration go to *Component config -> LWIP*.
-+
-+In the code of your firmware enable NAPT for the softAP interface by calling the *ip_napt_enable* function from `lwipt_napt.h` header file.
-+Additionally, you may want to change the DNS server ip address that is offered by the DHCP server of the softAP. By default, the DHCP server will use the ip address of the softAP as DNS server ip address.
-+To set a different ip address use the *dhcps_dns_setserver* function defined in the `esp-idf/components/lwip/include/apps/dhcpserver/dhcpserver.h` header file.
-+
-+Example esp-idf project where NAT is enabled and a custom DNS server ip is set: https://github.com/jonask1337/esp-idf-nat-example
-+
-+Tested with version v3.3 of the ESP-IDF: https://github.com/espressif/esp-idf/tree/release/v3.3
-+
-+It is based on the NAT implementation from this ESP8266 lwIP library: https://github.com/martin-ger/esp-open-lwip
-+
 diff --git a/src/core/init.c b/src/core/init.c
-index ea3b5ebe..f35344d5 100644
+index b3737a35..07461846 100644
 --- a/src/core/init.c
 +++ b/src/core/init.c
 @@ -57,6 +57,7 @@
  #include "lwip/nd6.h"
  #include "lwip/mld6.h"
  #include "lwip/api.h"
-+#include "lwip/lwip_napt.h"
++#include "lwip/napt.h"
  
  #include "netif/ppp/ppp_opts.h"
  #include "netif/ppp/ppp_impl.h"
-@@ -382,4 +383,8 @@ lwip_init(void)
+@@ -377,4 +378,8 @@ lwip_init(void)
  #if LWIP_TIMERS
    sys_timeouts_init();
  #endif /* LWIP_TIMERS */
@@ -51,7 +20,7 @@ index ea3b5ebe..f35344d5 100644
 +#endif /* IP_NAPT */
  }
 diff --git a/src/core/ipv4/ip4.c b/src/core/ipv4/ip4.c
-index 9ba6a9cc..7d202f6e 100644
+index 26c26a91..b699e5a6 100644
 --- a/src/core/ipv4/ip4.c
 +++ b/src/core/ipv4/ip4.c
 @@ -42,6 +42,7 @@
@@ -65,12 +34,12 @@ index 9ba6a9cc..7d202f6e 100644
 @@ -56,6 +57,7 @@
  #include "lwip/autoip.h"
  #include "lwip/stats.h"
- #include "lwip/prot/dhcp.h"
-+#include "lwip/lwip_napt.h"
+ #include "lwip/prot/iana.h"
++#include "lwip/napt.h"
  
  #include <string.h>
  
-@@ -279,6 +281,699 @@ ip4_route(const ip4_addr_t *dest)
+@@ -228,6 +230,716 @@ ip4_route(const ip4_addr_t *dest)
  }
  
  #if IP_FORWARD
@@ -124,82 +93,99 @@ index 9ba6a9cc..7d202f6e 100644
 +}
 +#endif /* NAPT_DEBUG */
 +
-+void
-+ip_napt_init(uint16_t max_nat, uint8_t max_portmap)
++err_t
++ip_napt_init(u16_t max_nat, u8_t max_portmap)
 +{
 +  u16_t i;
 +
++  struct napt_table* _napt = (struct napt_table*)calloc(1, sizeof(struct napt_table[max_nat]));
++  if (!_napt) {
++    return ERR_MEM;
++  }
++  struct portmap_table* _portmap = (struct portmap_table*)calloc(1, sizeof(struct portmap_table[max_portmap]));
++  if (!_portmap) {
++    free(_napt);
++    return ERR_MEM;
++  }
++
++  ip_napt_table = _napt;
++  ip_portmap_table = _portmap;
 +  ip_napt_max = max_nat;
 +  ip_portmap_max = max_portmap;
-+
-+  ip_napt_table = (struct napt_table*)calloc(1, sizeof(struct napt_table[ip_napt_max]));
-+  ip_portmap_table = (struct portmap_table*)calloc(1, sizeof(struct portmap_table[ip_portmap_max]));
 +
 +  for (i = 0; i < ip_napt_max - 1; i++)
 +    ip_napt_table[i].next = i + 1;
 +  ip_napt_table[i].next = NO_IDX;
++  return ERR_OK;
 +}
 +
-+void
++err_t
 +ip_napt_enable(u32_t addr, int enable)
 +{
 +  struct netif *netif;
 +  for (netif = netif_list; netif; netif = netif->next) {
-+    if (netif_is_up(netif) && !ip_addr_isany(&netif->ip_addr) && netif->ip_addr.u_addr.ip4.addr == addr) {
++    if (netif_is_up(netif) && !ip_addr_isany(&netif->ip_addr) && ip_2_ip4(&netif->ip_addr)->addr == addr) {
 +      netif->napt = !!enable;
-+      break;
++      return ERR_OK;
 +    }
 +  }
++  return ERR_VAL;
 +}
 +
-+void
++err_t
 +ip_napt_enable_no(u8_t number, int enable)
 +{
 +  struct netif *netif;
 +  for (netif = netif_list; netif; netif = netif->next) {
 +    if (netif->num == number) {
 +      netif->napt = !!enable;
-+      break;
++      return ERR_OK;
 +    }
 +  }
++  return ERR_VAL;
 +}
 +
-+void  checksumadjust(unsigned char *chksum, unsigned char *optr,
-+   int olen, unsigned char *nptr, int nlen)
-+   /* assuming: unsigned char is 8 bits, long is 32 bits.
-+     - chksum points to the chksum in the packet
-+     - optr points to the old data in the packet
-+     - nptr points to the new data in the packet
++void
++checksumadjust (u8_t *chksum, u8_t *optr, int olen, u8_t *nptr, int nlen)
++   /* - chksum points to the chksum in the packet
++      - optr points to the old data in the packet
++      - nptr points to the new data in the packet
 +   */
-+   {
-+     long x, old, new;
-+     x=chksum[0]*256+chksum[1];
-+     x=~x & 0xFFFF;
-+     while (olen)
-+     {
-+         old=optr[0]*256+optr[1]; optr+=2;
-+         x-=old & 0xffff;
-+         if (x<=0) { x--; x&=0xffff; }
-+         olen-=2;
-+     }
-+     while (nlen)
-+     {
-+         new=nptr[0]*256+nptr[1]; nptr+=2;
-+         x+=new & 0xffff;
-+         if (x & 0x10000) { x++; x&=0xffff; }
-+         nlen-=2;
-+     }
-+     x=~x & 0xFFFF;
-+     chksum[0]=x/256; chksum[1]=x & 0xff;
-+   }
-+
++{
++  s32_t x, old, new;
++  x = chksum[0] * 256 + chksum[1];
++  x = ~x & 0xFFFF;
++  while (olen) {
++    old = (optr[0] << 8) + optr[1];
++    optr += 2;
++    x -= old & 0xffff;
++    if (x <= 0) {
++      x--;
++      x &= 0xffff;
++    }
++    olen -= 2;
++  }
++  while (nlen) {
++    new = (nptr[0] << 8) + nptr[1];
++    nptr += 2;
++    x += new & 0xffff;
++    if (x & 0x10000) {
++      x++;
++      x &= 0xffff;
++    }
++    nlen -= 2;
++  }
++  x = ~x & 0xFFFF;
++  chksum[0] = x >> 8;
++  chksum[1] = x & 0xff;
++}
 +
 +/* t must be indexed by napt_free */
 +static void
 +ip_napt_insert(struct napt_table *t)
 +{
 +  u16_t ti = t - ip_napt_table;
-+  if (ti != napt_free) *((int*)1)=1; //DEBUG
++  LWIP_ASSERT("napt: free indexes mismatch", ti == napt_free);
 +  napt_free = t->next;
 +  t->prev = NO_IDX;
 +  t->next = napt_list;
@@ -221,7 +207,7 @@ index 9ba6a9cc..7d202f6e 100644
 +  if (t->proto == IP_PROTO_ICMP)
 +    nr_active_napt_icmp++;
 +#endif
-+//os_printf("T: %d, U: %d, I: %d\r\n", nr_active_napt_tcp, nr_active_napt_udp, nr_active_napt_icmp);
++  LWIP_DEBUGF(LWIP_DBG_ON, ("napt: T: %d, U: %d, I: %d\r\n", nr_active_napt_tcp, nr_active_napt_udp, nr_active_napt_icmp));
 +}
 +
 +static void
@@ -310,7 +296,7 @@ index 9ba6a9cc..7d202f6e 100644
 +      return port;
 +  for (;;) {
 +    port = PP_HTONS(IP_NAPT_PORT_RANGE_START +
-+                    esp_random() % (IP_NAPT_PORT_RANGE_END - IP_NAPT_PORT_RANGE_START + 1));
++                    LWIP_RAND() % (IP_NAPT_PORT_RANGE_END - IP_NAPT_PORT_RANGE_START + 1));
 +    if (ip_napt_find_port(proto, port))
 +      continue;
 +#if LWIP_TCP
@@ -411,7 +397,7 @@ index 9ba6a9cc..7d202f6e 100644
 +    if (proto == IP_PROTO_TCP)
 +      mport = ip_napt_new_port(IP_PROTO_TCP, sport);
 +#endif
-+#if LWIP_TCP
++#if LWIP_UDP
 +    if (proto == IP_PROTO_UDP)
 +      mport = ip_napt_new_port(IP_PROTO_UDP, sport);
 +#endif
@@ -674,7 +660,7 @@ index 9ba6a9cc..7d202f6e 100644
 +      /* register src addr and iecho->id and dest info */
 +      ip_napt_add(IP_PROTO_ICMP, iphdr->src.addr, iecho->id, iphdr->dest.addr, iecho->id);
 +
-+      ip_napt_modify_addr(iphdr, &iphdr->src, outp->ip_addr.u_addr.ip4.addr);
++      ip_napt_modify_addr(iphdr, &iphdr->src, ip_2_ip4(&outp->ip_addr)->addr);
 +    }
 +
 +    return ERR_OK;
@@ -719,8 +705,8 @@ index 9ba6a9cc..7d202f6e 100644
 +
 +    if (mport != tcphdr->src)
 +      ip_napt_modify_port_tcp(tcphdr, 0, mport);
-+    ip_napt_modify_addr_tcp(tcphdr, &iphdr->src, outp->ip_addr.u_addr.ip4.addr);
-+    ip_napt_modify_addr(iphdr, &iphdr->src, outp->ip_addr.u_addr.ip4.addr);
++    ip_napt_modify_addr_tcp(tcphdr, &iphdr->src, ip_2_ip4(&outp->ip_addr)->addr);
++    ip_napt_modify_addr(iphdr, &iphdr->src, ip_2_ip4(&outp->ip_addr)->addr);
 +
 +    return ERR_OK;
 +  }
@@ -757,8 +743,8 @@ index 9ba6a9cc..7d202f6e 100644
 +
 +    if (mport != udphdr->src)
 +      ip_napt_modify_port_udp(udphdr, 0, mport);
-+    ip_napt_modify_addr_udp(udphdr, &iphdr->src, outp->ip_addr.u_addr.ip4.addr);
-+    ip_napt_modify_addr(iphdr, &iphdr->src, outp->ip_addr.u_addr.ip4.addr);
++    ip_napt_modify_addr_udp(udphdr, &iphdr->src, ip_2_ip4(&outp->ip_addr)->addr);
++    ip_napt_modify_addr(iphdr, &iphdr->src, ip_2_ip4(&outp->ip_addr)->addr);
 +    return ERR_OK;
 +  }
 +#endif
@@ -770,7 +756,7 @@ index 9ba6a9cc..7d202f6e 100644
  /**
   * Determine whether an IP address is in a reserved set of addresses
   * that may not be forwarded, or whether datagrams to that destination
-@@ -374,6 +1069,11 @@ ip4_forward(struct pbuf *p, struct ip_hdr *iphdr, struct netif *inp)
+@@ -329,6 +1041,11 @@ ip4_forward(struct pbuf *p, struct ip_hdr *iphdr, struct netif *inp)
      return;
    }
  
@@ -781,27 +767,28 @@ index 9ba6a9cc..7d202f6e 100644
 +
    /* Incrementally update the IP checksum. */
    if (IPH_CHKSUM(iphdr) >= PP_HTONS(0xffffU - 0x100)) {
-     IPH_CHKSUM_SET(iphdr, IPH_CHKSUM(iphdr) + PP_HTONS(0x100) + 1);
-@@ -518,6 +1218,12 @@ ip4_input(struct pbuf *p, struct netif *inp)
+     IPH_CHKSUM_SET(iphdr, (u16_t)(IPH_CHKSUM(iphdr) + PP_HTONS(0x100) + 1));
+@@ -511,6 +1228,13 @@ ip4_input(struct pbuf *p, struct netif *inp)
    }
  #endif
  
 +#if IP_NAPT
 +  /* for unicast packet, check NAPT table and modify dest if needed */
++  /* iphdr is const, use p->payload instead */
 +  if (!inp->napt && ip4_addr_cmp(&iphdr->dest, netif_ip4_addr(inp)))
-+    ip_napt_recv(p, iphdr);
++    ip_napt_recv(p, (struct ip_hdr *)p->payload);
 +#endif
 +
    /* copy IP addresses to aligned ip_addr_t */
    ip_addr_copy_from_ip4(ip_data.current_iphdr_dest, iphdr->dest);
    ip_addr_copy_from_ip4(ip_data.current_iphdr_src, iphdr->src);
-@@ -659,6 +1365,16 @@ ip4_input(struct pbuf *p, struct netif *inp)
+@@ -621,6 +1345,16 @@ ip4_input(struct pbuf *p, struct netif *inp)
  #if IP_FORWARD
      /* non-broadcast packet? */
      if (!ip4_addr_isbroadcast(ip4_current_dest_addr(), inp)) {
 +      /* the header modification in ip4_forward may not work on PBUF_REF */
 +      /* so make a copy of packet */
-+      if (p->type == PBUF_REF) {
++      if (p->type_internal == PBUF_REF) {
 +          struct pbuf* q = pbuf_alloc(PBUF_IP, p->len + 16, PBUF_RAM);
 +          if (q != NULL) {
 +              pbuf_copy(q, p);
@@ -810,13 +797,13 @@ index 9ba6a9cc..7d202f6e 100644
 +          }
 +      }
        /* try to forward IP packet on (other) interfaces */
-       ip4_forward(p, iphdr, inp);
+       ip4_forward(p, (struct ip_hdr *)p->payload, inp);
      } else
 diff --git a/src/core/netif.c b/src/core/netif.c
-index fed070ae..9c411775 100644
+index 15200a27..c52fea26 100644
 --- a/src/core/netif.c
 +++ b/src/core/netif.c
-@@ -306,6 +306,10 @@ netif_add(struct netif *netif,
+@@ -363,6 +363,10 @@ netif_add(struct netif *netif,
    netif->loop_cnt_current = 0;
  #endif /* ENABLE_LOOPBACK && LWIP_LOOPBACK_MAX_PBUFS */
  
@@ -828,10 +815,10 @@ index fed070ae..9c411775 100644
    netif_set_addr(netif, ipaddr, netmask, gw);
  #endif /* LWIP_IPV4 */
 diff --git a/src/include/lwip/ip.h b/src/include/lwip/ip.h
-index 0673be9b..cdbce861 100644
+index 653c3b2f..230bfdcf 100644
 --- a/src/include/lwip/ip.h
 +++ b/src/include/lwip/ip.h
-@@ -187,6 +187,12 @@ extern struct ip_globals ip_data;
+@@ -189,6 +189,12 @@ extern struct ip_globals ip_data;
  /** Destination IP4 address of current_header */
  #define ip4_current_dest_addr()    (&ip_data.current_iphdr_dest)
  
@@ -844,16 +831,61 @@ index 0673be9b..cdbce861 100644
  #elif LWIP_IPV6 /* LWIP_IPV4 && LWIP_IPV6 */
  
  /** Get the IPv6 header of the current packet.
-diff --git a/src/include/lwip/lwip_napt.h b/src/include/lwip/lwip_napt.h
+diff --git a/src/include/lwip/netif.h b/src/include/lwip/netif.h
+index 911196ab..c29a9876 100644
+--- a/src/include/lwip/netif.h
++++ b/src/include/lwip/netif.h
+@@ -387,6 +387,9 @@ struct netif {
+   u16_t loop_cnt_current;
+ #endif /* LWIP_LOOPBACK_MAX_PBUFS */
+ #endif /* ENABLE_LOOPBACK */
++#if LWIP_IPV4 && IP_NAPT
++  u8_t napt;
++#endif
+ };
+ 
+ #if LWIP_CHECKSUM_CTRL_PER_NETIF
+diff --git a/src/include/lwip/opt.h b/src/include/lwip/opt.h
+index 82c420c1..371286b6 100644
+--- a/src/include/lwip/opt.h
++++ b/src/include/lwip/opt.h
+@@ -764,6 +764,10 @@
+ #define IP_FRAG                         0
+ #endif /* !LWIP_IPV4 */
+ 
++#ifndef IP_NAPT
++#define IP_NAPT                         0
++#endif
++
+ /**
+  * IP_OPTIONS_ALLOWED: Defines the behavior for IP options.
+  *      IP_OPTIONS_ALLOWED==0: All packets with IP options are dropped.
+@@ -3484,6 +3488,14 @@
+ #if !defined DHCP6_DEBUG || defined __DOXYGEN__
+ #define DHCP6_DEBUG                     LWIP_DBG_OFF
+ #endif
++
++/**
++ * NAPT_DEBUG: Enable debugging for NAPT.
++ */
++#ifndef NAPT_DEBUG
++#define NAPT_DEBUG                       LWIP_DBG_OFF
++#endif
++
+ /**
+  * @}
+  */
+diff --git a/src/include/lwip/napt.h b/src/include/lwip/napt.h
 new file mode 100644
-index 00000000..0cde2949
+index 00000000..b25e0394
 --- /dev/null
-+++ b/src/include/lwip/lwip_napt.h
-@@ -0,0 +1,114 @@
++++ b/src/include/lwip/napt.h
+@@ -0,0 +1,116 @@
 +#ifndef __LWIP_NAPT_H__
 +#define __LWIP_NAPT_H__
 +
 +#include "lwip/opt.h"
++#include "lwip/err.h"
 +
 +#ifdef __cplusplus
 +extern "C" {
@@ -909,7 +941,8 @@ index 00000000..0cde2949
 + * @param max_nat max number of enties in the NAPT table (use IP_NAPT_MAX if in doubt)
 + * @param max_portmap max number of enties in the NAPT table (use IP_PORTMAP_MAX if in doubt)
 + */
-+void ip_napt_init(uint16_t max_nat, uint8_t max_portmap);
++err_t
++ip_napt_init(u16_t max_nat, u8_t max_portmap);
 +
 +
 +/**
@@ -918,7 +951,7 @@ index 00000000..0cde2949
 + * @param addr ip address of the interface
 + * @param enable non-zero to enable NAPT, or 0 to disable.
 + */
-+void
++err_t
 +ip_napt_enable(u32_t addr, int enable);
 +
 +
@@ -928,7 +961,7 @@ index 00000000..0cde2949
 + * @param netif number of the interface
 + * @param enable non-zero to enable NAPT, or 0 to disable.
 + */
-+void
++err_t
 +ip_napt_enable_no(u8_t number, int enable);
 +
 +
@@ -964,44 +997,3 @@ index 00000000..0cde2949
 +#endif
 +
 +#endif /* __LWIP_NAPT_H__ */
-diff --git a/src/include/lwip/netif.h b/src/include/lwip/netif.h
-index bcc9c5b1..47d4f1fe 100644
---- a/src/include/lwip/netif.h
-+++ b/src/include/lwip/netif.h
-@@ -363,6 +363,9 @@ struct netif {
-   void (*l2_buffer_free_notify)(void *user_buf); /* Allows LWIP to notify driver when a L2-supplied pbuf can be freed */
-   ip_addr_t last_ip_addr; /* Store last non-zero ip address */
- #endif
-+#if LWIP_IPV4 && IP_NAPT
-+  u8_t napt;
-+#endif
- };
- 
- #if LWIP_CHECKSUM_CTRL_PER_NETIF
-diff --git a/src/include/lwip/opt.h b/src/include/lwip/opt.h
-index f15aa7b6..cf051208 100644
---- a/src/include/lwip/opt.h
-+++ b/src/include/lwip/opt.h
-@@ -681,6 +681,10 @@
- #define IP_FRAG                         0
- #endif /* !LWIP_IPV4 */
- 
-+#ifndef IP_NAPT
-+#define IP_NAPT                         0
-+#endif
-+
- /**
-  * IP_OPTIONS_ALLOWED: Defines the behavior for IP options.
-  *      IP_OPTIONS_ALLOWED==0: All packets with IP options are dropped.
-@@ -2889,4 +2893,11 @@
-  * @}
-  */
- 
-+/**
-+ * NAPT_DEBUG: Enable debugging for NAPT.
-+ */
-+#ifndef NAPT_DEBUG
-+#define NAPT_DEBUG                       LWIP_DBG_OFF
-+#endif
-+
- #endif /* LWIP_HDR_OPT_H */

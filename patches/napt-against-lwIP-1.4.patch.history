@@ -1,5 +1,6 @@
 
-original NAPT patch from neonat against lwIP-1.4 (refXXX)
+original NAPT patch from neocat against lwIP-1.4
+https://github.com/NeoCat/esp8266-Arduino/tree/ip_napt
 
 diff --git a/tools/sdk/lib/liblwip_gcc.a b/tools/sdk/lib/liblwip_gcc.a
 index f1cfed0..b8196f6 100644
