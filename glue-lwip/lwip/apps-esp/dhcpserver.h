@@ -118,7 +118,7 @@ extern "C"
 {
 #endif
 
-void dhcps_set_dns (int num, struct ipv4_addr* dns);
+void dhcps_set_dns (int num, const ipv4_addr_t* dns);
 
 void dhcps_start(struct ip_info *info);
 void dhcps_stop(void);

@@ -42,10 +42,11 @@ uint32 dhcps_lease_time = DHCPS_LEASE_TIME_DEF;  //minute
 void wifi_softap_dhcps_client_leave(u8 *bssid, struct ipv4_addr *ip,bool force);
 uint32 wifi_softap_dhcps_client_update(u8 *bssid, struct ipv4_addr *ip);
 
-void dhcps_set_dns (int num, struct ipv4_addr* dns)
+void dhcps_set_dns (int num, const ipv4_addr_t* dns)
 {
     (void)num;
-    ip4_addr_copy(dns_address, *dns);
+    if (!ip4_addr_isany(dns))
+        ip4_addr_copy(dns_address, *dns);
 }
 
 /******************************************************************************
