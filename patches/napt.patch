@@ -1,5 +1,5 @@
 diff --git a/src/core/init.c b/src/core/init.c
-index b3737a35..07461846 100644
+index b3737a35..9c2d1dcf 100644
 --- a/src/core/init.c
 +++ b/src/core/init.c
 @@ -57,6 +57,7 @@
@@ -10,17 +10,8 @@ index b3737a35..07461846 100644
  
  #include "netif/ppp/ppp_opts.h"
  #include "netif/ppp/ppp_impl.h"
-@@ -377,4 +378,8 @@ lwip_init(void)
- #if LWIP_TIMERS
-   sys_timeouts_init();
- #endif /* LWIP_TIMERS */
-+
-+#if IP_NAPT && !IP_NAPT_DYNAMIC
-+  ip_napt_init(IP_NAPT_MAX, IP_PORTMAP_MAX);
-+#endif /* IP_NAPT */
- }
 diff --git a/src/core/ipv4/ip4.c b/src/core/ipv4/ip4.c
-index 26c26a91..b699e5a6 100644
+index 26c26a91..c8948b9c 100644
 --- a/src/core/ipv4/ip4.c
 +++ b/src/core/ipv4/ip4.c
 @@ -42,6 +42,7 @@
@@ -39,23 +30,29 @@ index 26c26a91..b699e5a6 100644
  
  #include <string.h>
  
-@@ -228,6 +230,716 @@ ip4_route(const ip4_addr_t *dest)
+@@ -228,6 +230,739 @@ ip4_route(const ip4_addr_t *dest)
  }
  
  #if IP_FORWARD
 +#if IP_NAPT
 +
 +#define NO_IDX ((u16_t)-1)
-+#define NT(x) ((x) == NO_IDX ? NULL : &ip_napt_table[x])
++#define NT(x) ((x) == NO_IDX ? NULL : &napt_data->table[x])
 +
-+u16_t napt_list = NO_IDX, napt_list_last = NO_IDX, napt_free = 0;
++struct napt_data {
++  struct napt_table *table;
++  struct portmap_table *portmap_table;
++  int nr_active_tcp;
++  int nr_active_udp;
++  int nr_active_icmp;
++  u16_t list;
++  u16_t list_last;
++  u16_t free;
++  u16_t napt_max;
++  u8_t portmap_max;
++};
 +
-+static struct napt_table *ip_napt_table;
-+struct portmap_table *ip_portmap_table;
-+
-+int nr_active_napt_tcp = 0, nr_active_napt_udp = 0, nr_active_napt_icmp = 0;
-+uint16_t ip_napt_max = 0;
-+uint8_t ip_portmap_max = 0;
++struct napt_data *napt_data = NULL;
 +
 +#if NAPT_DEBUG
 +/* Print NAPT table using LWIP_DEBUGF
@@ -68,8 +65,8 @@ index 26c26a91..b699e5a6 100644
 +  LWIP_DEBUGF(NAPT_DEBUG, (" src                     dest                    sport   dport   mport   \n"));
 +  LWIP_DEBUGF(NAPT_DEBUG, ("+-----------------------+-----------------------+-------+-------+-------+\n"));
 +
-+  for (i = napt_list; i != NO_IDX; i = next) {
-+     struct napt_table *t = &ip_napt_table[i];
++  for (i = napt_data->list; i != NO_IDX; i = next) {
++     struct napt_table *t = &napt_data->table[i];
 +     next = t->next;
 +
 +     LWIP_DEBUGF(NAPT_DEBUG, ("| %3"U16_F" | %3"U16_F" | %3"U16_F" | %3"U16_F" |",
@@ -94,28 +91,41 @@ index 26c26a91..b699e5a6 100644
 +#endif /* NAPT_DEBUG */
 +
 +err_t
-+ip_napt_init(u16_t max_nat, u8_t max_portmap)
++ip_napt_init(u16_t nat_max, u8_t portmap_max)
 +{
 +  u16_t i;
 +
-+  struct napt_table* _napt = (struct napt_table*)calloc(1, sizeof(struct napt_table[max_nat]));
-+  if (!_napt) {
++  if (napt_data)
++    return ERR_BUF;
++
++  napt_data = (struct napt_data*)calloc(1, sizeof(struct napt_data));
++  if (!napt_data) {
++    napt_data = NULL;
 +    return ERR_MEM;
 +  }
-+  struct portmap_table* _portmap = (struct portmap_table*)calloc(1, sizeof(struct portmap_table[max_portmap]));
-+  if (!_portmap) {
-+    free(_napt);
++  napt_data->table = (struct napt_table*)calloc(1, sizeof(struct napt_table[nat_max]));
++  if (!napt_data->table) {
++    free(napt_data);
++    napt_data = NULL;
++    return ERR_MEM;
++  }
++  napt_data->portmap_table = (struct portmap_table*)calloc(1, sizeof(struct portmap_table[portmap_max]));
++  if (!napt_data->portmap_table) {
++    free(napt_data->table);
++    free(napt_data);
++    napt_data = NULL;
 +    return ERR_MEM;
 +  }
 +
-+  ip_napt_table = _napt;
-+  ip_portmap_table = _portmap;
-+  ip_napt_max = max_nat;
-+  ip_portmap_max = max_portmap;
++  napt_data->list = NO_IDX;
++  napt_data->list_last = NO_IDX;
++  napt_data->free = 0;
++  napt_data->napt_max = nat_max;
++  napt_data->portmap_max = portmap_max;
++  for (i = 0; i < nat_max - 1; i++)
++    napt_data->table[i].next = i + 1;
++  napt_data->table[i].next = NO_IDX;
 +
-+  for (i = 0; i < ip_napt_max - 1; i++)
-+    ip_napt_table[i].next = i + 1;
-+  ip_napt_table[i].next = NO_IDX;
 +  return ERR_OK;
 +}
 +
@@ -180,63 +190,63 @@ index 26c26a91..b699e5a6 100644
 +  chksum[1] = x & 0xff;
 +}
 +
-+/* t must be indexed by napt_free */
++/* t must be indexed by napt_data->free */
 +static void
 +ip_napt_insert(struct napt_table *t)
 +{
-+  u16_t ti = t - ip_napt_table;
-+  LWIP_ASSERT("napt: free indexes mismatch", ti == napt_free);
-+  napt_free = t->next;
++  u16_t ti = t - napt_data->table;
++  LWIP_ASSERT("napt: free indexes mismatch", ti == napt_data->free);
++  napt_data->free = t->next;
 +  t->prev = NO_IDX;
-+  t->next = napt_list;
-+  if (napt_list != NO_IDX)
-+    NT(napt_list)->prev = ti;
-+  napt_list = ti;
-+  if (napt_list_last == NO_IDX)
-+    napt_list_last = ti;
++  t->next = napt_data->list;
++  if (napt_data->list != NO_IDX)
++    NT(napt_data->list)->prev = ti;
++  napt_data->list = ti;
++  if (napt_data->list_last == NO_IDX)
++    napt_data->list_last = ti;
 +
 +#if LWIP_TCP
 +  if (t->proto == IP_PROTO_TCP)
-+    nr_active_napt_tcp++;
++    napt_data->nr_active_tcp++;
 +#endif
 +#if LWIP_UDP
 +  if (t->proto == IP_PROTO_UDP)
-+    nr_active_napt_udp++;
++    napt_data->nr_active_udp++;
 +#endif
 +#if LWIP_ICMP
 +  if (t->proto == IP_PROTO_ICMP)
-+    nr_active_napt_icmp++;
++    napt_data->nr_active_icmp++;
 +#endif
-+  LWIP_DEBUGF(LWIP_DBG_ON, ("napt: T: %d, U: %d, I: %d\r\n", nr_active_napt_tcp, nr_active_napt_udp, nr_active_napt_icmp));
++  LWIP_DEBUGF(LWIP_DBG_ON, ("napt: T: %d, U: %d, I: %d\r\n", napt_data->nr_active_tcp, napt_data->nr_active_udp, napt_data->nr_active_icmp));
 +}
 +
 +static void
 +ip_napt_free(struct napt_table *t)
 +{
-+  u16_t ti = t - ip_napt_table;
-+  if (ti == napt_list)
-+    napt_list = t->next;
-+  if (ti == napt_list_last)
-+    napt_list_last = t->prev;
++  u16_t ti = t - napt_data->table;
++  if (ti == napt_data->list)
++    napt_data->list = t->next;
++  if (ti == napt_data->list_last)
++    napt_data->list_last = t->prev;
 +  if (t->next != NO_IDX)
 +    NT(t->next)->prev = t->prev;
 +  if (t->prev != NO_IDX)
 +    NT(t->prev)->next = t->next;
 +  t->prev = NO_IDX;
-+  t->next = napt_free;
-+  napt_free = ti;
++  t->next = napt_data->free;
++  napt_data->free = ti;
 +
 +#if LWIP_TCP
 +  if (t->proto == IP_PROTO_TCP)
-+    nr_active_napt_tcp--;
++    napt_data->nr_active_tcp--;
 +#endif
 +#if LWIP_UDP
 +  if (t->proto == IP_PROTO_UDP)
-+    nr_active_napt_udp--;
++    napt_data->nr_active_udp--;
 +#endif
 +#if LWIP_ICMP
 +  if (t->proto == IP_PROTO_ICMP)
-+    nr_active_napt_icmp--;
++    napt_data->nr_active_icmp--;
 +#endif
 +  LWIP_DEBUGF(NAPT_DEBUG, ("ip_napt_free\n"));
 +#if NAPT_DEBUG
@@ -249,8 +259,8 @@ index 26c26a91..b699e5a6 100644
 +ip_napt_find_port(u8_t proto, u16_t port)
 +{
 +  int i, next;
-+  for (i = napt_list; i != NO_IDX; i = next) {
-+    struct napt_table *t = &ip_napt_table[i];
++  for (i = napt_data->list; i != NO_IDX; i = next) {
++    struct napt_table *t = &napt_data->table[i];
 +    next = t->next;
 +    if (t->proto == proto && t->mport == port)
 +      return 1;
@@ -330,7 +340,7 @@ index 26c26a91..b699e5a6 100644
 +#endif
 +
 +  u32_t now = sys_now();
-+  for (i = napt_list; i != NO_IDX; i = next) {
++  for (i = napt_data->list; i != NO_IDX; i = next) {
 +    t = NT(i);
 +    next = t->next;
 +#if LWIP_TCP
@@ -379,7 +389,7 @@ index 26c26a91..b699e5a6 100644
 +    t->last = sys_now();
 +    t->dest = dest;
 +    t->dport = dport;
-+    /* move this entry to the top of napt_list */
++    /* move this entry to the top of list */
 +    ip_napt_free(t);
 +    ip_napt_insert(t);
 +
@@ -390,7 +400,7 @@ index 26c26a91..b699e5a6 100644
 +
 +    return t->mport;
 +  }
-+  t = NT(napt_free);
++  t = NT(napt_data->free);
 +  if (t) {
 +    u16_t mport = sport;
 +#if LWIP_TCP
@@ -428,8 +438,8 @@ index 26c26a91..b699e5a6 100644
 +  dport = PP_HTONS(dport);
 +  int i;
 +
-+  for (i = 0; i < ip_portmap_max; i++) {
-+    struct portmap_table *p = &ip_portmap_table[i];
++  for (i = 0; i < napt_data->portmap_max; i++) {
++    struct portmap_table *p = &napt_data->portmap_table[i];
 +    if (p->valid && p->proto == proto && p->mport == mport) {
 +      p->dport = dport;
 +      p->daddr = daddr;
@@ -450,10 +460,10 @@ index 26c26a91..b699e5a6 100644
 +ip_portmap_find(u8_t proto, u16_t mport)
 +{
 +  int i;
-+  for (i = 0; i < ip_portmap_max; i++) {
-+    struct portmap_table *p = &ip_portmap_table[i];
++  for (i = 0; i < napt_data->portmap_max; i++) {
++    struct portmap_table *p = &napt_data->portmap_table[i];
 +    if (!p->valid)
-+      return 0;
++      return NULL;
 +    if (p->proto == proto && p->mport == mport)
 +      return p;
 +  }
@@ -464,10 +474,10 @@ index 26c26a91..b699e5a6 100644
 +ip_portmap_find_dest(u8_t proto, u16_t dport, u32_t daddr)
 +{
 +  int i;
-+  for (i = 0; i < ip_portmap_max; i++) {
-+    struct portmap_table *p = &ip_portmap_table[i];
++  for (i = 0; i < napt_data->portmap_max; i++) {
++    struct portmap_table *p = &napt_data->portmap_table[i];
 +    if (!p->valid)
-+      return 0;
++      return NULL;
 +    if (p->proto == proto && p->dport == dport && p->daddr == daddr)
 +      return p;
 +  }
@@ -478,7 +488,7 @@ index 26c26a91..b699e5a6 100644
 +ip_portmap_remove(u8_t proto, u16_t mport)
 +{
 +  mport = PP_HTONS(mport);
-+  struct portmap_table *last = &ip_portmap_table[ip_portmap_max - 1];
++  struct portmap_table *last = &napt_data->portmap_table[napt_data->portmap_max - 1];
 +  struct portmap_table *m = ip_portmap_find(proto, mport);
 +  if (!m)
 +    return 0;
@@ -548,6 +558,10 @@ index 26c26a91..b699e5a6 100644
 +{
 +  struct portmap_table *m;
 +  struct napt_table *t;
++
++  if (!napt_data)
++    return;
++
 +#if LWIP_ICMP
 +  /* NAPT for ICMP Echo Request using identifier */
 +  if (IPH_PROTO(iphdr) == IP_PROTO_ICMP) {
@@ -756,7 +770,7 @@ index 26c26a91..b699e5a6 100644
  /**
   * Determine whether an IP address is in a reserved set of addresses
   * that may not be forwarded, or whether datagrams to that destination
-@@ -329,6 +1041,11 @@ ip4_forward(struct pbuf *p, struct ip_hdr *iphdr, struct netif *inp)
+@@ -329,6 +1064,11 @@ ip4_forward(struct pbuf *p, struct ip_hdr *iphdr, struct netif *inp)
      return;
    }
  
@@ -768,7 +782,7 @@ index 26c26a91..b699e5a6 100644
    /* Incrementally update the IP checksum. */
    if (IPH_CHKSUM(iphdr) >= PP_HTONS(0xffffU - 0x100)) {
      IPH_CHKSUM_SET(iphdr, (u16_t)(IPH_CHKSUM(iphdr) + PP_HTONS(0x100) + 1));
-@@ -511,6 +1228,13 @@ ip4_input(struct pbuf *p, struct netif *inp)
+@@ -511,6 +1251,13 @@ ip4_input(struct pbuf *p, struct netif *inp)
    }
  #endif
  
@@ -782,7 +796,7 @@ index 26c26a91..b699e5a6 100644
    /* copy IP addresses to aligned ip_addr_t */
    ip_addr_copy_from_ip4(ip_data.current_iphdr_dest, iphdr->dest);
    ip_addr_copy_from_ip4(ip_data.current_iphdr_src, iphdr->src);
-@@ -621,6 +1345,16 @@ ip4_input(struct pbuf *p, struct netif *inp)
+@@ -621,6 +1368,16 @@ ip4_input(struct pbuf *p, struct netif *inp)
  #if IP_FORWARD
      /* non-broadcast packet? */
      if (!ip4_addr_isbroadcast(ip4_current_dest_addr(), inp)) {
