@@ -51,7 +51,6 @@ extern "C"
 #include "ets_sys.h"
 #include "osapi.h"
 #include "user_interface.h"
-#include "esp-missing.h"
 #ifdef __cplusplus
 }
 #endif

@@ -201,15 +201,24 @@ void esp2glue_dhcp_stop (int netif_idx)
 	dhcp_stop(&netif_git[netif_idx]);
 }
 
+// a pbuf flag bit for our own use
+#define PBUF_FLAG_GLUED 0x40U   // check unicity in pbuf.h:"#define PBUF_FLAG_*"
+
 err_t new_linkoutput (struct netif* netif, struct pbuf* p)
 {
 	#if !LWIP_NETIF_TX_SINGLE_PBUF
 	#warning ESP netif->linkoutput cannot handle pbuf chains.
 	#warning LWIP_NETIF_TX_SINGLE_PBUF should be 1 in lwipopts.h (but now works without)
 	#endif
-	if (p->next)
+
+	if (p->next || (p->flags & PBUF_FLAG_GLUED))
 	{
-		// should not happen since LWIP_NETIF_TX_SINGLE_PBUF=1
+		//printf("COPIED\n");
+	    // PBUF_FLAG_GLUED: this packet has been allocated by us below (esp2glue_alloc_for_recv())
+	    // and needs to be duplicated before sending to esp side (otherwise content is destroyed,
+	    // see comment below). This happens when a received packet is forwarded (ex: by napt).
+
+		// Otherwise, !!p->next should not happen since LWIP_NETIF_TX_SINGLE_PBUF=1
 		// it can however happen:
 		// see https://git.savannah.gnu.org/cgit/lwip.git/tree/src/include/lwip/opt.h#n1593
 		// see http://lists.nongnu.org/archive/html/lwip-users/2017-10/msg00059.html
@@ -224,14 +233,18 @@ err_t new_linkoutput (struct netif* netif, struct pbuf* p)
 		// new p = q will be released by glue2esp_linkoutput() subsequent callbacks to esp2glue_pbuf_freed()
 	}
 	else
+	{
 		// protect pbuf, so lwip2(git) won't free it before phy(esp) finishes sending
 		pbuf_ref(p);
+		//printf("NOT COPIED\n");
+    }
 
 	uassert(netif->num == STATION_IF || netif->num == SOFTAP_IF);
 
 	uprint(DBG "linkoutput: netif@%p (%s) pbuf=%p payload=%p\n", netif, netif_name[netif->num], p, p->payload);
 	uprint(DBG "linkoutput default netif: %d\n", netif_default? netif_default->num: -1);
 
+	// when packet is forwarded by NAPT but not cloned above, p->payload *value* is changed after this call:
 	err_t err = glue2git_err(glue2esp_linkoutput(netif->num, p, p->payload, p->len));
 
 	if (err != ERR_OK)
@@ -427,7 +440,10 @@ void esp2glue_alloc_for_recv (size_t len, void** pbuf, void** data)
 {
 	*pbuf = pbuf_alloc(PBUF_RAW, len, PBUF_RAM);
 	if (*pbuf)
+	{
 		*data = ((struct pbuf*)*pbuf)->payload;
+        ((struct pbuf*)*pbuf)->flags |= PBUF_FLAG_GLUED;
+    }
 }
 
 err_glue_t esp2glue_ethernet_input (int netif_idx, void* received)

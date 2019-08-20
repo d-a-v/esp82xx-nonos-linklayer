@@ -29,6 +29,7 @@ static struct udp_pcb *pcb_dhcps = NULL;
 static ip_addr_t broadcast_dhcps;
 static struct ipv4_addr server_address;
 static struct ipv4_addr client_address;//added
+static struct ipv4_addr dns_address = { 0 }; //added
 
 static struct dhcps_lease dhcps_lease;
 //static bool dhcps_lease_flag = true;
@@ -40,6 +41,13 @@ uint32 dhcps_lease_time = DHCPS_LEASE_TIME_DEF;  //minute
 
 void wifi_softap_dhcps_client_leave(u8 *bssid, struct ipv4_addr *ip,bool force);
 uint32 wifi_softap_dhcps_client_update(u8 *bssid, struct ipv4_addr *ip);
+
+void dhcps_set_dns (int num, const ipv4_addr_t* dns)
+{
+    (void)num;
+    if (!ip4_addr_isany(dns))
+        ip4_addr_copy(dns_address, *dns);
+}
 
 /******************************************************************************
  * FunctionName : node_insert_to_list
@@ -226,13 +234,21 @@ static uint8_t* ICACHE_FLASH_ATTR add_offer_options(uint8_t *optptr)
 #ifdef USE_DNS
         *optptr++ = DHCP_OPTION_DNS_SERVER;
         *optptr++ = 4;
-        *optptr++ = ip4_addr1( &ipadd);
-        *optptr++ = ip4_addr2( &ipadd);
-        *optptr++ = ip4_addr3( &ipadd);
-        *optptr++ = ip4_addr4( &ipadd);
+        if (dns_address.addr == 0) {
+            *optptr++ = ip4_addr1( &ipadd);
+            *optptr++ = ip4_addr2( &ipadd);
+            *optptr++ = ip4_addr3( &ipadd);
+            *optptr++ = ip4_addr4( &ipadd);
+        } else {
+            *optptr++ = ip4_addr1(&dns_address);
+            *optptr++ = ip4_addr2(&dns_address);;
+            *optptr++ = ip4_addr3(&dns_address);;
+            *optptr++ = ip4_addr4(&dns_address);;
+        }
 #endif
 
 #ifdef CLASS_B_NET
+#error
         *optptr++ = DHCP_OPTION_BROADCAST_ADDRESS;
         *optptr++ = 4;  
         *optptr++ = ip4_addr1( &ipadd);
@@ -262,15 +278,20 @@ static uint8_t* ICACHE_FLASH_ATTR add_offer_options(uint8_t *optptr)
         *optptr++ = 1;  
         *optptr++ = 0x00; 
 
-        *optptr++ = 43;
+#if 0 // vendor specific unititialized (??)
+        *optptr++ = 43; // vendor specific
         *optptr++ = 6;
+        // unitialized ?
+#endif
 
+#if 0 // already set (DHCP_OPTION_SUBNET_MASK==1) (??)
         *optptr++ = 0x01;
         *optptr++ = 4;  
-        *optptr++ = 0x00;
-        *optptr++ = 0x00;
-        *optptr++ = 0x00;
-        *optptr++ = 0x02;
+        *optptr++ = 0;
+        *optptr++ = 0;
+        *optptr++ = 0;
+        *optptr++ = 2;
+#endif
 
         return optptr;
 }
@@ -730,7 +751,6 @@ static void ICACHE_FLASH_ATTR wifi_softap_init_dhcps_lease(uint32 ip)
     uint32 softap_ip = 0,local_ip = 0;
     uint32 start_ip = 0;
     uint32 end_ip = 0;
-//  if (dhcps_lease_flag) {
     if (dhcps_lease.enable == TRUE) {
         softap_ip = htonl(ip);
         start_ip = htonl(dhcps_lease.start_ip.addr);

@@ -736,7 +736,7 @@
  * interface, define this to 0.
  */
 #if !defined IP_FORWARD || defined __DOXYGEN__
-#define IP_FORWARD                      0
+#define IP_FORWARD                      LWIP_FEATURES
 #endif
 
 /**
@@ -766,6 +766,10 @@
 #undef IP_FRAG
 #define IP_FRAG                         0
 #endif /* !LWIP_IPV4 */
+
+#ifndef IP_NAPT
+#define IP_NAPT                         (LWIP_FEATURES && !LWIP_IPV6)
+#endif
 
 /**
  * IP_OPTIONS_ALLOWED: Defines the behavior for IP options.
@@ -3490,6 +3494,13 @@
 /**
  * @}
  */
+
+/**
+ * NAPT_DEBUG: Enable debugging for NAPT.
+ */
+#ifndef NAPT_DEBUG
+#define NAPT_DEBUG                       LWIP_DBG_OFF
+#endif
 
 /**
  * LWIP_TESTMODE: Changes to make unit test possible

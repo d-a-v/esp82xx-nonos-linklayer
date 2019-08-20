@@ -61,13 +61,14 @@ install: $(AUTO) $(LWIP_LIB_RELEASE)
 	rm -rf $(LWIP_INCLUDES_RELEASE)
 	mkdir -p $(LWIP_INCLUDES_RELEASE)
 	cp -a lwip2-src/src/include/* $(LWIP_INCLUDES_RELEASE)
-	cp -a glue/gluedebug.h glue-lwip/lwip-git-hash.h glue-lwip/lwip-err-t.h glue-lwip/arch $(LWIP_INCLUDES_RELEASE)
+	cp -a glue/glue.h glue/gluedebug.h glue-lwip/lwip-git-hash.h glue-lwip/lwip-err-t.h glue-lwip/arch $(LWIP_INCLUDES_RELEASE)
 	echo "// this file will be overwritten upon lwip2 rebuild" > $(LWIP_INCLUDES_RELEASE)/lwipopts.h
 	echo "#ifndef __CUSTOM_EXTRA_DEFINES__" >> $(LWIP_INCLUDES_RELEASE)/lwipopts.h
 	echo "#define __CUSTOM_EXTRA_DEFINES__" >> $(LWIP_INCLUDES_RELEASE)/lwipopts.h
 	echo "$(CUSTOM_EXTRA_DEFINES)" >> $(LWIP_INCLUDES_RELEASE)/lwipopts.h
 	echo "#endif" >> $(LWIP_INCLUDES_RELEASE)/lwipopts.h
 	cat glue-lwip/$(target)/lwipopts.h >> $(LWIP_INCLUDES_RELEASE)/lwipopts.h
+	cp -a glue-lwip/lwip/apps-esp/dhcpserver.h $(LWIP_INCLUDES_RELEASE)
 	echo "warning: this directory is re/over/written from lwip2 builder upon lwip2 rebuild" > $(LWIP_INCLUDES_RELEASE)/README.md
 ifneq ($(target),open)
 	touch $(LWIP_INCLUDES_RELEASE)/espconn.h

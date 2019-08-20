@@ -113,8 +113,18 @@ extern uint32 dhcps_lease_time;
 
 #define   dhcps_router_enabled(offer)	((offer & OFFER_ROUTER) != 0)
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+void dhcps_set_dns (int num, const ipv4_addr_t* dns);
+
 void dhcps_start(struct ip_info *info);
 void dhcps_stop(void);
 
+#ifdef __cplusplus
+}
 #endif
 
+#endif

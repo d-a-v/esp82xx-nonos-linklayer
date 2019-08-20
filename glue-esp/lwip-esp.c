@@ -43,6 +43,8 @@ author: d. gauchard
 #include "netif/etharp.h"
 #include "lwip/mem.h"
 
+#include "esp-missing.h"
+
 #define DBG	"lwESP: "
 #define STUB(x) do { uerror("STUB: " #x "\n"); } while (0)
 
