@@ -65,6 +65,8 @@ const char netif_name[2][8] = { "station", "soft-ap" };
 
 int __attribute__((weak)) doprint_allow = 0; // for doprint()
 
+uint32_t sntp_update_delay_not_less_than_15000 = SNTP_UPDATE_DELAY_DEFAULT;
+
 err_t glue2git_err (err_glue_t err)
 {
 	switch (err)
