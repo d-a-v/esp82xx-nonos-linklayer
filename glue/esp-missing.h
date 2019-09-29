@@ -27,9 +27,11 @@ struct netif* eagle_lwip_getif (int netif_index);
 void ets_intr_lock (void);
 void ets_intr_unlock (void);
 
-int ets_vprintf (int (*print_function)(int), const char * format, va_list arg) __attribute__ ((format (printf, 2, 0)));
 int ets_sprintf (char *str, const char *format, ...)  __attribute__ ((format (printf, 2, 3)));
+#if !ARDUINO
+int ets_vprintf (int (*print_function)(int), const char * format, va_list arg) __attribute__ ((format (printf, 2, 0)));
 int ets_putc(int);
+#endif
 
 void ets_bzero (void*, size_t);
 int ets_memcmp (const void*, const void*, size_t n);
