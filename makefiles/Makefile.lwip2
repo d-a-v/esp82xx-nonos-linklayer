@@ -3,7 +3,6 @@
 
 OBJ = \
 	$(patsubst %.c,$(BUILD)/%.o,$(wildcard netif/ethernet.c)) \
-	$(patsubst %.c,$(BUILD)/%.o,$(wildcard netif/ppp/*.c)) \
 	$(patsubst %.c,$(BUILD)/%.o,$(wildcard core/*.c)) \
 	$(patsubst %.c,$(BUILD)/%.o,$(wildcard core/ipv4/*.c)) \
 	$(patsubst %.c,$(BUILD)/%.o,$(wildcard core/ipv6/*.c)) \
