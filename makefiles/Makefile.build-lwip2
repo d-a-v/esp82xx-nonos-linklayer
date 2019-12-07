@@ -21,7 +21,10 @@ include makefiles/Makefile.defs
 
 AUTO	= glue-lwip/lwip-err-t.h glue-lwip/lwip-git-hash.h
 
-all: $(AUTO) $(LWIP_LIB_RELEASE)
+all: upstream $(AUTO) $(LWIP_LIB_RELEASE)
+
+upstream:
+    git clone --depth=1 -b $(UPSTREAM_VERSION) https://git.savannah.nongnu.org/git/lwip.git lwip2-src
 
 glue-lwip/lwip-err-t.h: $(LWIP_ESP)/arch/cc.h
 	( \

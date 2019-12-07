@@ -1,4 +1,6 @@
 
+UPSTREAM_VERSION = STABLE-2_1_2_RELEASE
+
 V ?= 0
 ifeq ($(V), 0)
 VERBC = @echo "C  $@";
