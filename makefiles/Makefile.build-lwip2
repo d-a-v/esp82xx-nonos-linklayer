@@ -23,8 +23,10 @@ AUTO	= glue-lwip/lwip-err-t.h glue-lwip/lwip-git-hash.h
 
 all: upstream $(AUTO) $(LWIP_LIB_RELEASE)
 
-upstream:
-    git clone --depth=1 -b $(UPSTREAM_VERSION) https://git.savannah.nongnu.org/git/lwip.git lwip2-src
+upstream: lwip2-src/README
+
+lwip2-src/README:
+	git clone --depth=1 -b $(UPSTREAM_VERSION) https://git.savannah.nongnu.org/git/lwip.git lwip2-src
 
 glue-lwip/lwip-err-t.h: $(LWIP_ESP)/arch/cc.h
 	( \
@@ -60,7 +62,7 @@ section-show:
 		echo  $$i \\t\\t `$(OD) -t $(LWIP_LIB_RELEASE) | grep " F .* $${i}$$"`; \
 	done; true
 
-install: $(AUTO) $(LWIP_LIB_RELEASE)
+install: upstream $(AUTO) $(LWIP_LIB_RELEASE)
 	rm -rf $(LWIP_INCLUDES_RELEASE)
 	mkdir -p $(LWIP_INCLUDES_RELEASE)
 	cp -a lwip2-src/src/include/* $(LWIP_INCLUDES_RELEASE)
