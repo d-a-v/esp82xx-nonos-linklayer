@@ -51,8 +51,15 @@ author: d. gauchard
 #include "lwip-git.h"
 
 // this is dhcpserver taken from lwip-1.4-espressif
+// arduino will use its own sources based on the above
+// this source only needs dhcps_start() prototype
 #include "lwip/apps-esp/dhcpserver.h"
+
 // this is espconn taken from lwip-1.4-espressif
+// espconn is probably a modified version of lwIP's netconn
+// note:
+//  arduino needs to call espconn_init()
+//  esp-open-sdk always calls it
 #include "lwip/apps-esp/espconn.h"
 
 #define DBG "GLUE: "
