@@ -2274,6 +2274,12 @@
  * @{
  */
 /**
+ * LWIP_CHKSUM_ALGORITHM==3: Checksum algorithm fastest for ESP8266
+ */
+#if !defined LWIP_CHKSUM_ALGORITHM || defined __DOXYGEN__
+#define LWIP_CHKSUM_ALGORITHM           3 // 2
+#endif
+/**
  * LWIP_CHECKSUM_CTRL_PER_NETIF==1: Checksum generation/check can be enabled/disabled
  * per netif.
  * ATTENTION: if enabled, the CHECKSUM_GEN_* and CHECKSUM_CHECK_* defines must be enabled!
