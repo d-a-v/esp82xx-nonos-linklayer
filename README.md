@@ -19,7 +19,10 @@ lwIP version currently used: [STABLE_2.1.2](http://git.savannah.nongnu.org/cgit/
 
 # Build
 
-[with Arduino](https://github.com/esp8266/Arduino/tree/master/tools/sdk/lwip2)
+- with Arduino:
+  - Install the [git version](https://arduino-esp8266.readthedocs.io/en/stable/installing.html#using-git-version) of the esp8266 arduino core
+  - Head to [tools/sdk/lwip2/](https://github.com/esp8266/Arduino/tree/master/tools/sdk/lwip2)
+  - Run `make install`
 
 # MSS
 
