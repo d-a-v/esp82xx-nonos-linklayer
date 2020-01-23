@@ -1397,7 +1397,7 @@
  * TCP_LISTEN_BACKLOG: Enable the backlog option for tcp listen pcb.
  */
 #if !defined TCP_LISTEN_BACKLOG || defined __DOXYGEN__
-#define TCP_LISTEN_BACKLOG              0
+#define TCP_LISTEN_BACKLOG              LWIP_FEATURES // 0
 #endif
 
 /**
