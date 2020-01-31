@@ -1,4 +1,4 @@
-PREFIX ?= $(abspath ../../../xtensa-lx106-elf)
+PREFIX ?= ../../../xtensa-lx106-elf
 
 %:
 	for v6 in 0 1; do \
@@ -15,7 +15,7 @@ PREFIX ?= $(abspath ../../../xtensa-lx106-elf)
 			LWIP_LIB=liblwip$$((2+4*v6))-$$mss$$featname.a \
 			LWIP_LIB_RELEASE=../../lib/liblwip$$((2+4*v6))-$$mss$$featname.a \
 			LWIP_INCLUDES_RELEASE=../include \
-			TOOLS=$(PREFIX)/bin/xtensa-lx106-elf- \
+			TOOLS=$(abspath $(wildcard $(PREFIX)))/bin/xtensa-lx106-elf- \
 			TCP_MSS=$$mss LWIP_FEATURES=$$feat LWIP_IPV6=$$v6 \
 			BUILD=build-$$mss$$featname-v$$((4+2*v6)) \
 			$@ ; \
