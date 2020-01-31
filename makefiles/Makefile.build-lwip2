@@ -81,4 +81,4 @@ endif
 
 clean:
 	rm -rf $(BUILD) $(LWIP_LIB) $(AUTO)
-	cd lwip2-src; rm -f src/.patched src/core/*.c.orig src/core/ipv6/*.c.orig; git checkout -- src;
+	cd lwip2-src; git checkout -f -- src; git clean -f -- src;
