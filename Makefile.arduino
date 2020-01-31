@@ -1,4 +1,4 @@
-PREFIX ?= ../../../xtensa-lx106-elf/
+PREFIX ?= $(abspath ../../../xtensa-lx106-elf)
 
 %:
 	for v6 in 0 1; do \
