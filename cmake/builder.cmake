@@ -11,13 +11,17 @@ set(GLUE_C_FLAGS TCP_MSS=${TCP_MSS} LWIP_IPV6=${LWIP_IPV6} LWIP_FEATURES=${LWIP_
 # TODO: glue-lwip/lwip-err-t.h defines this!
 #       -DLWIP_NO_STDINT_H=1
 #       Should probably be here instead
-set (LWIP_DEFINITIONS
+set (GLUE_DEFINITIONS
     -DARDUINO
     -D__ets__
     -DICACHE_FLASH
     -DLWIP_OPEN_SRC
-    -DLWIP_BUILD
     -DUSE_OPTIMIZE_PRINTF
+)
+
+set (LWIP_DEFINITIONS
+    ${GLUE_DEFINITIONS}
+    -DLWIP_BUILD
 )
 set (LWIP_INCLUDE_DIRS
     "${ARDUINO_DIR}/tools/sdk/include"
@@ -43,12 +47,7 @@ target_sources(lwipcore
 
 # --- all the source code from the glue-lwip/...
 # --- TODO: arduino target does not need millis() stub
-add_library(${GLUE_VARIANT_NAME}-glue STATIC "")
-
-# --- we need to explicitly set these
-# --- TODO: target_compile_features?
-target_sources(${GLUE_VARIANT_NAME}-glue
-    PRIVATE
+add_library(${GLUE_VARIANT_NAME}-glue STATIC
     ${GLUE_DIR}/glue-lwip/lwip-git.c
     ${GLUE_DIR}/glue-lwip/esp-dhcpserver.c
     ${GLUE_DIR}/glue-lwip/esp-ping.c
@@ -56,11 +55,32 @@ target_sources(${GLUE_VARIANT_NAME}-glue
     ${GLUE_DIR}/glue-lwip/espconn_buf.c
     ${GLUE_DIR}/glue-lwip/espconn_tcp.c
     ${GLUE_DIR}/glue-lwip/espconn_udp.c
+)
+
+add_library(${GLUE_VARIANT_NAME}-debug STATIC
     ${GLUE_DIR}/glue/doprint.c
     ${GLUE_DIR}/glue/uprint.c
 )
+
+add_library(${GLUE_VARIANT_NAME}-esp STATIC
+    ${GLUE_DIR}/glue-esp/lwip-esp.c
+)
+
 target_include_directories(${GLUE_VARIANT_NAME}-glue BEFORE
     PRIVATE
+    ${GLUE_DIR}/glue-lwip/
+    ${GLUE_DIR}/glue/
+    ${LWIP_INCLUDE_DIRS}
+)
+target_include_directories(${GLUE_VARIANT_NAME}-debug BEFORE
+    PRIVATE
+    ${GLUE_DIR}/glue-lwip/
+    ${GLUE_DIR}/glue/
+    ${LWIP_INCLUDE_DIRS}
+)
+target_include_directories(${GLUE_VARIANT_NAME}-esp BEFORE
+    PRIVATE
+    ${ARDUINO_DIR}/tools/sdk/lwip/include
     ${GLUE_DIR}/glue-lwip/
     ${GLUE_DIR}/glue/
     ${LWIP_INCLUDE_DIRS}
@@ -74,13 +94,24 @@ if($(GLUE_TARGET) EQUAL OPENSDK)
     )
 endif()
 
-target_compile_definitions(${GLUE_VARIANT_NAME}-glue PRIVATE ${LWIP_DEFINITIONS})
+target_compile_definitions(${GLUE_VARIANT_NAME}-glue PRIVATE ${GLUE_DEFINITIONS})
 target_compile_definitions(${GLUE_VARIANT_NAME}-glue PRIVATE ${GLUE_C_FLAGS})
+
+target_compile_definitions(${GLUE_VARIANT_NAME}-debug PRIVATE ${GLUE_DEFINITIONS})
+target_compile_definitions(${GLUE_VARIANT_NAME}-debug PRIVATE ${GLUE_C_FLAGS})
+
+target_compile_definitions(${GLUE_VARIANT_NAME}-esp PRIVATE ${GLUE_DEFINITIONS})
+target_compile_definitions(${GLUE_VARIANT_NAME}-esp PRIVATE ${GLUE_C_FLAGS})
 
 target_compile_definitions(lwipcore PRIVATE ${GLUE_C_FLAGS})
 
-target_link_libraries(${GLUE_VARIANT_NAME}-glue PUBLIC lwipcore)
+target_link_libraries(${GLUE_VARIANT_NAME}-glue PUBLIC lwipcore ${GLUE_VARIANT_NAME}-debug ${GLUE_VARIANT_NAME}-esp)
 
-add_library(${GLUE_VARIANT_NAME} STATIC $<TARGET_OBJECTS:${GLUE_VARIANT_NAME}-glue> $<TARGET_OBJECTS:lwipcore>)
+add_library(${GLUE_VARIANT_NAME} STATIC
+    $<TARGET_OBJECTS:${GLUE_VARIANT_NAME}-glue>
+    $<TARGET_OBJECTS:${GLUE_VARIANT_NAME}-esp>
+    $<TARGET_OBJECTS:${GLUE_VARIANT_NAME}-debug>
+    $<TARGET_OBJECTS:lwipcore>
+)
 
 install(TARGETS ${GLUE_VARIANT_NAME} ARCHIVE DESTINATION ".")
