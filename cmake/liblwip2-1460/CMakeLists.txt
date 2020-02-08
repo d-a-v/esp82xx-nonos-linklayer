@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.9)
+project(lwip2-1460 LANGUAGES C)
+
+set(TCP_MSS 1460)
+set(LWIP_IPV6 0)
+set(LWIP_FEATURES 0)
+
+include(../builder.cmake)
