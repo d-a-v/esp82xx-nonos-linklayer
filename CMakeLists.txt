@@ -10,16 +10,20 @@
 cmake_minimum_required(VERSION 3.9)
 project(lwip-glue-builder VERSION 1 DESCRIPTION "lwip-glue-builder" LANGUAGES NONE)
 
-# --- TODO: "describe" arduino/esp8266 as toolchain?
-set(LWIP_DIR "${CMAKE_SOURCE_DIR}/lwip2-src")
+# --- set this to update the tracked repo
+# --- TODO: patch command needs to be aware of the change, somehow?
+
 set(LWIP_TAG "STABLE-2_1_2_RELEASE")
 
 # --- adjust relative paths to absolute
+
+set(LWIP_DIR "${CMAKE_SOURCE_DIR}/lwip2-src")
 get_filename_component(ARDUINO_DIR ${ARDUINO_DIR} REALPATH BASE_DIR "${CMAKE_SOURCE_DIR}")
 get_filename_component(LWIP_DIR ${LWIP_DIR} REALPATH BASE_DIR "${CMAKE_SOURCE_DIR}")
 
 message(STATUS "arduino dir: " "${ARDUINO_DIR}")
 message(STATUS "lwip dir: " "${LWIP_DIR}")
+message(STATUS "lwip tag: " "${LWIP_TAG}")
 
 # --- patch / undo patch from our special directory
 
@@ -30,29 +34,27 @@ set(LWIP_CLEAN_COMMAND ${CMAKE_SOURCE_DIR}/scripts/clean-lwip2-src ${LWIP_DIR})
 # --- we don't keep it as submodule to allow build tools that recursively check-out main repo avoid always downloading lwip2-src
 # --- checkout and everything else is handled by patch & clean targets
 
-if(NOT EXISTS "${LWIP_DIR}")
-    message(STATUS "Fetching ${LWIP_TAG}")
-    execute_process(
-        COMMAND git clone --depth=1 -b ${LWIP_TAG} https://git.savannah.nongnu.org/git/lwip.git ${LWIP_DIR}
-    )
-endif()
+include(ExternalProject)
 
-add_custom_command(
-    OUTPUT "${LWIP_DIR}/.patched"
-    COMMAND ${LWIP_PATCH_COMMAND}
-    COMMENT "Patching ${LWIP_DIR}"
+ExternalProject_Add(lwip2-src
+    GIT_REPOSITORY https://git.savannah.nongnu.org/git/lwip.git
+    GIT_TAG ${LWIP_TAG}
+    GIT_SHALLOW ON
+    GIT_PROGRESS ON
+    SOURCE_DIR lwip2-src
+    INSTALL_COMMAND ""
+    BUILD_COMMAND ""
+    CONFIGURE_COMMAND ""
+    PATCH_COMMAND ${LWIP_PATCH_COMMAND}
 )
 
 # --- following creates two makefile targets, allowing us to manually patch or clean lwip2-src
 
 add_custom_target(patch-lwip-sources
-    ALL
     COMMAND ${LWIP_PATCH_COMMAND}
-    DEPENDS "${LWIP_DIR}/.patched"
 )
 add_custom_target(clean-lwip-sources
     COMMAND ${LWIP_CLEAN_COMMAND}
-    COMMENT "Cleaning ${LWIP_DIR}"
 )
 
 # --- info about the build system
@@ -72,7 +74,6 @@ execute_process(
 )
 
 message(STATUS "glue desc: " ${GLUE_REPO_DESC_STR})
-message(STATUS "lwip desc: " ${LWIP_REPO_DESC_STR})
 
 # --- handle
 # include "lwip-git-hash.h"
@@ -119,18 +120,16 @@ message(STATUS "err_t: " ${GLUE_LWIP_ERR_T_DEFINITION})
 #
 # cmake_minimum_required(VERSION 3.9)
 # project(lwip2-1460 LANGUAGES C)
-# 
+#
 # set(TCP_MSS 1460)
 # set(LWIP_IPV6 0)
 # set(LWIP_FEATURES 0)
-# 
+#
 # include(../builder.cmake)
 
 # TODO:
 # - INSTALL_DIR should be provided by user? small install() hack in cmake/builder.cmake puts it directly there, without lib/ directory
 # - allow to pass some other args?
-
-include(ExternalProject)
 
 #set(LWIP_VARIANTS lwip2-536 lwip2-536-feat lwip2-1460 lwip2-1460-feat lwip6-536-feat lwip6-1460-feat)
 foreach(GLUE_VARIANT_NAME lwip2-536 lwip2-536-feat lwip2-1460 lwip2-1460-feat lwip6-536-feat lwip6-1460-feat)
@@ -149,6 +148,6 @@ foreach(GLUE_VARIANT_NAME lwip2-536 lwip2-536-feat lwip2-1460 lwip2-1460-feat lw
             -DARDUINO_DIR=${ARDUINO_DIR}
             -DLWIP_DIR=${LWIP_DIR}
     )
-    add_dependencies(${GLUE_VARIANT_NAME} patch-lwip-sources)
+    add_dependencies(${GLUE_VARIANT_NAME} lwip2-src)
 
 endforeach()
