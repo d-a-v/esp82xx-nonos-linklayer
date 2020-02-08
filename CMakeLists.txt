@@ -41,7 +41,7 @@ ExternalProject_Add(lwip2-src
     GIT_TAG ${LWIP_TAG}
     GIT_SHALLOW ON
     GIT_PROGRESS ON
-    SOURCE_DIR lwip2-src
+    SOURCE_DIR ${CMAKE_SOURCE_DIR}/lwip2-src
     INSTALL_COMMAND ""
     BUILD_COMMAND ""
     CONFIGURE_COMMAND ""
@@ -132,13 +132,16 @@ message(STATUS "err_t: " ${GLUE_LWIP_ERR_T_DEFINITION})
 # - allow to pass some other args?
 
 #set(LWIP_VARIANTS lwip2-536 lwip2-536-feat lwip2-1460 lwip2-1460-feat lwip6-536-feat lwip6-1460-feat)
+
+set(LIB_INSTALL_DIR ${CMAKE_SOURCE_DIR}/output CACHE INTERNAL "Library installation directory")
+
 foreach(GLUE_VARIANT_NAME lwip2-536 lwip2-536-feat lwip2-1460 lwip2-1460-feat lwip6-536-feat lwip6-1460-feat)
 
     message(STATUS "Preparing ${GLUE_VARIANT_NAME}")
     ExternalProject_Add(${GLUE_VARIANT_NAME}
         DOWNLOAD_COMMAND ""
         SOURCE_DIR ${CMAKE_SOURCE_DIR}/cmake/${GLUE_VARIANT_NAME}
-        INSTALL_DIR ${CMAKE_SOURCE_DIR}/output
+        INSTALL_DIR ${LIB_INSTALL_DIR}
         CMAKE_ARGS
             -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
             -DGLUE_VARIANT_NAME=${GLUE_VARIANT_NAME}
