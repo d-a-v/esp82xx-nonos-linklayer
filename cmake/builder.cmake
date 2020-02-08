@@ -1,22 +1,12 @@
 cmake_minimum_required(VERSION 3.9)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+# --- we are expected to be included from variant CMakeLists.txt
 set(CMAKE_C_STANDARD 99)
-
-message(STATUS "toolchain: " ${CMAKE_TOOLCHAIN_FILE})
-message(STATUS "programpath: " ${CMAKE_PROGRAM_PATH})
-
-# --- to always regen sources when running cmake:
-#   message(STATUS "Checkout ${LWIP_TAG}")
-#   execute_process(
-#       COMMAND ${LWIP_CLEAN_COMMAND}
-#   )
-#   execute_process(
-#       COMMAND git -C ${LWIP_DIR} checkout ${LWIP_TAG}
-#   )
-
-
 set(GLUE_C_FLAGS TCP_MSS=${TCP_MSS} LWIP_IPV6=${LWIP_IPV6} LWIP_FEATURES=${LWIP_FEATURES})
+
+# --- lwip2 src/Filelists.cmake expects these to be provided
+# --- following creates `add_library(lwipcore ...)` and `add_library(lwipallapps)`
+# --- we only need mdns and sntp on top of the core configuration
 
 # TODO: glue-lwip/lwip-err-t.h defines this!
 #       -DLWIP_NO_STDINT_H=1
@@ -44,6 +34,12 @@ set(LWIP_COMPILER_FLAGS
 )
 
 include(${LWIP_DIR}/src/Filelists.cmake)
+
+target_sources(lwipcore
+    PRIVATE
+    ${lwipsntp_SRCS}
+    ${lwipmdns_SRCS}
+)
 
 # --- all the source code from the glue-lwip/...
 # --- TODO: arduino target does not need millis() stub
