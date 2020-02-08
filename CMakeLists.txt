@@ -13,7 +13,6 @@ project(lwip-glue-builder VERSION 1 DESCRIPTION "lwip-glue-builder" LANGUAGES NO
 # --- TODO: "describe" arduino/esp8266 as toolchain?
 set(LWIP_DIR "${CMAKE_SOURCE_DIR}/lwip2-src")
 set(LWIP_TAG "STABLE-2_1_2_RELEASE")
-#set(LWIP_VARIANTS liblwip2-1460 liblwip2-1460-feat liblwip2-536 liblwip2-536-feat liblwip6-1460-feat liblwip6-536-feat)
 
 # --- adjust relative paths to absolute
 get_filename_component(ARDUINO_DIR ${ARDUINO_DIR} REALPATH BASE_DIR "${CMAKE_SOURCE_DIR}")
@@ -133,7 +132,8 @@ message(STATUS "err_t: " ${GLUE_LWIP_ERR_T_DEFINITION})
 
 include(ExternalProject)
 
-foreach(GLUE_VARIANT_NAME liblwip2-1460 liblwip2-536)
+#set(LWIP_VARIANTS lwip2-536 lwip2-536-feat lwip2-1460 lwip2-1460-feat lwip6-536-feat lwip6-1460-feat)
+foreach(GLUE_VARIANT_NAME lwip2-536 lwip2-536-feat lwip2-1460 lwip2-1460-feat lwip6-536-feat lwip6-1460-feat)
 
     message(STATUS "Preparing ${GLUE_VARIANT_NAME}")
     ExternalProject_Add(${GLUE_VARIANT_NAME}
