@@ -130,6 +130,8 @@ message(STATUS "err_t: " ${GLUE_LWIP_ERR_T_DEFINITION})
 # TODO:
 # - INSTALL_DIR should be provided by user? small install() hack in cmake/builder.cmake puts it directly there, without lib/ directory
 # - allow to pass some other args?
+# - add_directory? lwip filelists could not be included, since we hit name collision when creating lwipcore target multiple times
+#   source lists would repeat current Makefile, probably skipping polarssl bits and directly including sntp & mdns sources
 
 #set(LWIP_VARIANTS lwip2-536 lwip2-536-feat lwip2-1460 lwip2-1460-feat lwip6-536-feat lwip6-1460-feat)
 
