@@ -4,13 +4,9 @@ cmake_minimum_required(VERSION 3.9)
 set(CMAKE_C_STANDARD 99)
 set(GLUE_C_FLAGS TCP_MSS=${TCP_MSS} LWIP_IPV6=${LWIP_IPV6} LWIP_FEATURES=${LWIP_FEATURES})
 
-# --- lwip2 src/Filelists.cmake expects these to be provided
-# --- following creates `add_library(lwipcore ...)` and `add_library(lwipallapps)`
-# --- we only need mdns and sntp on top of the core configuration
-
-# TODO: glue-lwip/lwip-err-t.h defines this!
-#       -DLWIP_NO_STDINT_H=1
-#       Should probably be here instead
+# TODO: Instead of glue-lwip/lwip-err-t.h having:
+#       #define LWIP_NO_STDINT_H 1
+#       Just add it here
 set (GLUE_DEFINITIONS
     -DARDUINO
     -D__ets__
@@ -19,6 +15,7 @@ set (GLUE_DEFINITIONS
     -DUSE_OPTIMIZE_PRINTF
 )
 
+# --- lwip2 src/Filelists.cmake expects these to be provided
 set (LWIP_DEFINITIONS
     ${GLUE_DEFINITIONS}
     -DLWIP_BUILD
@@ -37,6 +34,8 @@ set(LWIP_COMPILER_FLAGS
     -g
 )
 
+# --- following creates `add_library(lwipcore ...)` and `add_library(lwipallapps)`
+# --- we only need mdns and sntp on top of the core configuration
 include(${LWIP_DIR}/src/Filelists.cmake)
 
 target_sources(lwipcore
@@ -45,9 +44,8 @@ target_sources(lwipcore
     ${lwipmdns_SRCS}
 )
 
-# --- all the source code from the glue-lwip/...
-# --- TODO: arduino target does not need millis() stub
-add_library(${GLUE_VARIANT_NAME}-glue STATIC
+# Main part that is supposed to talk to the lwip2
+add_library(glue STATIC
     ${GLUE_DIR}/glue-lwip/lwip-git.c
     ${GLUE_DIR}/glue-lwip/esp-dhcpserver.c
     ${GLUE_DIR}/glue-lwip/esp-ping.c
@@ -57,28 +55,37 @@ add_library(${GLUE_VARIANT_NAME}-glue STATIC
     ${GLUE_DIR}/glue-lwip/espconn_udp.c
 )
 
-add_library(${GLUE_VARIANT_NAME}-debug STATIC
+target_include_directories(glue BEFORE
+    PRIVATE
+    ${GLUE_DIR}/glue-lwip/
+    ${GLUE_DIR}/glue/
+    ${LWIP_INCLUDE_DIRS}
+)
+
+target_compile_definitions(glue PRIVATE ${GLUE_DEFINITIONS})
+target_compile_definitions(glue PRIVATE ${GLUE_C_FLAGS})
+
+# Debug utils
+add_library(glue-debug STATIC
     ${GLUE_DIR}/glue/doprint.c
     ${GLUE_DIR}/glue/uprint.c
 )
 
-add_library(${GLUE_VARIANT_NAME}-esp STATIC
+target_include_directories(glue-debug BEFORE
+    PRIVATE
+    ${GLUE_DIR}/glue-lwip/
+    ${GLUE_DIR}/glue/
+    ${LWIP_INCLUDE_DIRS}
+)
+target_compile_definitions(glue-debug PRIVATE ${GLUE_DEFINITIONS})
+target_compile_definitions(glue-debug PRIVATE ${GLUE_C_FLAGS})
+
+# Parts of lwip that are called from SDK side. Re-maps them to lwip2
+add_library(glue-esp STATIC
     ${GLUE_DIR}/glue-esp/lwip-esp.c
 )
 
-target_include_directories(${GLUE_VARIANT_NAME}-glue BEFORE
-    PRIVATE
-    ${GLUE_DIR}/glue-lwip/
-    ${GLUE_DIR}/glue/
-    ${LWIP_INCLUDE_DIRS}
-)
-target_include_directories(${GLUE_VARIANT_NAME}-debug BEFORE
-    PRIVATE
-    ${GLUE_DIR}/glue-lwip/
-    ${GLUE_DIR}/glue/
-    ${LWIP_INCLUDE_DIRS}
-)
-target_include_directories(${GLUE_VARIANT_NAME}-esp BEFORE
+target_include_directories(glue-esp BEFORE
     PRIVATE
     ${ARDUINO_DIR}/tools/sdk/lwip/include
     ${GLUE_DIR}/glue-lwip/
@@ -86,32 +93,35 @@ target_include_directories(${GLUE_VARIANT_NAME}-esp BEFORE
     ${LWIP_INCLUDE_DIRS}
 )
 
-if($(GLUE_TARGET) EQUAL OPENSDK)
-    target_sources(${GLUE_VARIANT_NAME}-glue
-        PRIVATE
-        ${GLUE_DIR}/glue-lwip/esp-time.c
-        ${GLUE_DIR}/glue-lwip/esp-millis.c
-    )
-endif()
+target_compile_definitions(glue-esp PRIVATE ${GLUE_DEFINITIONS})
+target_compile_definitions(glue-esp PRIVATE ${GLUE_C_FLAGS})
 
-target_compile_definitions(${GLUE_VARIANT_NAME}-glue PRIVATE ${GLUE_DEFINITIONS})
-target_compile_definitions(${GLUE_VARIANT_NAME}-glue PRIVATE ${GLUE_C_FLAGS})
-
-target_compile_definitions(${GLUE_VARIANT_NAME}-debug PRIVATE ${GLUE_DEFINITIONS})
-target_compile_definitions(${GLUE_VARIANT_NAME}-debug PRIVATE ${GLUE_C_FLAGS})
-
-target_compile_definitions(${GLUE_VARIANT_NAME}-esp PRIVATE ${GLUE_DEFINITIONS})
-target_compile_definitions(${GLUE_VARIANT_NAME}-esp PRIVATE ${GLUE_C_FLAGS})
-
+# TODO: ???
 target_compile_definitions(lwipcore PRIVATE ${GLUE_C_FLAGS})
 
-target_link_libraries(${GLUE_VARIANT_NAME}-glue PUBLIC lwipcore ${GLUE_VARIANT_NAME}-debug ${GLUE_VARIANT_NAME}-esp)
+# --- finally, add a dummy link target so that we build all of the libraries
+target_link_libraries(glue PUBLIC lwipcore glue-debug glue-esp)
 
+# --- then, combine .o from them in a single archive
 add_library(${GLUE_VARIANT_NAME} STATIC
-    $<TARGET_OBJECTS:${GLUE_VARIANT_NAME}-glue>
-    $<TARGET_OBJECTS:${GLUE_VARIANT_NAME}-esp>
-    $<TARGET_OBJECTS:${GLUE_VARIANT_NAME}-debug>
+    $<TARGET_OBJECTS:glue>
+    $<TARGET_OBJECTS:glue-esp>
+    $<TARGET_OBJECTS:glue-debug>
     $<TARGET_OBJECTS:lwipcore>
 )
 
-install(TARGETS ${GLUE_VARIANT_NAME} ARCHIVE DESTINATION ".")
+# TODO: default DESTINATION is `lib/`, which is then prefixed with {CMAKE_INSTALL_PREFIX}
+#       empty string results in the default `lib/`
+
+# TODO: this will install to just prefix, but the actual path will be with a dot:
+# install(TARGETS ${GLUE_VARIANT_NAME} ARCHIVE DESTINATION ".")
+#
+# For example:
+# $ make lwip1460
+# ... building ...
+# [100%] Built target lwip2-1460
+# Install the project...
+# -- Install configuration: ""
+# -- Installing: /home/builder/esp82xx-nonos-linklayer/output/./liblwip2-1460.a
+
+install(TARGETS ${GLUE_VARIANT_NAME} ARCHIVE)
