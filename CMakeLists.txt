@@ -139,6 +139,7 @@ foreach(GLUE_VARIANT_NAME lwip2-536 lwip2-536-feat lwip2-1460 lwip2-1460-feat lw
 
     message(STATUS "Preparing ${GLUE_VARIANT_NAME}")
     ExternalProject_Add(${GLUE_VARIANT_NAME}
+        BUILD_ALWAYS ON
         DOWNLOAD_COMMAND ""
         SOURCE_DIR ${CMAKE_SOURCE_DIR}/cmake/${GLUE_VARIANT_NAME}
         INSTALL_DIR ${LIB_INSTALL_DIR}
