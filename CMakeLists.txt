@@ -115,22 +115,25 @@ message(STATUS "typedefs: " ${GLUE_LWIP_TYPEDEF_STRINGS})
 message(STATUS "err_t: " ${GLUE_LWIP_ERR_T_DEFINITION})
 
 # --- our variants setup.
-# - cmake/<GLUE_VARIANT_NAME> must exist
-# - it should follow this template:
+# - directory cmake/<GLUE_VARIANT_NAME> must exist
+# - it should follow this template, where set(...) are -D... values
 #
 # cmake_minimum_required(VERSION 3.9)
-# project(lwip2-1460 LANGUAGES C)
+# project(some-arbitrary-name LANGUAGES C)
 #
-# set(TCP_MSS 1460)
-# set(LWIP_IPV6 0)
-# set(LWIP_FEATURES 0)
+# set(TCP_MSS ...)
+# set(LWIP_IPV6 ...)
+# set(LWIP_FEATURES ...)
 #
 # include(../builder.cmake)
+#
+
+# LIB_INSTALL_DIR=... is a customizable prefix
+# when build is done, resulting library .a will be copied to ${LIB_INSTALL_DIR}/lib/lib${GLUE_VARIANT_NAME}.a
 
 # TODO:
-# - INSTALL_DIR should be provided by user? small install() hack in cmake/builder.cmake puts it directly there, without lib/ directory
 # - allow to pass some other args?
-# - add_directory? lwip filelists could not be included, since we hit name collision when creating lwipcore target multiple times
+# - add_directory? lwip filelists could not be included, since we hit name collision when creating lwipcore and glue targets multiple times
 #   source lists would repeat current Makefile, probably skipping polarssl bits and directly including sntp & mdns sources
 
 #set(LWIP_VARIANTS lwip2-536 lwip2-536-feat lwip2-1460 lwip2-1460-feat lwip6-536-feat lwip6-1460-feat)
