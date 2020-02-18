@@ -1,12 +1,3 @@
-# Draft of cmake integration. For now, only supports Arduino as target
-# To run:
-# $ mkdir build
-# $ cd build/
-# $ cmake ../ -DESP8266_ARDUINO_CORE_DIR=<PATH_TO_THE_ARDUINO_CORE_ROOT> -DESP8266_TOOLCHAIN_PATH=<PATH_TO_TOOLCHAIN_BIN_DIRECTORY>
-# $ cmake --build .
-# or
-# $ make
-
 cmake_minimum_required(VERSION 3.9)
 project(lwip-glue-builder VERSION 1 DESCRIPTION "lwip-glue-builder" LANGUAGES NONE)
 
@@ -19,13 +10,15 @@ set(LWIP_TAG "STABLE-2_1_2_RELEASE")
 
 set(LWIP_DIR "${CMAKE_SOURCE_DIR}/lwip2-src")
 
+set(ESP8266_ARDUINO_CORE_DIR ${CMAKE_SOURCE_DIR}/../.. CACHE INTERNAL "Arduino Core default path")
+set(ESP8266_TOOLCHAIN_PATH ${ESP8266_ARDUINO_CORE_DIR}/tools/xtensa-lx106-elf/bin CACHE INTERNAL "Toolchain default path")
+
 get_filename_component(ESP8266_ARDUINO_CORE_DIR ${ESP8266_ARDUINO_CORE_DIR} REALPATH BASE_DIR "${CMAKE_SOURCE_DIR}")
 get_filename_component(LWIP_DIR ${LWIP_DIR} REALPATH BASE_DIR "${CMAKE_SOURCE_DIR}")
 
 file(TO_NATIVE_PATH ${LWIP_DIR} LWIP_DIR_NATIVE)
 file(TO_NATIVE_PATH ${ESP8266_ARDUINO_CORE_DIR} ESP8266_ARDUINO_CORE_DIR_NATIVE)
 
-set(ESP8266_TOOLCHAIN_PATH ${ESP8266_ARDUINO_CORE_DIR}/tools/xtensa-lx106-elf/bin CACHE INTERNAL "Toolchain default path")
 if (NOT EXISTS ${ESP8266_TOOLCHAIN_PATH})
     message(SEND_ERROR ${ESP8266_TOOLCHAIN_PATH})
     message(FATAL_ERROR "Toolchain directory does not exist")
