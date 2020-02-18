@@ -87,7 +87,8 @@ set(LWIP_ARCH_CC_H tools/sdk/lwip/include/arch/cc.h)
 get_filename_component(LWIP_ARCH_CC_H ${LWIP_ARCH_CC_H} REALPATH BASE_DIR "${ESP8266_ARDUINO_CORE_DIR}")
 file(TO_NATIVE_PATH ${LWIP_ARCH_CC_H} LWIP_ARCH_CC_H)
 
-if (WIN32)
+find_program(PROG_FINDSTR findstr)
+if (PROG_FINDSTR)
     set(CMD_GREP_TYPEDEF findstr typedef ${LWIP_ARCH_CC_H})
     set(CMD_GREP_ERR_T findstr LWIP_ERR_T ${LWIP_ARCH_CC_H})
 else()
@@ -105,6 +106,15 @@ execute_process(
     WORKING_DIRECTORY "${ESP8266_ARDUINO_CORE_DIR}"
     OUTPUT_VARIABLE GLUE_LWIP_ERR_T_DEFINITION
 )
+
+if (NOT GLUE_LWIP_TYPEDEF_STRINGS)
+    message(FATAL_ERROR "No typedef strings found")
+endif()
+
+if (NOT GLUE_LWIP_ERR_T_DEFINITION)
+    message(FATAL_ERROR "No LWIP_ERR_T string found")
+endif()
+
 configure_file(
     "${CMAKE_SOURCE_DIR}/glue-lwip/lwip-err-t.h.in"
     "${CMAKE_SOURCE_DIR}/glue-lwip/lwip-err-t.h"
