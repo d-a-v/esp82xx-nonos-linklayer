@@ -2,7 +2,7 @@
 # To run:
 # $ mkdir build
 # $ cd build/
-# $ cmake ../ -DARDUINO_DIR=<PATH_TO_THE_ARDUINO_CORE_ROOT> -DCMAKE_PROGRAM_PATH=<PATH_TO_TOOLCHAIN_BIN_DIRECTORY>
+# $ cmake ../ -DESP8266_ARDUINO_CORE_DIR=<PATH_TO_THE_ARDUINO_CORE_ROOT> -DCMAKE_PROGRAM_PATH=<PATH_TO_TOOLCHAIN_BIN_DIRECTORY>
 # $ cmake --build .
 # or
 # $ make
@@ -18,10 +18,10 @@ set(LWIP_TAG "STABLE-2_1_2_RELEASE")
 # --- adjust relative paths to absolute
 
 set(LWIP_DIR "${CMAKE_SOURCE_DIR}/lwip2-src")
-get_filename_component(ARDUINO_DIR ${ARDUINO_DIR} REALPATH BASE_DIR "${CMAKE_SOURCE_DIR}")
+get_filename_component(ESP8266_ARDUINO_CORE_DIR ${ESP8266_ARDUINO_CORE_DIR} REALPATH BASE_DIR "${CMAKE_SOURCE_DIR}")
 get_filename_component(LWIP_DIR ${LWIP_DIR} REALPATH BASE_DIR "${CMAKE_SOURCE_DIR}")
 
-message(STATUS "arduino dir: " "${ARDUINO_DIR}")
+message(STATUS "arduino dir: " "${ESP8266_ARDUINO_CORE_DIR}")
 message(STATUS "lwip dir: " "${LWIP_DIR}")
 message(STATUS "lwip tag: " "${LWIP_TAG}")
 
@@ -86,12 +86,12 @@ message(STATUS "glue desc: " ${GLUE_REPO_DESC_STR})
 
 execute_process(
     COMMAND grep -E "^typedef" tools/sdk/lwip/include/arch/cc.h
-    WORKING_DIRECTORY "${ARDUINO_DIR}"
+    WORKING_DIRECTORY "${ESP8266_ARDUINO_CORE_DIR}"
     OUTPUT_VARIABLE GLUE_LWIP_TYPEDEF_STRINGS
 )
 execute_process(
     COMMAND grep -E "LWIP_ERR_T" tools/sdk/lwip/include/arch/cc.h
-    WORKING_DIRECTORY "${ARDUINO_DIR}"
+    WORKING_DIRECTORY "${ESP8266_ARDUINO_CORE_DIR}"
     OUTPUT_VARIABLE GLUE_LWIP_ERR_T_DEFINITION
 )
 configure_file(
@@ -138,8 +138,6 @@ message(STATUS "err_t: " ${GLUE_LWIP_ERR_T_DEFINITION})
 
 #set(LWIP_VARIANTS lwip2-536 lwip2-536-feat lwip2-1460 lwip2-1460-feat lwip6-536-feat lwip6-1460-feat)
 
-set(LIB_INSTALL_DIR ${CMAKE_SOURCE_DIR}/output CACHE INTERNAL "Library installation directory")
-
 foreach(GLUE_VARIANT_NAME lwip2-536 lwip2-536-feat lwip2-1460 lwip2-1460-feat lwip6-536-feat lwip6-1460-feat)
 
     message(STATUS "Preparing ${GLUE_VARIANT_NAME}")
@@ -147,14 +145,14 @@ foreach(GLUE_VARIANT_NAME lwip2-536 lwip2-536-feat lwip2-1460 lwip2-1460-feat lw
         BUILD_ALWAYS ON
         DOWNLOAD_COMMAND ""
         SOURCE_DIR ${CMAKE_SOURCE_DIR}/cmake/${GLUE_VARIANT_NAME}
-        INSTALL_DIR ${LIB_INSTALL_DIR}
+        INSTALL_DIR ${ESP8266_ARDUINO_CORE_DIR}/tools/sdk
         CMAKE_ARGS
             -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
             -DGLUE_VARIANT_NAME=${GLUE_VARIANT_NAME}
             -DGLUE_DIR=${CMAKE_SOURCE_DIR}
             -DCMAKE_PROGRAM_PATH=${CMAKE_PROGRAM_PATH}
             -DCMAKE_TOOLCHAIN_FILE=${CMAKE_SOURCE_DIR}/cmake/toolchain.cmake
-            -DARDUINO_DIR=${ARDUINO_DIR}
+            -DESP8266_ARDUINO_CORE_DIR=${ESP8266_ARDUINO_CORE_DIR}
             -DLWIP_DIR=${LWIP_DIR}
     )
     add_dependencies(${GLUE_VARIANT_NAME} lwip2-src)

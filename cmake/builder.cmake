@@ -21,9 +21,9 @@ set (LWIP_DEFINITIONS
     -DLWIP_BUILD
 )
 set (LWIP_INCLUDE_DIRS
-    "${ARDUINO_DIR}/tools/sdk/include"
-    "${ARDUINO_DIR}/tools/sdk/libc/xtensa-lx106-elf/include"
-    "${ARDUINO_DIR}/cores/esp8266"
+    "${ESP8266_ARDUINO_CORE_DIR}/tools/sdk/include"
+    "${ESP8266_ARDUINO_CORE_DIR}/tools/sdk/libc/xtensa-lx106-elf/include"
+    "${ESP8266_ARDUINO_CORE_DIR}/cores/esp8266"
     "${LWIP_DIR}/src/include"
     "${GLUE_DIR}/glue"
     "${GLUE_DIR}/glue-esp"
@@ -87,7 +87,7 @@ add_library(glue-esp STATIC
 
 target_include_directories(glue-esp BEFORE
     PRIVATE
-    ${ARDUINO_DIR}/tools/sdk/lwip/include
+    ${ESP8266_ARDUINO_CORE_DIR}/tools/sdk/lwip/include
     ${GLUE_DIR}/glue-lwip/
     ${GLUE_DIR}/glue/
     ${LWIP_INCLUDE_DIRS}
