@@ -53,7 +53,7 @@ ExternalProject_Add(lwip2-src
     INSTALL_COMMAND ""
     BUILD_COMMAND ""
     CONFIGURE_COMMAND ""
-    PATCH_COMMAND git apply -3 --whitespace=fix ${LWIP_PATCHES}
+    PATCH_COMMAND git apply -3 --recount --whitespace=fix ${LWIP_PATCHES}
 )
 
 # --- info about the build system
