@@ -163,8 +163,8 @@ foreach(GLUE_VARIANT_NAME lwip2-536 lwip2-536-feat lwip2-1460 lwip2-1460-feat lw
             -DGLUE_DIR=${CMAKE_SOURCE_DIR}
             -DCMAKE_PROGRAM_PATH=${ESP8266_TOOLCHAIN_PATH}
             -DCMAKE_TOOLCHAIN_FILE=${CMAKE_SOURCE_DIR}/cmake/toolchain.cmake
-            -DESP8266_ARDUINO_CORE_DIR=${ESP8266_ARDUINO_CORE_DIR}
-            -DLWIP_DIR=${LWIP_DIR}
+            -DESP8266_ARDUINO_CORE_DIR=${ESP8266_ARDUINO_CORE_DIR_NATIVE}
+            -DLWIP_DIR=${LWIP_DIR_NATIVE}
     )
     add_dependencies(${GLUE_VARIANT_NAME} lwip2-src)
 
