@@ -10,8 +10,8 @@ set(LWIP_TAG "STABLE-2_1_2_RELEASE")
 
 set(LWIP_DIR "${CMAKE_SOURCE_DIR}/lwip2-src")
 
-set(ESP8266_ARDUINO_CORE_DIR ${CMAKE_SOURCE_DIR}/../../../../ CACHE INTERNAL "Arduino Core default path")
-set(ESP8266_TOOLCHAIN_PATH ${ESP8266_ARDUINO_CORE_DIR}/tools/xtensa-lx106-elf/bin CACHE INTERNAL "Toolchain default path")
+set(ESP8266_ARDUINO_CORE_DIR ${CMAKE_SOURCE_DIR}/../../../../ CACHE FILEPATH "Arduino Core default path")
+set(ESP8266_TOOLCHAIN_PATH ${ESP8266_ARDUINO_CORE_DIR}/tools/xtensa-lx106-elf/bin CACHE FILEPATH "Toolchain default path")
 
 get_filename_component(ESP8266_ARDUINO_CORE_DIR ${ESP8266_ARDUINO_CORE_DIR} REALPATH BASE_DIR "${CMAKE_SOURCE_DIR}")
 get_filename_component(LWIP_DIR ${LWIP_DIR} REALPATH BASE_DIR "${CMAKE_SOURCE_DIR}")
