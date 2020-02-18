@@ -2,7 +2,7 @@
 # To run:
 # $ mkdir build
 # $ cd build/
-# $ cmake ../ -DESP8266_ARDUINO_CORE_DIR=<PATH_TO_THE_ARDUINO_CORE_ROOT> -DCMAKE_PROGRAM_PATH=<PATH_TO_TOOLCHAIN_BIN_DIRECTORY>
+# $ cmake ../ -DESP8266_ARDUINO_CORE_DIR=<PATH_TO_THE_ARDUINO_CORE_ROOT> -DESP8266_TOOLCHAIN_PATH=<PATH_TO_TOOLCHAIN_BIN_DIRECTORY>
 # $ cmake --build .
 # or
 # $ make
@@ -18,23 +18,31 @@ set(LWIP_TAG "STABLE-2_1_2_RELEASE")
 # --- adjust relative paths to absolute
 
 set(LWIP_DIR "${CMAKE_SOURCE_DIR}/lwip2-src")
+
 get_filename_component(ESP8266_ARDUINO_CORE_DIR ${ESP8266_ARDUINO_CORE_DIR} REALPATH BASE_DIR "${CMAKE_SOURCE_DIR}")
 get_filename_component(LWIP_DIR ${LWIP_DIR} REALPATH BASE_DIR "${CMAKE_SOURCE_DIR}")
 
-message(STATUS "arduino dir: " "${ESP8266_ARDUINO_CORE_DIR}")
+file(TO_NATIVE_PATH ${LWIP_DIR} LWIP_DIR_NATIVE)
+file(TO_NATIVE_PATH ${ESP8266_ARDUINO_CORE_DIR} ESP8266_ARDUINO_CORE_DIR_NATIVE)
+
+set(ESP8266_TOOLCHAIN_PATH ${ESP8266_ARDUINO_CORE_DIR}/tools/xtensa-lx106-elf/bin CACHE INTERNAL "Toolchain default path")
+if (NOT EXISTS ${ESP8266_TOOLCHAIN_PATH})
+    message(SEND_ERROR ${ESP8266_TOOLCHAIN_PATH})
+    message(FATAL_ERROR "Toolchain directory does not exist")
+endif()
+
+message(STATUS "toolchain: " ${ESP8266_TOOLCHAIN_PATH})
+message(STATUS "core dir: " "${ESP8266_ARDUINO_CORE_DIR}")
 message(STATUS "lwip dir: " "${LWIP_DIR}")
 message(STATUS "lwip tag: " "${LWIP_TAG}")
-
-# --- patch / undo patch from our special directory
-
-set(LWIP_PATCH_COMMAND ${CMAKE_SOURCE_DIR}/scripts/patch-lwip2-src ${CMAKE_SOURCE_DIR}/patches ${LWIP_DIR})
-set(LWIP_CLEAN_COMMAND ${CMAKE_SOURCE_DIR}/scripts/clean-lwip2-src ${LWIP_DIR})
 
 # --- fetch lwip when needed
 # --- we don't keep it as submodule to allow build tools that recursively check-out main repo avoid always downloading lwip2-src
 # --- checkout and everything else is handled by patch & clean targets
 
 include(ExternalProject)
+
+file(GLOB LWIP_PATCHES ${CMAKE_SOURCE_DIR}/patches/*.patch)
 
 ExternalProject_Add(lwip2-src
     GIT_REPOSITORY https://git.savannah.nongnu.org/git/lwip.git
@@ -45,29 +53,20 @@ ExternalProject_Add(lwip2-src
     INSTALL_COMMAND ""
     BUILD_COMMAND ""
     CONFIGURE_COMMAND ""
-    PATCH_COMMAND ${LWIP_PATCH_COMMAND}
-)
-
-# --- following creates two makefile targets, allowing us to manually patch or clean lwip2-src
-
-add_custom_target(patch-lwip-sources
-    COMMAND ${LWIP_PATCH_COMMAND}
-)
-add_custom_target(clean-lwip-sources
-    COMMAND ${LWIP_CLEAN_COMMAND}
+    PATCH_COMMAND git apply -3 --whitespace=fix ${LWIP_PATCHES}
 )
 
 # --- info about the build system
 # --- LWIP is most likely a custom tag name, glue should be tag + N-commits
 
 execute_process(
-    COMMAND sh -c "git describe --tag"
+    COMMAND git describe --tag
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
     OUTPUT_VARIABLE GLUE_REPO_DESC_STR
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 execute_process(
-    COMMAND sh -c "git describe --tag"
+    COMMAND git describe --tag
     WORKING_DIRECTORY "${LWIP_DIR}"
     OUTPUT_VARIABLE LWIP_REPO_DESC_STR
     OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -84,13 +83,25 @@ message(STATUS "glue desc: " ${GLUE_REPO_DESC_STR})
 #       Can be passed to ExternalProject via -DGLUE_INCLUDE_DIR=${CMAKE_BINARY_DIR}
 # TODO: A single ${CMAKE_BINARY_DIR}/glue-generated.h?
 
+set(LWIP_ARCH_CC_H tools/sdk/lwip/include/arch/cc.h)
+get_filename_component(LWIP_ARCH_CC_H ${LWIP_ARCH_CC_H} REALPATH BASE_DIR "${ESP8266_ARDUINO_CORE_DIR}")
+file(TO_NATIVE_PATH ${LWIP_ARCH_CC_H} LWIP_ARCH_CC_H)
+
+if (WIN32)
+    set(CMD_GREP_TYPEDEF findstr typedef ${LWIP_ARCH_CC_H})
+    set(CMD_GREP_ERR_T findstr LWIP_ERR_T ${LWIP_ARCH_CC_H})
+else()
+    set(CMD_GREP_TYPEDEF grep -E "^typedef" ${LWIP_ARCH_CC_H})
+    set(CMD_GREP_ERR_T grep "LWIP_ERR_T" ${LWIP_ARCH_CC_H})
+endif()
+
 execute_process(
-    COMMAND grep -E "^typedef" tools/sdk/lwip/include/arch/cc.h
+    COMMAND ${CMD_GREP_TYPEDEF}
     WORKING_DIRECTORY "${ESP8266_ARDUINO_CORE_DIR}"
     OUTPUT_VARIABLE GLUE_LWIP_TYPEDEF_STRINGS
 )
 execute_process(
-    COMMAND grep -E "LWIP_ERR_T" tools/sdk/lwip/include/arch/cc.h
+    COMMAND ${CMD_GREP_ERR_T}
     WORKING_DIRECTORY "${ESP8266_ARDUINO_CORE_DIR}"
     OUTPUT_VARIABLE GLUE_LWIP_ERR_T_DEFINITION
 )
@@ -150,7 +161,7 @@ foreach(GLUE_VARIANT_NAME lwip2-536 lwip2-536-feat lwip2-1460 lwip2-1460-feat lw
             -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
             -DGLUE_VARIANT_NAME=${GLUE_VARIANT_NAME}
             -DGLUE_DIR=${CMAKE_SOURCE_DIR}
-            -DCMAKE_PROGRAM_PATH=${CMAKE_PROGRAM_PATH}
+            -DCMAKE_PROGRAM_PATH=${ESP8266_TOOLCHAIN_PATH}
             -DCMAKE_TOOLCHAIN_FILE=${CMAKE_SOURCE_DIR}/cmake/toolchain.cmake
             -DESP8266_ARDUINO_CORE_DIR=${ESP8266_ARDUINO_CORE_DIR}
             -DLWIP_DIR=${LWIP_DIR}
