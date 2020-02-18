@@ -31,7 +31,12 @@ If you are using Windows and can't (or don't want to) use [WSL](https://docs.mic
 
 - Download the Visual Studio Installer at https://visualstudio.microsoft.com/
 - In addition to the core package, install C++ dev tools (~7GB in size total)
-- Run Native Tools Command Prompt:
+- Run in "Native Tools Command Prompt for Visual Studio":
+```
+> cmake -G "Ninja" ../
+> cmake --build .
+```
+Or, using NMake generator:
 ```
 > cmake -G "NMake Makefiles" ../
 > cmake --build .
