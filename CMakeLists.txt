@@ -59,6 +59,8 @@ ExternalProject_Add(glue-package
         -DESP8266_ARDUINO_CORE_DIR=${ESP8266_ARDUINO_CORE_DIR}
 )
 
+add_dependencies(glue-package lwip2-src)
+
 # --- handle
 # include "lwip-git-hash.h"
 # include "lwip-err-t.h"
