@@ -27,7 +27,7 @@ set(TCP_MSS $mss)
 set(LWIP_IPV6 $v6)
 set(LWIP_FEATURES $feat)
 
-include(lwip-builder.cmake)
+include(lwip-builder)
 EOF
 
 variants+="$variant "
