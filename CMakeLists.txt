@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.9)
-project(lwip-glue-builder VERSION 1 DESCRIPTION "lwip-glue-builder" LANGUAGES NONE)
+project(lwip-glue-builder VERSION 20200212 DESCRIPTION "lwip-glue-builder" LANGUAGES NONE)
+
+include(ExternalProject)
 
 # --- set this to update the tracked repo
 # --- TODO: patch command needs to be aware of the change, somehow?
@@ -33,8 +35,6 @@ message(STATUS "lwip tag: " "${LWIP_TAG}")
 # --- we don't keep it as submodule to allow build tools that recursively check-out main repo avoid always downloading lwip2-src
 # --- checkout and everything else is handled by patch & clean targets
 
-include(ExternalProject)
-
 file(GLOB LWIP_PATCHES ${CMAKE_SOURCE_DIR}/patches/*.patch)
 
 ExternalProject_Add(lwip2-src
@@ -49,23 +49,15 @@ ExternalProject_Add(lwip2-src
     PATCH_COMMAND git apply -3 --recount --whitespace=fix ${LWIP_PATCHES}
 )
 
-# --- info about the build system
-# --- LWIP is most likely a custom tag name, glue should be tag + N-commits
-
-execute_process(
-    COMMAND git describe --tag
-    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-    OUTPUT_VARIABLE GLUE_REPO_DESC_STR
-    OUTPUT_STRIP_TRAILING_WHITESPACE
+ExternalProject_Add(glue-package
+    BUILD_ALWAYS TRUE
+    DOWNLOAD_COMMAND ""
+    SOURCE_DIR ${CMAKE_SOURCE_DIR}/cmake/package
+    CMAKE_ARGS
+        -DLWIP_DIR=${LWIP_DIR}
+        -DGLUE_DIR=${CMAKE_SOURCE_DIR}
+        -DESP8266_ARDUINO_CORE_DIR=${ESP8266_ARDUINO_CORE_DIR}
 )
-execute_process(
-    COMMAND git describe --tag
-    WORKING_DIRECTORY "${LWIP_DIR}"
-    OUTPUT_VARIABLE LWIP_REPO_DESC_STR
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-
-message(STATUS "glue desc: " ${GLUE_REPO_DESC_STR})
 
 # --- handle
 # include "lwip-git-hash.h"
@@ -75,55 +67,6 @@ message(STATUS "glue desc: " ${GLUE_REPO_DESC_STR})
 # TODO: Put files to ${CMAKE_BINARY_DIR}? No need to pollute source dir
 #       Can be passed to ExternalProject via -DGLUE_INCLUDE_DIR=${CMAKE_BINARY_DIR}
 # TODO: A single ${CMAKE_BINARY_DIR}/glue-generated.h?
-
-set(LWIP_ARCH_CC_H tools/sdk/lwip/include/arch/cc.h)
-get_filename_component(LWIP_ARCH_CC_H ${LWIP_ARCH_CC_H} REALPATH BASE_DIR "${ESP8266_ARDUINO_CORE_DIR}")
-file(TO_NATIVE_PATH ${LWIP_ARCH_CC_H} LWIP_ARCH_CC_H)
-
-if (CMAKE_HOST_WIN32)
-    set(CMD_GREP_TYPEDEF findstr typedef ${LWIP_ARCH_CC_H})
-    set(CMD_GREP_ERR_T findstr LWIP_ERR_T ${LWIP_ARCH_CC_H})
-else()
-    set(CMD_GREP_TYPEDEF grep -E "^typedef" ${LWIP_ARCH_CC_H})
-    set(CMD_GREP_ERR_T grep "LWIP_ERR_T" ${LWIP_ARCH_CC_H})
-endif()
-
-execute_process(
-    COMMAND ${CMD_GREP_TYPEDEF}
-    WORKING_DIRECTORY "${ESP8266_ARDUINO_CORE_DIR}"
-    OUTPUT_VARIABLE GLUE_LWIP_TYPEDEF_STRINGS
-)
-execute_process(
-    COMMAND ${CMD_GREP_ERR_T}
-    WORKING_DIRECTORY "${ESP8266_ARDUINO_CORE_DIR}"
-    OUTPUT_VARIABLE GLUE_LWIP_ERR_T_DEFINITION
-)
-
-if (NOT GLUE_LWIP_TYPEDEF_STRINGS)
-    message(FATAL_ERROR "No typedef strings found")
-endif()
-
-if (NOT GLUE_LWIP_ERR_T_DEFINITION)
-    message(FATAL_ERROR "No LWIP_ERR_T string found")
-endif()
-
-configure_file(
-    "${CMAKE_SOURCE_DIR}/glue-lwip/lwip-err-t.h.in"
-    "${CMAKE_SOURCE_DIR}/glue-lwip/lwip-err-t.h"
-    @ONLY
-)
-
-configure_file(
-    "${CMAKE_SOURCE_DIR}/glue-lwip/lwip-git-hash.h.in"
-    "${CMAKE_SOURCE_DIR}/glue-lwip/lwip-git-hash.h"
-    @ONLY
-)
-
-list(APPEND SOURCES "${CMAKE_SOURCE_DIR}/glue-lwip/lwip-err-t.h")
-list(APPEND SOURCES "${CMAKE_SOURCE_DIR}/glue-lwip/lwip-git-hash.h")
-
-message(STATUS "typedefs: " ${GLUE_LWIP_TYPEDEF_STRINGS})
-message(STATUS "err_t: " ${GLUE_LWIP_ERR_T_DEFINITION})
 
 # --- our variants setup.
 # - directory cmake/<GLUE_VARIANT_NAME> must exist
@@ -154,7 +97,7 @@ foreach(GLUE_VARIANT_DIR ${GLUE_VARIANT_DIRS})
     message(STATUS "Preparing ${GLUE_VARIANT_NAME}")
 
     ExternalProject_Add(${GLUE_VARIANT_NAME}
-        BUILD_ALWAYS ON
+        BUILD_ALWAYS TRUE
         DOWNLOAD_COMMAND ""
         SOURCE_DIR ${GLUE_VARIANT_DIR}
         INSTALL_DIR ${ESP8266_ARDUINO_CORE_DIR}/tools/sdk
@@ -168,41 +111,6 @@ foreach(GLUE_VARIANT_DIR ${GLUE_VARIANT_DIRS})
             -DESP8266_ARDUINO_CORE_DIR=${ESP8266_ARDUINO_CORE_DIR}
             -DLWIP_DIR=${LWIP_DIR}
     )
-    add_dependencies(${GLUE_VARIANT_NAME} lwip2-src)
+    add_dependencies(${GLUE_VARIANT_NAME} lwip2-src glue-package)
 
 endforeach()
-
-# - We need to distribute current version of lwip2 & glue headers with the Core
-
-install(DIRECTORY ${LWIP_DIR}/src/include
-    DESTINATION ${ESP8266_ARDUINO_CORE_DIR}/tools/sdk/lwip2/include
-    FILES_MATCHING PATTERN "*.h"
-)
-
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/glue-lwip/arch
-    DESTINATION ${ESP8266_ARDUINO_CORE_DIR}/tools/sdk/lwip2/include/arch
-    FILES_MATCHING PATTERN "*.h"
-)
-
-install(FILES
-    ${CMAKE_SOURCE_DIR}/glue-lwip/arduino/lwipopts.h
-    ${CMAKE_SOURCE_DIR}/glue-lwip/lwip-git-hash.h
-    ${CMAKE_SOURCE_DIR}/glue-lwip/lwip-err-t.h
-    ${CMAKE_SOURCE_DIR}/glue-lwip/lwip/apps-esp/dhcpserver.h
-    ${CMAKE_SOURCE_DIR}/glue/glue.h
-    ${CMAKE_SOURCE_DIR}/glue/gluedebug.h
-    DESTINATION ${ESP8266_ARDUINO_CORE_DIR}/tools/sdk/lwip2/include
-)
-
-# - Adding notice about the origin of files in ${ESP8266_ARDUINO_CORE_DIR}/tools/sdk/lwip2/include
-
-file(GENERATE
-    OUTPUT ${CMAKE_BINARY_DIR}/README.md
-    CONTENT "Warning! This directory will be re/over/written from lwip2 builder upon lwip2 rebuild. Current version was built with lwip:${LWIP_REPO_DESC_STR} glue:${GLUE_REPO_DESC_STR}"
-)
-
-install(FILES
-    ${CMAKE_BINARY_DIR}/README.md
-    DESTINATION ${ESP8266_ARDUINO_CORE_DIR}/tools/sdk/lwip2/include
-)
-
