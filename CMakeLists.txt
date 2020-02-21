@@ -113,8 +113,6 @@ configure_file(
     @ONLY
 )
 
-# --- TODO: perhaps, we can even use a target_compile_definitions(lwipcore, ...) in externalproject
-
 configure_file(
     "${CMAKE_SOURCE_DIR}/glue-lwip/lwip-git-hash.h.in"
     "${CMAKE_SOURCE_DIR}/glue-lwip/lwip-git-hash.h"
@@ -138,22 +136,23 @@ message(STATUS "err_t: " ${GLUE_LWIP_ERR_T_DEFINITION})
 # set(LWIP_IPV6 ...)
 # set(LWIP_FEATURES ...)
 #
-# include(../builder.cmake)
+# include(lwip-builder.cmake)
 #
-
-# LIB_INSTALL_DIR=... is a customizable prefix
-# when build is done, resulting library .a will be copied to ${LIB_INSTALL_DIR}/lib/lib${GLUE_VARIANT_NAME}.a
 
 # TODO:
 # - allow to pass some other args?
 # - add_directory? lwip filelists could not be included, since we hit name collision when creating lwipcore and glue targets multiple times
 #   source lists would repeat current Makefile, probably skipping polarssl bits and directly including sntp & mdns sources
 
-#set(LWIP_VARIANTS lwip2-536 lwip2-536-feat lwip2-1460 lwip2-1460-feat lwip6-536-feat lwip6-1460-feat)
+# - ExternalProject will install lib<variant>.a to the ESP8266_ARDUINO_CORE_DIR
 
-foreach(GLUE_VARIANT_NAME lwip2-536 lwip2-536-feat lwip2-1460 lwip2-1460-feat lwip6-536-feat lwip6-1460-feat)
+file(GLOB GLUE_VARIANT_DIRS LIST_DIRECTORIES true ${CMAKE_SOURCE_DIR}/cmake/variants/*)
 
+foreach(GLUE_VARIANT_DIR ${GLUE_VARIANT_DIRS})
+
+    get_filename_component(GLUE_VARIANT_NAME ${GLUE_VARIANT_DIR} NAME)
     message(STATUS "Preparing ${GLUE_VARIANT_NAME}")
+
     ExternalProject_Add(${GLUE_VARIANT_NAME}
         BUILD_ALWAYS ON
         DOWNLOAD_COMMAND ""
@@ -163,6 +162,7 @@ foreach(GLUE_VARIANT_NAME lwip2-536 lwip2-536-feat lwip2-1460 lwip2-1460-feat lw
             -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
             -DGLUE_VARIANT_NAME=${GLUE_VARIANT_NAME}
             -DGLUE_DIR=${CMAKE_SOURCE_DIR}
+            -DCMAKE_INCLUDE_PATH=${CMAKE_SOURCE_DIR}/cmake
             -DCMAKE_PROGRAM_PATH=${ESP8266_TOOLCHAIN_PATH}
             -DCMAKE_TOOLCHAIN_FILE=${CMAKE_SOURCE_DIR}/cmake/toolchain.cmake
             -DESP8266_ARDUINO_CORE_DIR=${ESP8266_ARDUINO_CORE_DIR}
@@ -171,3 +171,38 @@ foreach(GLUE_VARIANT_NAME lwip2-536 lwip2-536-feat lwip2-1460 lwip2-1460-feat lw
     add_dependencies(${GLUE_VARIANT_NAME} lwip2-src)
 
 endforeach()
+
+# - We need to distribute current version of lwip2 & glue headers with the Core
+
+install(DIRECTORY ${LWIP_DIR}/src/include
+    DESTINATION ${ESP8266_ARDUINO_CORE_DIR}/tools/sdk/lwip2/include
+    FILES_MATCHING PATTERN "*.h"
+)
+
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/glue-lwip/arch
+    DESTINATION ${ESP8266_ARDUINO_CORE_DIR}/tools/sdk/lwip2/include/arch
+    FILES_MATCHING PATTERN "*.h"
+)
+
+install(FILES
+    ${CMAKE_SOURCE_DIR}/glue-lwip/arduino/lwipopts.h
+    ${CMAKE_SOURCE_DIR}/glue-lwip/lwip-git-hash.h
+    ${CMAKE_SOURCE_DIR}/glue-lwip/lwip-err-t.h
+    ${CMAKE_SOURCE_DIR}/glue-lwip/lwip/apps-esp/dhcpserver.h
+    ${CMAKE_SOURCE_DIR}/glue/glue.h
+    ${CMAKE_SOURCE_DIR}/glue/gluedebug.h
+    DESTINATION ${ESP8266_ARDUINO_CORE_DIR}/tools/sdk/lwip2/include
+)
+
+# - Adding notice about the origin of files in ${ESP8266_ARDUINO_CORE_DIR}/tools/sdk/lwip2/include
+
+file(GENERATE
+    OUTPUT ${CMAKE_BINARY_DIR}/README.md
+    CONTENT "Warning! This directory will be re/over/written from lwip2 builder upon lwip2 rebuild. Current version was built with lwip:${LWIP_REPO_DESC_STR} glue:${GLUE_REPO_DESC_STR}"
+)
+
+install(FILES
+    ${CMAKE_BINARY_DIR}/README.md
+    DESTINATION ${ESP8266_ARDUINO_CORE_DIR}/tools/sdk/lwip2/include
+)
+

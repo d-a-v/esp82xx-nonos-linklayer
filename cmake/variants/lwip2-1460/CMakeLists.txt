@@ -6,4 +6,4 @@ set(TCP_MSS 1460)
 set(LWIP_IPV6 0)
 set(LWIP_FEATURES 0)
 
-include(../builder.cmake)
+include(lwip-builder.cmake)

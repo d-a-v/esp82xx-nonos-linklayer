@@ -42,3 +42,21 @@ Or, using NMake generator:
 > cmake --build .
 ```
 
+# Maintainer notice
+
+- Directory cmake/<GLUE_VARIANT_NAME> must exist
+- <GLUE_VARIANT_NAME> must be mentioned in the CMakeLists.txt
+- It should follow this template:
+
+```cmake
+
+cmake_minimum_required(VERSION 3.9)
+project(some-arbitrary-name LANGUAGES C)
+
+set(TCP_MSS ...)
+set(LWIP_IPV6 ...)
+set(LWIP_FEATURES ...)
+
+include(lwip-builder.cmake)
+
+```
