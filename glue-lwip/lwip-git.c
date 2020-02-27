@@ -486,6 +486,9 @@ void esp2glue_netif_set_up1down0 (int netif_idx, int up1_or_down0)
 	}
 	else
 	{
+		// stop dhcp client (if started)
+		dhcp_release_and_stop(netif);
+
 		// need to do this and pass it to esp
 		// (through netif_sta_status_callback())
 		// to update users's view of state
