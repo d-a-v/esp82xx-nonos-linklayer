@@ -502,6 +502,10 @@ void esp2glue_netif_set_up1down0 (int netif_idx, int up1_or_down0)
 		if (netif_default == &netif_git[netif_idx])
 			netif_set_default(NULL);
 	}
+
+#if ARDUINO
+	netif_status_changed(netif);
+#endif
 }
 
 #define VALUE_TO_STRING(x) #x
@@ -518,3 +522,11 @@ LWIP_ERR_T lwip_unhandled_packet (struct pbuf* pbuf, struct netif* netif)
 	(void)netif;
 	return ERR_ARG;
 }
+
+#if ARDUINO
+void netif_status_changed (struct netif*) __attribute__((weak));
+void netif_status_changed (struct netif* netif)
+{
+    (void)netif;
+}
+#endif
