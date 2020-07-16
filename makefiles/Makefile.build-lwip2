@@ -52,7 +52,7 @@ $(LWIP_LIB):
 	make -f makefiles/Makefile.glue-esp BUILD=$(BUILD) V=$(V)
 	make -f makefiles/Makefile.glue target=$(target) BUILD=$(BUILD) TCP_MSS=$(TCP_MSS) LWIP_FEATURES=$(LWIP_FEATURES) LWIP_IPV6=$(LWIP_IPV6) V=$(V)
 ifeq ($(target),arduino)
-	make -C lwip2-src/src -f ../../makefiles/Makefile.lwip2 BUILD=../../$(BUILD) LWIP_LIB=../../$(LWIP_LIB) SDK=../../$(SDK) TCP_MSS=$(TCP_MSS) LWIP_FEATURES=$(LWIP_FEATURES) LWIP_IPV6=$(LWIP_IPV6) V=$(V)
+	make -C lwip2-src/src -f ../../makefiles/Makefile.lwip2 BUILD=../../$(BUILD) LWIP_LIB=../../$(LWIP_LIB) TCP_MSS=$(TCP_MSS) LWIP_FEATURES=$(LWIP_FEATURES) LWIP_IPV6=$(LWIP_IPV6) V=$(V) SDK=../../$(SDK)
 else
 	make -C lwip2-src/src -f ../../makefiles/Makefile.lwip2 BUILD=../../$(BUILD) LWIP_LIB=../../$(LWIP_LIB) TCP_MSS=$(TCP_MSS) LWIP_FEATURES=$(LWIP_FEATURES) LWIP_IPV6=$(LWIP_IPV6) V=$(V)
 endif
