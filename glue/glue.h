@@ -50,8 +50,8 @@ extern "C"
 #endif
 
 #if LWIP14GLUE
-#define __IPV4_ADDR_H__     // prevent inclusion of ipv4_addr.h meant for lwip2
-#define ipv4_addr ip_addr   // structures are identical, ipv4_addr is meaningless with lwIP-1.4
+#define __IPV4_ADDR_H__     // prevents inclusion of ipv4_addr.h meant for lwip2
+#define ipv4_addr ip_addr   // structures are identical, ipv4_addr is unknown with lwIP-1.4
 #include <lwip/ip_addr.h>   // formerly official struct ip_info, disappeared in lwIP-v2
 #endif
 
