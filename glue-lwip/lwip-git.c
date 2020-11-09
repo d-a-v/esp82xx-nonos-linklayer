@@ -542,9 +542,31 @@ LWIP_ERR_T lwip_unhandled_packet (struct pbuf* pbuf, struct netif* netif)
 }
 
 #if ARDUINO
+
 void netif_status_changed (struct netif*) __attribute__((weak));
 void netif_status_changed (struct netif* netif)
 {
     (void)netif;
 }
-#endif
+
+void lwip_hook_dhcp_parse_option(struct netif *netif, struct dhcp *dhcp, int state, struct dhcp_msg *msg,
+                                 int msg_type, int option, int option_len, struct pbuf *pbuf,
+                                 int option_value_offset) __attribute__((weak));
+
+void lwip_hook_dhcp_parse_option(struct netif *netif, struct dhcp *dhcp, int state, struct dhcp_msg *msg,
+                                 int msg_type, int option, int option_len, struct pbuf *pbuf,
+                                 int option_value_offset)
+{
+    (void)netif;
+    (void)dhcp;
+    (void)state;
+    (void)msg;
+    (void)msg_type;
+    (void)option;
+    (void)option_len;
+    (void)pbuf;
+    (void)option_value_offset;
+    uprint(DBG "unhandled dhcp option in lwip_hook_dhcp_parse_option()\n");
+}
+
+#endif // ARDUINO
