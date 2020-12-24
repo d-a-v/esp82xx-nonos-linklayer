@@ -218,7 +218,7 @@ static struct pbuf_wrapper* pbuf_wrapper_get (void)
 
 	if (!pbuf_wrapper_head)
 	{
-		struct pbuf_wrapper* p = (struct pbuf_wrapper*)os_malloc(sizeof(struct pbuf_wrapper) * PBUF_WRAPPER_BLOCK);
+		struct pbuf_wrapper* p = (struct pbuf_wrapper*)pvPortMalloc(sizeof(struct pbuf_wrapper) * PBUF_WRAPPER_BLOCK, NULL, -1);
 		if (!p)
 		{
 			lwip_xt_wsr_ps(saved_ps);
@@ -646,7 +646,7 @@ struct pbuf* pbuf_alloc (pbuf_layer layer, u16_t length, pbuf_type type)
 		
 		/* If pbuf is to be allocated in RAM, allocate memory for it. */
 		size_t alloclen = LWIP_MEM_ALIGN_SIZE(SIZEOF_STRUCT_PBUF + offset) + LWIP_MEM_ALIGN_SIZE(length);
-		struct pbuf* p = (struct pbuf*)mem_malloc(alloclen);
+		struct pbuf* p = (struct pbuf*)pvPortMalloc(alloclen, NULL, -1);
 		if (p == NULL)
 			return NULL;
 		/* Set up internal structure of the pbuf. */
@@ -665,7 +665,7 @@ struct pbuf* pbuf_alloc (pbuf_layer layer, u16_t length, pbuf_type type)
 	{
 		//unused: offset += EP_OFFSET;
 		size_t alloclen = LWIP_MEM_ALIGN_SIZE(SIZEOF_STRUCT_PBUF);
-		struct pbuf* p = (struct pbuf*)mem_malloc(alloclen);
+		struct pbuf* p = (struct pbuf*)pvPortMalloc(alloclen, NULL, -1);
 		if (p == NULL)
 			return NULL;
 		p->payload = NULL;
@@ -720,7 +720,7 @@ u8_t pbuf_free (struct pbuf *p)
 		if (p->eb)
 			system_pp_recycle_rx_pkt(p->eb);
 		// allocated by blobs for received packets
-		mem_free(p);
+		vPortFree(p, NULL, -1);
 		return 1;
 	}
 
