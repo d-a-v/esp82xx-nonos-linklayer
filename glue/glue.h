@@ -124,12 +124,14 @@ err_glue_t	glue2esp_linkoutput		(int netif_idx, void* ref2save, void* data, size
 // gcc-4.x:    __PRI32(x) is __STRINGIFY(l##x)
 // gcc-10.2.0: __PRI32(x) is __INT32 __STRINGIFY(x)
 #include <inttypes.h>
-#if !defined(__INT32)
-#if __have_long32
-#define __INT32 l
-#else
-#define __INT32
+#if !defined(__INT8)
+#define __INT8
 #endif
-#endif // !defined(__INT32)
+#if !defined(__INT16)
+#define __INT16
+#endif
+#if !defined(__INT32)
+#define __INT32 "l"
+#endif
 
 #endif // GLUE_H
