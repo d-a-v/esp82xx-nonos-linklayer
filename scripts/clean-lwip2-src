@@ -1,0 +1,9 @@
+#!/bin/sh
+
+echo "clean script $1"
+
+lwip_dir=$1
+
+git -C $lwip_dir checkout -f -- src
+git -C $lwip_dir clean -f -- src
+rm -f $lwip_dir/.patched

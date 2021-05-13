@@ -24,6 +24,10 @@ lwIP version currently used: [STABLE_2.1.2](http://git.savannah.nongnu.org/cgit/
   - Head to [tools/sdk/lwip2/](https://github.com/esp8266/Arduino/tree/master/tools/sdk/lwip2)
   - Run `make install`
 
+- with PlatformIO:
+  - Install the [git version](https://docs.platformio.org/en/latest/platforms/espressif8266.html#using-arduino-framework-with-staging-version)
+  - Run `make PREFIX=<path-to-the-toolchain-xtensa-package> install` (most common location is `~/.platformio/packages/toolchain-xtensa`)
+
 # MSS
 
 Remember the MSS footprint: 4\*MSS bytes in RAM per tcp connection.
