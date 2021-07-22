@@ -2744,7 +2744,7 @@
  * Declare your hook function prototypes in there, you may also \#include all headers
  * providing data types that are need in this file.
  */
-#ifdef __DOXYGEN__
+#if !defined LWIP_HOOK_FILENAME && defined __DOXYGEN__
 #define LWIP_HOOK_FILENAME "path/to/my/lwip_hooks.h"
 #endif
 
@@ -2769,7 +2769,7 @@
  * Return value:
  * - the 32-bit Initial Sequence Number to use for the new TCP connection.
  */
-#ifdef __DOXYGEN__
+#if !defined LWIP_HOOK_TCP_ISN && defined __DOXYGEN__
 #define LWIP_HOOK_TCP_ISN(local_ip, local_port, remote_ip, remote_port)
 #endif
 
@@ -2799,7 +2799,7 @@
  * ATTENTION: don't call any tcp api functions that might change tcp state (pcb
  * state or any pcb lists) from this callback!
  */
-#ifdef __DOXYGEN__
+#if !defined LWIP_HOOK_TCP_INPACKET_PCB && defined __DOXYGEN__
 #define LWIP_HOOK_TCP_INPACKET_PCB(pcb, hdr, optlen, opt1len, opt2, p)
 #endif
 
@@ -2821,7 +2821,7 @@
  * ATTENTION: don't call any tcp api functions that might change tcp state (pcb
  * state or any pcb lists) from this callback!
  */
-#ifdef __DOXYGEN__
+#if !defined LWIP_HOOK_TCP_OUT_TCPOPT_LENGTH && defined __DOXYGEN__
 #define LWIP_HOOK_TCP_OUT_TCPOPT_LENGTH(pcb, internal_len)
 #endif
 
@@ -2845,7 +2845,7 @@
  * ATTENTION: don't call any tcp api functions that might change tcp state (pcb
  * state or any pcb lists) from this callback!
  */
-#ifdef __DOXYGEN__
+#if !defined LWIP_HOOK_TCP_OUT_ADD_TCPOPTS && defined __DOXYGEN__
 #define LWIP_HOOK_TCP_OUT_ADD_TCPOPTS(p, hdr, pcb, opts)
 #endif
 
@@ -2864,7 +2864,7 @@
  * If the hook consumed the packet, 'pbuf' is in the responsibility of the hook
  * (i.e. free it when done).
  */
-#ifdef __DOXYGEN__
+#if !defined LWIP_HOOK_IP4_INPUT && defined __DOXYGEN__
 #define LWIP_HOOK_IP4_INPUT(pbuf, input_netif)
 #endif
 
@@ -2880,7 +2880,7 @@
  * - the destination netif
  * - NULL if no destination netif is found. In that case, ip_route() continues as normal.
  */
-#ifdef __DOXYGEN__
+#if !defined LWIP_HOOK_IP4_ROUTE && defined __DOXYGEN__
 #define LWIP_HOOK_IP4_ROUTE()
 #endif
 
@@ -2897,7 +2897,7 @@
  * - the destination netif
  * - NULL if no destination netif is found. In that case, ip_route() continues as normal.
  */
-#ifdef __DOXYGEN__
+#if !defined LWIP_HOOK_IP4_ROUTE_SRC && defined __DOXYGEN__
 #define LWIP_HOOK_IP4_ROUTE_SRC(src, dest)
 #endif
 
@@ -2918,7 +2918,7 @@
  * - 0: don't forward
  * - -1: no decision. In that case, ip4_canforward() continues as normal.
  */
-#ifdef __DOXYGEN__
+#if !defined LWIP_HOOK_IP4_CANFORWARD && defined __DOXYGEN__
 #define LWIP_HOOK_IP4_CANFORWARD(src, dest)
 #endif
 
@@ -2940,7 +2940,7 @@
  * LWIP_HOOK_IP4_ROUTE(). The actual routing/gateway table implementation is
  * not part of lwIP but can e.g. be hidden in the netif's state argument.
 */
-#ifdef __DOXYGEN__
+#if !defined LWIP_HOOK_ETHARP_GET_GW && defined __DOXYGEN__
 #define LWIP_HOOK_ETHARP_GET_GW(netif, dest)
 #endif
 
@@ -2959,7 +2959,7 @@
  * If the hook consumed the packet, 'pbuf' is in the responsibility of the hook
  * (i.e. free it when done).
  */
-#ifdef __DOXYGEN__
+#if !defined LWIP_HOOK_IP6_INPUT && defined __DOXYGEN__
 #define LWIP_HOOK_IP6_INPUT(pbuf, input_netif)
 #endif
 
@@ -2976,7 +2976,7 @@
  * - the destination netif
  * - NULL if no destination netif is found. In that case, ip6_route() continues as normal.
  */
-#ifdef __DOXYGEN__
+#if !defined LWIP_HOOK_IP6_ROUTE && defined __DOXYGEN__
 #define LWIP_HOOK_IP6_ROUTE(src, dest)
 #endif
 
@@ -2998,7 +2998,7 @@
  * LWIP_HOOK_IP6_ROUTE(). The actual routing/gateway table implementation is
  * not part of lwIP but can e.g. be hidden in the netif's state argument.
 */
-#ifdef __DOXYGEN__
+#if !defined LWIP_HOOK_ND6_GET_GW && defined __DOXYGEN__
 #define LWIP_HOOK_ND6_GET_GW(netif, dest)
 #endif
 
@@ -3016,7 +3016,7 @@
  * - 0: Packet must be dropped.
  * - != 0: Packet must be accepted.
  */
-#ifdef __DOXYGEN__
+#if !defined LWIP_HOOK_VLAN_CHECK && defined __DOXYGEN__
 #define LWIP_HOOK_VLAN_CHECK(netif, eth_hdr, vlan_hdr)
 #endif
 
@@ -3040,7 +3040,7 @@
  * - &lt;0: Packet shall not contain VLAN header.
  * - 0 &lt;= return value &lt;= 0xFFFF: Packet shall contain VLAN header. Return value is prio_vid in host byte order.
  */
-#ifdef __DOXYGEN__
+#if !defined LWIP_HOOK_VLAN_SET && defined __DOXYGEN__
 #define LWIP_HOOK_VLAN_SET(netif, p, src, dst, eth_type)
 #endif
 
@@ -3051,7 +3051,7 @@
  *   void my_hook(memp_t type);
  * \endcode
  */
-#ifdef __DOXYGEN__
+#if !defined LWIP_HOOK_MEMP_AVAILABLE && defined __DOXYGEN__
 #define LWIP_HOOK_MEMP_AVAILABLE(memp_t_type)
 #endif
 
@@ -3070,7 +3070,7 @@
  *
  * Payload points to ethernet header!
  */
-#ifdef __DOXYGEN__
+#if !defined LWIP_HOOK_UNKNOWN_ETH_PROTOCOL && defined __DOXYGEN__
 #define LWIP_HOOK_UNKNOWN_ETH_PROTOCOL(pbuf, netif) lwip_unhandled_packet((pbuf), (netif))
 #endif
 
@@ -3099,7 +3099,7 @@
  *   msg->options[(*options_len_ptr)++] = &lt;option_bytes&gt;;
  *   [...]
  */
-#ifdef __DOXYGEN__
+#if !defined LWIP_HOOK_DHCP_APPEND_OPTIONS && defined __DOXYGEN__
 #define LWIP_HOOK_DHCP_APPEND_OPTIONS(netif, dhcp, state, msg, msg_type, options_len_ptr)
 #endif
 
@@ -3127,7 +3127,7 @@
  *  u8_t buf[32];
  *  u8_t *ptr = (u8_t*)pbuf_get_contiguous(p, buf, sizeof(buf), LWIP_MIN(option_len, sizeof(buf)), offset);
  */
-#ifdef __DOXYGEN__
+#if !defined LWIP_HOOK_DHCP_PARSE_OPTION && defined __DOXYGEN__
 #define LWIP_HOOK_DHCP_PARSE_OPTION(netif, dhcp, state, msg, msg_type, option, len, pbuf, offset)
 #endif
 
@@ -3155,7 +3155,7 @@
  *   options[(*options_len_ptr)++] = &lt;option_data&gt;;
  *   [...]
  */
-#ifdef __DOXYGEN__
+#if !defined LWIP_HOOK_DHCP6_APPEND_OPTIONS && defined __DOXYGEN__
 #define LWIP_HOOK_DHCP6_APPEND_OPTIONS(netif, dhcp6, state, msg, msg_type, options_len_ptr, max_len)
 #endif
 
@@ -3178,7 +3178,7 @@
  * - 0: Hook has not consumed the option, code continues as normal (to internal options)
  * - != 0: Hook has consumed the option, 'err' is returned
  */
-#ifdef __DOXYGEN__
+#if !defined LWIP_HOOK_SOCKETS_SETSOCKOPT && defined __DOXYGEN__
 #define LWIP_HOOK_SOCKETS_SETSOCKOPT(s, sock, level, optname, optval, optlen, err)
 #endif
 
@@ -3201,7 +3201,7 @@
  * - 0: Hook has not consumed the option, code continues as normal (to internal options)
  * - != 0: Hook has consumed the option, 'err' is returned
  */
-#ifdef __DOXYGEN__
+#if !defined LWIP_HOOK_SOCKETS_GETSOCKOPT && defined __DOXYGEN__
 #define LWIP_HOOK_SOCKETS_GETSOCKOPT(s, sock, level, optname, optval, optlen, err)
 #endif
 
@@ -3224,7 +3224,7 @@
  * err must also be checked to determine if the hook consumed the query, but
  * the query failed
  */
-#ifdef __DOXYGEN__
+#if !defined LWIP_HOOK_NETCONN_EXTERNAL_RESOLVE && defined __DOXYGEN__
 #define LWIP_HOOK_NETCONN_EXTERNAL_RESOLVE(name, addr, addrtype, err)
 #endif
 /**
