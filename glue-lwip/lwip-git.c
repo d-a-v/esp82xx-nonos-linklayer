@@ -196,6 +196,7 @@ err_glue_t esp2glue_dhcp_start (int netif_idx)
 	// calls netif_sta_status_callback() - if applicable (STA)
 	netif_set_up(&netif_git[netif_idx]);
 
+#if LWIP_NETIF_HOSTNAME
 	// Update to latest esp hostname before starting dhcp client,
 	// 	because this name is provided to the dhcp server.
 	// Until proven wrong, dhcp client is the only code
@@ -205,6 +206,7 @@ err_glue_t esp2glue_dhcp_start (int netif_idx)
 	// XXX to check: is wifi_station_get_hostname()
 	// 	returning a const pointer once _set_hostname is called?
 	netif_git[netif_idx].hostname = wifi_station_get_hostname();
+#endif
 
 	err_t err = dhcp_start(&netif_git[netif_idx]);
 #if LWIP_IPV6 && LWIP_IPV6_DHCP6_STATELESS
@@ -352,7 +354,9 @@ static void netif_init_common (struct netif* netif)
 	netif->ip6_autoconfig_enabled = 1;
 #endif
 	
+#if LWIP_NETIF_HOSTNAME
 	netif->hostname = wifi_station_get_hostname();
+#endif
 	netif->chksum_flags = NETIF_CHECKSUM_ENABLE_ALL;
 	// netif->mtu given by glue
 }
@@ -409,7 +413,9 @@ void esp2glue_netif_update (int netif_idx, uint32_t ip, uint32_t mask, uint32_t 
 		netif->flags &= ~NETIF_FLAG_UP;
 
 	netif->mtu = mtu;
+#if LWIP_NETIF_HOSTNAME
 	netif->hostname = wifi_station_get_hostname();
+#endif
 	ip4_addr_t aip = { ip }, amask = { mask }, agw = { gw };
 	netif_set_addr(&netif_git[netif_idx], &aip, &amask, &agw);
 	esp2glue_netif_set_up1down0(netif_idx, 1);

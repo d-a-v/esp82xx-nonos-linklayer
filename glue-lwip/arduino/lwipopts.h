@@ -3144,7 +3144,7 @@
  * options are at the end of a DHCP6 message.
  * Signature:\code{.c}
  *   void my_hook(struct netif *netif, struct dhcp6 *dhcp, u8_t state, struct dhcp6_msg *msg,
- *                u8_t msg_type, u16_t *options_len_ptr);
+ *                u8_t msg_type, u16_t *options_len_ptr, buffer_len);
  * \endcode
  * Arguments:
  * - netif: struct netif that the packet will be sent through
@@ -3154,6 +3154,7 @@
  * - msg_type: dhcp6 message type to be sent (u8_t)
  * - options_len_ptr: pointer to the current length of options in the dhcp6_msg "msg"
  *                    (must be increased when options are added!)
+ * - buffer_len: length of the buffer (u16_t)
  *
  * Options need to appended like this:
  *   u8_t *options = (u8_t *)(msg + 1);
@@ -3162,7 +3163,7 @@
  *   [...]
  */
 #if !defined LWIP_HOOK_DHCP6_APPEND_OPTIONS && defined __DOXYGEN__
-#define LWIP_HOOK_DHCP6_APPEND_OPTIONS(netif, dhcp6, state, msg, msg_type, options_len_ptr, max_len)
+#define LWIP_HOOK_DHCP6_APPEND_OPTIONS(netif, dhcp6, state, msg, msg_type, options_len_ptr, buffer_len)
 #endif
 
 /**
