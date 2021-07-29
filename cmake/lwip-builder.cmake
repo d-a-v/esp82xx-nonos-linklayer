@@ -1,6 +1,12 @@
 include(cmake/common.cmake)
 
-# --- lwip2 src/Filelists.cmake expects these to be provided
+set(GLUE_COMMON_DEFINITIONS
+    -DARDUINO
+    -D__ets__
+    -DICACHE_FLASH
+    -DLWIP_OPEN_SRC
+    -DUSE_OPTIMIZE_PRINTF
+)
 
 set(LWIP_DEFINITIONS
     ${GLUE_COMMON_DEFINITIONS}
@@ -21,7 +27,19 @@ set(LWIP_COMPILER_FLAGS
     -g
 )
 
-#include(${LWIP_DIR}/src/Filelists.cmake)
+install(
+    DIRECTORY ${LWIP_DIR}/src/include
+    CONFIGURATIONS Release
+    DESTINATION ${ESP8266_ARDUINO_CORE_DIR}/tools/sdk/lwip2
+    FILES_MATCHING PATTERN "*.h"
+)
+
+install(
+    DIRECTORY ${CMAKE_SOURCE_DIR}/glue-lwip/arch
+    CONFIGURATIONS Release
+    DESTINATION ${ESP8266_ARDUINO_CORE_DIR}/tools/sdk/lwip2/include
+    FILES_MATCHING PATTERN "*.h"
+)
 
 function(glue_variant)
     cmake_parse_arguments(
@@ -127,6 +145,10 @@ function(glue_variant)
         $<TARGET_OBJECTS:${GLUE_VARIANT_NAME}-core>
     )
 
-    install(TARGETS ${GLUE_VARIANT_NAME} ARCHIVE)
+    install(
+        TARGETS ${GLUE_VARIANT_NAME} ARCHIVE
+        DESTINATION ${ESP8266_ARDUINO_CORE_DIR}/tools/sdk/lib
+        CONFIGURATIONS Release
+    )
 
 endfunction()

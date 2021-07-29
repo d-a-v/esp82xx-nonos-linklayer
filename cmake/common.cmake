@@ -5,8 +5,6 @@ execute_process(
     WORKING_DIRECTORY "${GLUE_DIR}"
     OUTPUT_VARIABLE GLUE_REPO_DESC_STR
     OUTPUT_STRIP_TRAILING_WHITESPACE
-
-
 )
 execute_process(
     COMMAND git describe --tag
@@ -53,23 +51,30 @@ message(STATUS "err_t: " ${GLUE_LWIP_ERR_T_DEFINITION})
 configure_file(
     "${CMAKE_SOURCE_DIR}/glue-lwip/lwip-err-t.h.in"
     "${CMAKE_BINARY_DIR}/common/lwip-err-t.h"
+    NEWLINE_STYLE UNIX
     @ONLY
 )
 
 configure_file(
     "${CMAKE_SOURCE_DIR}/glue-lwip/lwip-git-hash.h.in"
     "${CMAKE_BINARY_DIR}/common/lwip-git-hash.h"
+    NEWLINE_STYLE UNIX
     @ONLY
 )
 
-# TODO: Instead of glue-lwip/lwip-err-t.h having:
-#       #define LWIP_NO_STDINT_H 1
-#       Just add it here?
+file(GENERATE
+    OUTPUT ${CMAKE_BINARY_DIR}/README.md
+    CONTENT "Warning! This directory will be re/over/written from lwip2 builder upon lwip2 rebuild. Current version was built with lwip:${LWIP_REPO_DESC_STR} glue:${GLUE_REPO_DESC_STR}"
+)
 
-set(GLUE_COMMON_DEFINITIONS
-    -DARDUINO
-    -D__ets__
-    -DICACHE_FLASH
-    -DLWIP_OPEN_SRC
-    -DUSE_OPTIMIZE_PRINTF
+install(FILES
+    ${CMAKE_BINARY_DIR}/common/lwip-err-t.h
+    ${CMAKE_BINARY_DIR}/common/lwip-git-hash.h
+    ${CMAKE_BINARY_DIR}/README.md
+    ${CMAKE_SOURCE_DIR}/glue-lwip/arduino/lwipopts.h
+    ${CMAKE_SOURCE_DIR}/glue-lwip/lwip/apps-esp/dhcpserver.h
+    ${CMAKE_SOURCE_DIR}/glue/glue.h
+    ${CMAKE_SOURCE_DIR}/glue/gluedebug.h
+    CONFIGURATIONS Release
+    DESTINATION ${ESP8266_ARDUINO_CORE_DIR}/tools/sdk/lwip2/include
 )
