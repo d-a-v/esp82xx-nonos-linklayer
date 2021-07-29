@@ -1,61 +1,58 @@
 # Building
 
 - Follow the `git` version installation instructions from the [**Build** section of the README](README.md#Build)
-- Ensure that the toolchain is installed (Run `tools/get.py` for Arduino IDE, run `pio platform install ...` for PlatformIO)
-- Head to [tools/sdk/lwip2/](https://github.com/esp8266/Arduino/tree/master/tools/sdk/lwip2)
-- To build & install everything into the selected ESP8266 Core directory:
+- Ensure that the toolchain is installed:
+  - run `tools/get.py` for Arduino IDE so toolchain directory is created in the tools/ directory
+  - run `pio platform install --with-package toolchain-xtensa espressif8266` for PlatformIO so the toolchain files are installed into the ~/.platformio/packages/toolchain-xtensa (or the versioned dir, depending on existing packages)
 
-When using Arduino IDE:
-```
-$ mkdir build ; cd build
-$ cmake ../
-$ cmake --build .
-```
 
-When using PlatformIO:
+To build & install everything into the specific ESP8266 Core directory:
 ```
-$ cmake -DESP8266_TOOLCHAIN_PATH=<path-to-the-toolchain-xtensa-package> ../
-$ cmake --build .
+$ cmake \
+    -DESP8266_ARDUINO_CORE_DIR=<path to the arduino core directory>
+    -DCMAKE_TOOLCHAIN_FILE=<path to the current directory>/cmake/toolchain.cmake
+    -DCMAKE_PROGRAM_PATH=<path to the toolchain bin directory>
+    -B build
+$ cmake --build build
+$ cmake --install build --config Release
 ```
 
 Or, just to build a single variant:
 ```
-$ cmake --build . --target lwip2-1460
+$ cmake --build <build directory> --target lwip2-1460
 ```
+Resulting `.a` library files can be found in the `<build directory>` root.
 
-Run `cmake --build . --target help` to list all of the available targets.
+Run `cmake --build <build directory> --target help` to list all of the available targets.
 
 # Windows
 
-If you are using Windows and can't (or don't want to) use [WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10) / [WSL2](https://docs.microsoft.com/en-us/windows/wsl/wsl2-install) to run the build in the Unix environment, you would need to install the latest C++ development package:
+If you are using Windows and can't (or don't want to) use [WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10) / [WSL2](https://docs.microsoft.com/en-us/windows/wsl/wsl2-install) to run the build in the Unix environment. Configuration stage requires `-D...` parameters, as described above.
+
+## Using Windows Development Tools
 
 - Download the Visual Studio Installer at https://visualstudio.microsoft.com/
 - In addition to the core package, install C++ dev tools (~7GB in size total)
 - Run in "Native Tools Command Prompt for Visual Studio":
 ```
-> cmake -G "Ninja" ../
-> cmake --build .
+> cmake -G "Ninja" -B build
 ```
 Or, using NMake generator:
 ```
-> cmake -G "NMake Makefiles" ../
-> cmake --build .
+> cmake -G "NMake Makefiles" -B build
+```
+
+## Manually installing the tools
+
+For example, to use ninja build system:
+- Download and install the latest cmake package at https://cmake.org/download/
+- Download the latest ninja package at https://github.com/ninja-build/ninja/releases
+- Make sure both cmake.exe and ninja.exe locations are in PATH (or manually add them to the current powershell session via `$env:PATH+=";C:\Program Files\CMake\bin"`, or using the GUI controlling the environment variables).
+- Configure the build using the Ninja generator:
+```
+> cmake -G "Ninja" -B build
 ```
 
 # Maintainer notice
 
-To build `<GLUE_VARIANT_NAME>`
-
-- `cmake/variants/<GLUE_VARIANT_NAME>/CMakeLists.txt` must exist
-- It should follow this template:
-
-```cmake
-cmake_minimum_required(VERSION 3.9)
-project(<GLUE_VARIANT_NAME> LANGUAGES C)
-
-set(TCP_MSS ...)
-set(LWIP_IPV6 ...)
-set(LWIP_FEATURES ...)
-
-include(lwip-builder)
-```
+To add another variant, add `glue_variant(NAME <GLUE_VARIANT_NAME> DEFINITIONS <GLUE_VARIANT_DEFINITIONS>)` to the CMakeLists.txt. Notice that NAME must be unique.
