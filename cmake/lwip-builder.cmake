@@ -1,4 +1,4 @@
-include(cmake/package.cmake)
+include(cmake/common.cmake)
 
 # --- lwip2 src/Filelists.cmake expects these to be provided
 
