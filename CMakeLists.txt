@@ -18,19 +18,19 @@ if (NOT EXISTS ${ESP8266_ARDUINO_CORE_DIR})
 endif()
 message(STATUS "core dir: " "${ESP8266_ARDUINO_CORE_DIR}")
 
-get_filename_component(ESP8266_ARDUINO_CORE_DIR ${ESP8266_ARDUINO_CORE_DIR} REALPATH BASE_DIR "${CMAKE_SOURCE_DIR}")
-file(TO_NATIVE_PATH ${ESP8266_ARDUINO_CORE_DIR} ESP8266_ARDUINO_CORE_DIR_NATIVE)
-
 # fetches lwip2-src into the current build directory, then automatically patches it
 
 file(GLOB LWIP_PATCHES ${CMAKE_SOURCE_DIR}/patches/*.patch)
-message(STATUS "patches: " ${LWIP_PATCHES})
+message(STATUS "patches: " "${LWIP_PATCHES}")
 
+# TODO: GIT_CONFIG needed for windows install. lwip.git repo classifies .h as text through .gitattributes, and git-clone will apply native eol conversion
+# by default, git does not attribute .h files as text, so when installing .h into the esp8266 repo it will make them differ when all that's different is eol
 include(FetchContent)
 FetchContent_Declare(
     lwip2
     GIT_REPOSITORY https://git.savannah.nongnu.org/git/lwip.git
     GIT_TAG ${LWIP_TAG}
+    GIT_CONFIG core.autocrlf=false core.eol=lf
     PATCH_COMMAND git reset --hard && git clean -f && git apply --3way --recount --whitespace=fix ${LWIP_PATCHES}
 )
 
@@ -38,15 +38,18 @@ FetchContent_MakeAvailable(lwip2)
 FetchContent_GetProperties(lwip2 SOURCE_DIR)
 set(LWIP_DIR ${lwip2_SOURCE_DIR})
 
-# TODO: this comes from the lwip2-src CMakeLists.txt, and should be fixed next stable release
-add_custom_target(lwipdocs)
+# TODO: lwip does not check whether target exists, but adds explicit dependency. make a dummy target so the fetchcontent'ed repo still works
+# will be fixed in the next stable release, or by using development versions after the 2.1.2 tag that patch the CMakeLists.txt
+if (NOT TARGET lwipdocs)
+    add_custom_target(lwipdocs)
+endif()
 
 message(STATUS "lwip dir: " "${LWIP_DIR}")
 message(STATUS "lwip tag: " "${LWIP_TAG}")
 
 # the actual builder consists of a glue_variant(NAME DEFINITIONS), which will add a library target to build the actual sources
 # from the glue, glue-esp and the lwip2-src
-include (cmake/lwip-builder.cmake)
+include(cmake/lwip-builder.cmake)
 
 glue_variant(
     NAME lwip2-1460
