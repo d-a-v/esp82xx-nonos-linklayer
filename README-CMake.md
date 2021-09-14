@@ -17,11 +17,16 @@ $ cmake --build build
 $ cmake --install build --config Release
 ```
 
-Or, just to build a single variant:
+To build a single variant:
 ```
 $ cmake --build <build directory> --target lwip2-1460
 ```
-Resulting `.a` library files can be found in the `<build directory>` root.
+
+To build in parallel:
+```
+# cmake --build <build directory> --parallel <N>
+```
+The option specifies the maximum number of concurrent processes to use when building. If \<N\> is omitted the native build tool's default number is used.
 
 Run `cmake --build <build directory> --target help` to list all of the available targets.
 
