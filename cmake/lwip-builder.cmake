@@ -31,7 +31,14 @@ install(
     DIRECTORY ${LWIP_DIR}/src/include
     CONFIGURATIONS Release
     DESTINATION ${ESP8266_ARDUINO_CORE_DIR}/tools/sdk/lwip2
-    FILES_MATCHING PATTERN "*.h"
+    FILES_MATCHING
+    PATTERN "*.h"
+    PATTERN "lwip/apps/sntp.h"
+    PATTERN "compat/*" EXCLUDE
+    PATTERN "lwip/apps/*" EXCLUDE
+    PATTERN "netif/ppp*" EXCLUDE
+    PATTERN "netif/slipif.h" EXCLUDE
+    PATTERN "netif/zepif.h" EXCLUDE
 )
 
 install(
