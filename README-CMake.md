@@ -32,7 +32,11 @@ Run `cmake --build <build directory> --target help` to list all of the available
 
 # Windows
 
-If you are using Windows and can't (or don't want to) use [WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10) / [WSL2](https://docs.microsoft.com/en-us/windows/wsl/wsl2-install) to run the build in the Unix environment. Configuration stage requires `-D...` parameters, as described above.
+## Windows Subsystem for Linux (WSL)
+
+- Install the WSL environment by following the guide at https://docs.microsoft.com/en-us/windows/wsl/install-win10
+- Install the Linux distribution (for the list, see the output of `wsl --list --online`)
+- [Launch the distribution terminal and follow the instructions above](#Building)
 
 ## Using Windows Development Tools
 
