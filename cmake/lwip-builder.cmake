@@ -35,7 +35,12 @@ install(
     PATTERN "*.h"
     PATTERN "lwip/apps/sntp.h"
     PATTERN "compat/*" EXCLUDE
+    PATTERN "lwip/altcp_*" EXCLUDE
     PATTERN "lwip/apps/*" EXCLUDE
+    PATTERN "netif/bridgeif.h" EXCLUDE
+    PATTERN "netif/bridgeif_opts.h" EXCLUDE
+    PATTERN "netif/ieee802154.h" EXCLUDE
+    PATTERN "netif/lowpan6*" EXCLUDE
     PATTERN "netif/ppp*" EXCLUDE
     PATTERN "netif/slipif.h" EXCLUDE
     PATTERN "netif/zepif.h" EXCLUDE
