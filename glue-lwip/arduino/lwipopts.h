@@ -3579,6 +3579,14 @@ extern void lwip_hook_dhcp_parse_option(struct netif *netif, struct dhcp *dhcp, 
                                         int msg_type, int option, int option_len, struct pbuf *pbuf,
                                         int option_value_offset);
 
+#if LWIP_FEATURES
+#define LWIP_HOOK_DHCP_APPEND_OPTIONS(netif, dhcp, state, msg, msg_type, option_len_ptr) \
+   lwip_hook_dhcp_amend_options(netif, dhcp, state, msg, msg_type, option_len_ptr)
+
+extern void lwip_hook_dhcp_amend_options(struct netif *netif, struct dhcp *dhcp, int state, struct dhcp_msg *msg,
+                                         int msg_type, int *option_len_ptr);
+#endif
+
 /*
    --------------------------------------------------
    ------------------ SNTP options ------------------
