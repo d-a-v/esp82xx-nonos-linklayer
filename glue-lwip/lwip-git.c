@@ -54,7 +54,8 @@ author: d. gauchard
 // this is dhcpserver taken from lwip-1.4-espressif
 // arduino will use its own sources based on the above
 // this source only needs dhcps_start() prototype
-#include "lwip/apps-esp/dhcpserver.h"
+//#include "lwip/apps-esp/dhcpserver.h"
+void dhcps_start(struct ip_info *info);
 
 // this is espconn taken from lwip-1.4-espressif
 // espconn is probably a modified version of lwIP's netconn
@@ -577,24 +578,25 @@ void lwip_hook_dhcp_parse_option(struct netif *netif, struct dhcp *dhcp, int sta
 }
 
 void lwip_hook_dhcp_amend_options(struct netif *netif, struct dhcp *dhcp, int state, struct dhcp_msg *msg,
-                                         int msg_type, int *option_len_ptr);
-
-void lwip_hook_dhcp_amend_options(struct netif *netif, struct dhcp *dhcp, int state, struct dhcp_msg *msg,
-                                         int msg_type, int *option_len_ptr)
+                                  int msg_type, u16 *option_len_ptr)
 {
-	// amend default Client-Identifier
-	// {intf.id} {intf.mac} => {01}:{AA:BB:CC:11:22:33}
- 	{
-		size_t i;
-		
-		msg->options[(*option_len_ptr)++] = DHCP_OPTION_CLIENT_ID;
-		msg->options[(*option_len_ptr)++] = 1 + netif->hwaddr_len;
-		msg->options[(*option_len_ptr)++] = 0x01;
+    (void)dhcp;
+    (void)state;
+    (void)msg_type;
 
-		for (i = 0; i < netif->hwaddr_len; ++i) {
-			msg->options[(*option_len_ptr)++] = netif->hwaddr[i];
-		}
-	}
+    // amend default Client-Identifier
+    // {intf.id} {intf.mac} => {01}:{AA:BB:CC:11:22:33}
+    {
+        size_t i;
+
+        msg->options[(*option_len_ptr)++] = DHCP_OPTION_CLIENT_ID;
+        msg->options[(*option_len_ptr)++] = 1 + netif->hwaddr_len;
+        msg->options[(*option_len_ptr)++] = 0x01;
+
+        for (i = 0; i < netif->hwaddr_len; ++i) {
+            msg->options[(*option_len_ptr)++] = netif->hwaddr[i];
+        }
+    }
 }
 
 

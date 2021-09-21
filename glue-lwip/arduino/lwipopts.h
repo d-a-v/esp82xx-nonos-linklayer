@@ -3542,6 +3542,11 @@
    --------------------------------------------------
 */
 
+#include "lwip/debug.h"
+#include "arch/cc.h"
+#include "lwip-git-hash.h"
+#include <sys/time.h> // settimeofday() + struct timeval
+
 #ifndef LWIP_FEATURES
 #error LWIP_FEATURES must be defined
 #endif
@@ -3584,7 +3589,7 @@ extern void lwip_hook_dhcp_parse_option(struct netif *netif, struct dhcp *dhcp, 
    lwip_hook_dhcp_amend_options(netif, dhcp, state, msg, msg_type, option_len_ptr)
 
 extern void lwip_hook_dhcp_amend_options(struct netif *netif, struct dhcp *dhcp, int state, struct dhcp_msg *msg,
-                                         int msg_type, int *option_len_ptr);
+                                         int msg_type, u16 *option_len_ptr);
 #endif
 
 /*
@@ -3631,11 +3636,6 @@ uint32_t SNTP_STARTUP_DELAY_FUNC;
    ------------------- LOCAL FIXES ------------------
    --------------------------------------------------
 */
-
-#include "lwip/debug.h"
-#include "arch/cc.h"
-#include "lwip-git-hash.h"
-#include <sys/time.h> // settimeofday() + struct timeval
 
 // allow to handle special packets (user redefinable)
 struct pbuf;
