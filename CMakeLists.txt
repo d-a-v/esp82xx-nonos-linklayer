@@ -7,7 +7,7 @@ project(lwip-glue-builder
 
 message(STATUS "c compiler: " ${CMAKE_C_COMPILER})
 
-set(UPSTREAM_VERSION "STABLE-2_1_2_RELEASE")
+set(UPSTREAM_VERSION "STABLE-2_1_3_RC1")
 set(LWIP_TAG ${UPSTREAM_VERSION})
 
 # TODO: never assume this is in-tree of esp8266/Arduino, force to give some path
@@ -37,12 +37,6 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(lwip2)
 FetchContent_GetProperties(lwip2 SOURCE_DIR)
 set(LWIP_DIR ${lwip2_SOURCE_DIR})
-
-# TODO: lwip does not check whether target exists, but adds explicit dependency. make a dummy target so the fetchcontent'ed repo still works
-# will be fixed in the next stable release, or by using development versions after the 2.1.2 tag that patch the CMakeLists.txt
-if (NOT TARGET lwipdocs)
-    add_custom_target(lwipdocs)
-endif()
 
 message(STATUS "lwip dir: " "${LWIP_DIR}")
 message(STATUS "lwip tag: " "${LWIP_TAG}")

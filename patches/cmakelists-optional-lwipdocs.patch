@@ -1,0 +1,26 @@
+From 23945d2e3f4f450da11ba928707d85f714781db3 Mon Sep 17 00:00:00 2001
+From: Dirk Ziegelmeier <dziegelmeier@de.pepperl-fuchs.com>
+Date: Thu, 18 Oct 2018 10:58:29 +0200
+Subject: Try to build documentation on travis, too
+
+---
+ CMakeLists.txt | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+(limited to 'CMakeLists.txt')
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 74c91aa6..71b57f11 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -28,4 +28,6 @@ include(CPack)
+ # Generate docs before creating source package
+ include(src/Filelists.cmake)
+ add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
+-add_dependencies(dist lwipdocs)
++if (TARGET lwipdocs)
++  add_dependencies(dist lwipdocs)
++endif()
+-- 
+cgit v1.2.1
+
