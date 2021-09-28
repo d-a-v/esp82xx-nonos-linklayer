@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.11)
 project(lwip-glue-builder
-    VERSION 20210728
+    VERSION 20210928
     DESCRIPTION "lwip-glue-builder"
     LANGUAGES C
 )
