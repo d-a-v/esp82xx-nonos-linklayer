@@ -7,7 +7,7 @@ project(lwip-glue-builder
 
 message(STATUS "c compiler: " ${CMAKE_C_COMPILER})
 
-set(UPSTREAM_VERSION "STABLE-2_1_3_RC1")
+set(UPSTREAM_VERSION "STABLE-2_1_3_RELEASE")
 set(LWIP_TAG ${UPSTREAM_VERSION})
 
 # TODO: never assume this is in-tree of esp8266/Arduino, force to give some path
