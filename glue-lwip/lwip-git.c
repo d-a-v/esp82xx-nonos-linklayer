@@ -322,9 +322,11 @@ static void netif_sta_status_callback (struct netif* netif)
 	if (   netif->flags & NETIF_FLAG_UP
 	    && netif == netif_sta)
 	{
-		// this is our default route
-		netif_set_default(netif);
-			
+		if (netif_default == nullptr || netif_default == netif_ap) {
+			// STA interface can be our default route if none or AP is currently set
+			netif_set_default(netif);
+		}
+
 		// If we have a valid address of any type restart SNTP
 		bool valid_address = ip_2_ip4(&netif->ip_addr)->addr;
 
