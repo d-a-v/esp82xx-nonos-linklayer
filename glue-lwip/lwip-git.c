@@ -322,7 +322,7 @@ static void netif_sta_status_callback (struct netif* netif)
 	if (   netif->flags & NETIF_FLAG_UP
 	    && netif == netif_sta)
 	{
-		if (netif_default == NULL || netif_default == netif_ap) {
+		if ((netif_default == NULL || netif_default == netif_ap) && !ip_addr_islinklocal(&netif->ip_addr)) {
 			// STA interface can be our default route if none or AP is currently set
 			netif_set_default(netif);
 		}
