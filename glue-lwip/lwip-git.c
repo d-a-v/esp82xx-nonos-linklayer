@@ -312,6 +312,7 @@ void esp2glue_netif_set_default (int netif_idx)
 static void netif_sta_status_callback (struct netif* netif)
 {
 	// address can be set or reset/any (=0)
+	// netif is netif_sta
 
 	uprint(DBG "netif status callback:\n");
 	new_display_netif(netif);
@@ -319,10 +320,9 @@ static void netif_sta_status_callback (struct netif* netif)
 	// tell ESP that link is updated
 	glue2esp_ifupdown(netif->num, ip_2_ip4(&netif->ip_addr)->addr, ip_2_ip4(&netif->netmask)->addr, ip_2_ip4(&netif->gw)->addr);
 
-	if (   netif->flags & NETIF_FLAG_UP
-	    && netif == netif_sta)
+	if (netif->flags & NETIF_FLAG_UP)
 	{
-		if ((netif_default == NULL || netif_default == netif_ap) && !ip_addr_isany(&netif->gw)) {
+		if ((netif_default == NULL) && !ip_addr_isany(&netif->gw)) {
 			// STA interface can be our default route if there is currently none and if there is a valid gw address
 			netif_set_default(netif);
 		}
@@ -341,6 +341,11 @@ static void netif_sta_status_callback (struct netif* netif)
 			sntp_stop();
 			sntp_init();
 		}
+	}
+	else
+	{
+	    if (netif_default == netif)
+	        netif_set_default(NULL);
 	}
 }
 
