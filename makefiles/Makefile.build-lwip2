@@ -49,6 +49,7 @@ $(LWIP_LIB_RELEASE): $(LWIP_LIB)
 
 .PHONY: $(LWIP_LIB)
 $(LWIP_LIB):
+	make -C lwip2-src/src -f ../../makefiles/Makefile.patches
 	make -f makefiles/Makefile.glue-esp BUILD=$(BUILD) V=$(V)
 	make -f makefiles/Makefile.glue target=$(target) BUILD=$(BUILD) TCP_MSS=$(TCP_MSS) LWIP_FEATURES=$(LWIP_FEATURES) LWIP_IPV6=$(LWIP_IPV6) V=$(V)
 ifeq ($(target),arduino)
