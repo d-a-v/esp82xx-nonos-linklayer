@@ -16,16 +16,7 @@ OBJ = \
 BUILD_INCLUDES = -I$(BUILD) -I$(SDK)/include -Iinclude -I../../glue -I../../glue-lwip -I../../glue-lwip/$(target)
 #BUILD_INCLUDES += -I../../lwip2-contrib-src/apps/ping
 
-all: patches $(LWIP_LIB)
-
-patches: .patched
-
-.patched:
-	for p in ../../patches/*.patch; do echo "--------- APPLY PATCH $${p#../../}:"; patch -d .. -p1 < $$p; done
-ifeq ($(target),open)
-	patch -d .. -p1 < ../../patches/open/sdk-mem-macros.patch
-endif
-	touch .patched
+all: $(LWIP_LIB)
 
 include ../../makefiles/Makefile.defs
 include ../../makefiles/Makefile.rules
