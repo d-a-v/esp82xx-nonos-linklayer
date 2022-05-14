@@ -85,7 +85,17 @@ typedef uint32_t sys_prot_t;
 ///////////////////////////////
 //// MISSING 
 
-// b/c we have conflicting typedefs of u32_t and can't substitute funcs,
+// Arduino Core exposes time func with a generic type
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+unsigned long millis(void);
+#ifdef __cplusplus
+}
+#endif
+
+// b/c we have conflicting typedefs of u32_t and ulong and can't substitute funcs,
 // forcibly cast the `millis()` result to lwip's version of u32_t
 // (previous version was `#define sys_now millis`)
 #define sys_now() ((u32_t)millis())
