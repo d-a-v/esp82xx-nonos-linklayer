@@ -139,7 +139,7 @@ ping_recv(void *arg, struct raw_pcb *pcb, struct pbuf *p, const ip_addr_t *addr)
   LWIP_UNUSED_ARG(addr);
   LWIP_ASSERT("p != NULL", p != NULL);
 
-  if (pbuf_header( p, -PBUF_IP_HLEN)==0) {
+  if (pbuf_header( p, -PBUF_TRANSPORT_HLEN)==0) {
     iecho = (struct icmp_echo_hdr *)p->payload;
 
     if ((iecho->id == PING_ID) && (iecho->seqno == htons(ping_seq_num)) && iecho->type == ICMP_ER) {
