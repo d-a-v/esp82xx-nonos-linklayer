@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          path: ${{ github.repository }}
+          path: repo
 
       - uses: actions/setup-python@v4
         with:
@@ -29,7 +29,7 @@ jobs:
             build/_deps/lwip2-src
             build/_deps/lwip2-subbuild
             esp8266/tools/dist
-          key: ${{ runner.os }}-cmake-${{ hashFiles('CMakeLists.txt', 'cmake/**') }}
+          key: ${{ runner.os }}-cmake-${{ hashFiles('repo/CMakeLists.txt', 'repo/cmake/*.cmake') }}
 
       - name: Fetch ESP8266 Core
         uses: actions/checkout@v3
@@ -49,9 +49,9 @@ jobs:
           ESP8266_ARDUINO_CORE_DIR: ${{ github.workspace }}/esp8266
         run: |
           cmake \
-             --toolchain=${{ github.workspace }}/${{ github.repository }}/cmake/toolchain.cmake \
+             --toolchain=${{ github.workspace }}/repo/cmake/toolchain.cmake \
             -DCMAKE_PROGRAM_PATH=${ESP8266_ARDUINO_CORE_DIR}/tools/xtensa-lx106-elf/bin \
             -DESP8266_ARDUINO_CORE_DIR=${ESP8266_ARDUINO_CORE_DIR} \
-            -S ${{ github.repository }} \
+            -S repo \
             -B build
           cmake --build build/ --parallel $(nproc)
