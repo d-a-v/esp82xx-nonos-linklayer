@@ -1,14 +1,11 @@
 include(Compiler/GNU)
 
-set(CMAKE_SYSTEM_NAME "xtensa")
-set(CMAKE_SYSTEM_PROCESSOR "lx106")
+set(CMAKE_SYSTEM_NAME "Generic")
 
 set(triple xtensa-lx106-elf)
 
-set(CMAKE_C_COMPILER gcc)
-set(CMAKE_C_COMPILER_TARGET ${triple})
-set(CMAKE_CXX_COMPILER g++)
-set(CMAKE_CXX_COMPILER_TARGET ${triple})
+set(CMAKE_C_COMPILER ${triple}-gcc)
+set(CMAKE_CXX_COMPILER_TARGET ${triple}-g++)
 
 list(APPEND compile_options
     "-nostdlib"

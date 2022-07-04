@@ -1,0 +1,57 @@
+name: CMake build
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: ${{ github.repository }}
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - uses: actions/cache@v3
+        with:
+          path: |
+            build/_deps/lwip2-src
+            build/_deps/lwip2-subbuild
+            esp8266/tools/dist
+          key: ${{ runner.os }}-cmake-${{ hashFiles('CMakeLists.txt', 'cmake/**') }}
+
+      - name: Fetch ESP8266 Core
+        uses: actions/checkout@v3
+        with:
+          path: esp8266
+          repository: esp8266/Arduino
+          fetch-depth: 1
+          submodules: false
+
+      - name: Get toolchain files
+        run: |
+          cd esp8266/tools
+          python get.py -q
+
+      - name: Build
+        env:
+          ESP8266_ARDUINO_CORE_DIR: ${{ github.workspace }}/esp8266
+        run: |
+          cmake \
+             --toolchain=${{ github.workspace }}/${{ github.repository }}/cmake/toolchain.cmake \
+            -DCMAKE_PROGRAM_PATH=${ESP8266_ARDUINO_CORE_DIR}/tools/xtensa-lx106-elf/bin \
+            -DESP8266_ARDUINO_CORE_DIR=${ESP8266_ARDUINO_CORE_DIR} \
+            -S ${{ github.repository }} \
+            -B build
+          cmake --build build/ --parallel $(nproc)

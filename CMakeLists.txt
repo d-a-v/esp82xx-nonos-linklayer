@@ -17,7 +17,6 @@ list(APPEND compile_options
 
 add_compile_options("${compile_options}")
 
-message(STATUS "compiler: " ${CMAKE_C_COMPILER})
 message(STATUS "default options: " "${compile_options}")
 
 set(UPSTREAM_VERSION "STABLE-2_1_3_RELEASE")
