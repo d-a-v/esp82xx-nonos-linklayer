@@ -1,5 +1,6 @@
 include(Compiler/GNU)
 
+set(CMAKE_USER_MAKE_RULES_OVERRIDE "${CMAKE_CURRENT_LIST_DIR}/esp8266-platform.cmake")
 set(CMAKE_SYSTEM_NAME "Generic")
 
 set(triple xtensa-lx106-elf)
