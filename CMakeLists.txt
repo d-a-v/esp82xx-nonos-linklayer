@@ -1,11 +1,24 @@
 cmake_minimum_required(VERSION 3.11)
 project(lwip-glue-builder
-    VERSION 20210928
+    VERSION 20220704
     DESCRIPTION "lwip-glue-builder"
     LANGUAGES C
 )
 
-message(STATUS "c compiler: " ${CMAKE_C_COMPILER})
+list(APPEND compile_options
+    "-Wall"
+    "-Wextra"
+    "-Wpointer-arith"
+    "-Werror=return-type")
+
+list(APPEND compile_options
+    "-Os"
+    "-g")
+
+add_compile_options("${compile_options}")
+
+message(STATUS "compiler: " ${CMAKE_C_COMPILER})
+message(STATUS "default options: " "${compile_options}")
 
 set(UPSTREAM_VERSION "STABLE-2_1_3_RELEASE")
 set(LWIP_TAG ${UPSTREAM_VERSION})

@@ -1,13 +1,24 @@
 include(Compiler/GNU)
 
-set(CMAKE_USER_MAKE_RULES_OVERRIDE "${CMAKE_CURRENT_LIST_DIR}/esp8266-platform.cmake")
-set(CMAKE_SYSTEM_NAME "Generic")
+set(CMAKE_SYSTEM_NAME "xtensa")
+set(CMAKE_SYSTEM_PROCESSOR "lx106")
 
-set(CMAKE_C_COMPILER xtensa-lx106-elf-gcc)
-set(CMAKE_CXX_COMPILER xtensa-lx106-elf-g++)
+set(triple xtensa-lx106-elf)
 
-set(CMAKE_C_FLAGS "-Wall -Wextra -c -Os -g -Wpointer-arith -Wl,-EL -fno-inline-functions -nostdlib -mlongcalls -mtext-section-literals -falign-functions=4 -MMD -ffunction-sections -fdata-sections")
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -c -Os -g -Wpointer-arith -Wl,-EL -fno-inline-functions -nostdlib -mlongcalls -mtext-section-literals -falign-functions=4 -MMD -ffunction-sections -fdata-sections")
+set(CMAKE_C_COMPILER gcc)
+set(CMAKE_C_COMPILER_TARGET ${triple})
+set(CMAKE_CXX_COMPILER g++)
+set(CMAKE_CXX_COMPILER_TARGET ${triple})
+
+list(APPEND compile_options
+    "-nostdlib"
+    "-mlongcalls"
+    "-mtext-section-literals"
+    "-ffunction-sections"
+    "-fdata-sections"
+    "-falign-functions=4")
+
+set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
