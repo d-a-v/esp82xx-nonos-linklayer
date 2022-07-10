@@ -9,12 +9,8 @@ set(CMAKE_C_COMPILER ${triple}-gcc)
 set(CMAKE_CXX_COMPILER ${triple}-g++)
 
 list(APPEND compile_options
-    "-nostdlib"
     "-mlongcalls"
-    "-mtext-section-literals"
-    "-ffunction-sections"
-    "-fdata-sections"
-    "-falign-functions=4")
+    "-mtext-section-literals")
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 

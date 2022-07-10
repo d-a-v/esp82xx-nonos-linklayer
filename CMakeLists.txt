@@ -6,6 +6,12 @@ project(lwip-glue-builder
 )
 
 list(APPEND compile_options
+    "-nostdlib"
+    "-ffunction-sections"
+    "-fdata-sections"
+    "-falign-functions=4")
+
+list(APPEND compile_options
     "-Wall"
     "-Wextra"
     "-Wpointer-arith"
