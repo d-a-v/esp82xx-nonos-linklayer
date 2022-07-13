@@ -49,7 +49,7 @@ jobs:
           ESP8266_ARDUINO_CORE_DIR: ${{ github.workspace }}/esp8266
         run: |
           cmake \
-             --toolchain=${{ github.workspace }}/repo/cmake/toolchain.cmake \
+             --toolchain=${{ github.workspace }}/repo/cmake/toolchain-esp8266.cmake \
             -DCMAKE_PROGRAM_PATH=${ESP8266_ARDUINO_CORE_DIR}/tools/xtensa-lx106-elf/bin \
             -DESP8266_ARDUINO_CORE_DIR=${ESP8266_ARDUINO_CORE_DIR} \
             -S repo \
