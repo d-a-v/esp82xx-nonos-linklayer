@@ -9,8 +9,8 @@
 To build & install everything into the specific ESP8266 Core directory:
 ```
 $ cmake \
-    --toolchain=cmake/toolchain.cmake \
-    -DCMAKE_PROGRAM_PATH=<path to the toolchain bin directory> \
+    --toolchain=cmake/toolchain-esp8266.cmake \
+    -DCMAKE_PROGRAM_PATH=<path to the gcc toolchain bin directory> \
     -DESP8266_ARDUINO_CORE_DIR=<path to the arduino core directory> \
     -B build
 $ cmake --build build

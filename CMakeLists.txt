@@ -1,29 +1,28 @@
 cmake_minimum_required(VERSION 3.11)
 project(lwip-glue-builder
-    VERSION 20220704
+    VERSION 20220711
     DESCRIPTION "lwip-glue-builder"
     LANGUAGES C
 )
 
-list(APPEND compile_options
-    "-nostdlib"
-    "-ffunction-sections"
-    "-fdata-sections"
-    "-falign-functions=4")
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_CXX_STANDARD 11)
 
-list(APPEND compile_options
-    "-Wall"
-    "-Wextra"
-    "-Wpointer-arith"
-    "-Werror=return-type")
+add_compile_options(
+    -nostdlib
+    -ffunction-sections
+    -fdata-sections
+    -falign-functions=4)
 
-list(APPEND compile_options
-    "-Os"
-    "-g")
+add_compile_options(
+    -Wall
+    -Wextra
+    -Wpointer-arith
+    -Werror=return-type)
 
-add_compile_options("${compile_options}")
-
-message(STATUS "default options: " "${compile_options}")
+add_compile_options(
+    -Os
+    -g)
 
 set(UPSTREAM_VERSION "STABLE-2_1_3_RELEASE")
 set(LWIP_TAG ${UPSTREAM_VERSION})
