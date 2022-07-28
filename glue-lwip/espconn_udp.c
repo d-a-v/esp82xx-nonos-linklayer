@@ -132,7 +132,7 @@ espconn_udp_sent(void *arg, uint8 *psent, uint16 length)
     		pudp_sent->pespconn->proto.udp->remote_ip[2],
     		pudp_sent->pespconn->proto.udp->remote_ip[3]);
 
-    LWIP_DEBUGF(ESPCONN_UDP_DEBUG, ("espconn_udp_sent %d %x %d\n", __LINE__, upcb->remote_ip, upcb->remote_port));
+    LWIP_DEBUGF(ESPCONN_UDP_DEBUG, ("espconn_udp_sent %d %x %d\n", __LINE__, ip_2_ip4(&upcb->remote_ip)->addr, upcb->remote_port));
 
     struct netif *sta_netif = (struct netif *)eagle_lwip_getif(0x00);
     struct netif *ap_netif =  (struct netif *)eagle_lwip_getif(0x01);
@@ -236,7 +236,7 @@ espconn_udp_sendto(void *arg, uint8 *psent, uint16 length)
     IP4_ADDR(&dst_ip, pespconn->proto.udp->remote_ip[0],
 			pespconn->proto.udp->remote_ip[1], pespconn->proto.udp->remote_ip[2],
 			pespconn->proto.udp->remote_ip[3]);
-    LWIP_DEBUGF(ESPCONN_UDP_DEBUG, ("espconn_udp_sent %d %x %d\n", __LINE__, upcb->remote_ip, upcb->remote_port));
+    LWIP_DEBUGF(ESPCONN_UDP_DEBUG, ("espconn_udp_sent %d %x %d\n", __LINE__, ip_2_ip4(&upcb->remote_ip)->addr, upcb->remote_port));
 
     //struct netif *sta_netif = (struct netif *)eagle_lwip_getif(0x00);
     //struct netif *ap_netif =  (struct netif *)eagle_lwip_getif(0x01);
