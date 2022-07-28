@@ -104,7 +104,6 @@ function(glue_variant)
 
     # Debug utils for the -glue package
     add_library(${GLUE_VARIANT_NAME}-glue-debug STATIC
-        ${CMAKE_SOURCE_DIR}/glue/doprint.c
         ${CMAKE_SOURCE_DIR}/glue/uprint.c
     )
     target_include_directories(${GLUE_VARIANT_NAME}-glue-debug BEFORE
