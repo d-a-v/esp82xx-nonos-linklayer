@@ -347,6 +347,8 @@ static void netif_sta_status_callback (struct netif* netif)
 	    if (netif_default == netif)
 	        netif_set_default(NULL);
 	}
+
+	netif_status_changed(netif);
 }
 
 static void netif_init_common (struct netif* netif)
@@ -389,7 +391,7 @@ static err_t netif_init_ap (struct netif* netif)
 
 	netif->name[0] = 'a';
 	netif->name[1] = 'p';
-	netif->status_callback = NULL; // esp-netif-ap is made up by esp
+	netif->status_callback = netif_status_changed;
 	
 	netif_init_common(netif);
 
@@ -503,19 +505,26 @@ void esp2glue_netif_set_up1down0 (int netif_idx, int up1_or_down0)
 	struct netif* netif = &netif_git[netif_idx];
 	if (up1_or_down0)
 	{
+        // netif is brought UP
+
 		netif_set_link_up(netif);
-		//netif_set_up(netif); // unwanted call to netif_sta_status_callback()
+
+		// We are called more often that it should by FW at boot time,
+		// there is no need to uselessly shake the network interface:
+		// netif_set_up(netif); <-- unwanted call to netif_sta_status_callback()
 		netif->flags |= NETIF_FLAG_UP;
 #if ARDUINO
-		if (!netif_enabled[netif_idx])
+		//if (!netif_enabled[netif_idx])
 		{
 		    netif_enabled[netif_idx] = 1;
-		    netif_status_changed(netif);
+		    //netif_status_changed(netif) was here but is now called from lwIP by netif->status_callback()
 		}
 #endif
 	}
 	else
 	{
+        // netif is pulled DOWN
+
 		// stop dhcp client (if started)
 		dhcp_release_and_stop(netif);
 
@@ -532,10 +541,10 @@ void esp2glue_netif_set_up1down0 (int netif_idx, int up1_or_down0)
 		if (netif_default == &netif_git[netif_idx])
 			netif_set_default(NULL);
 #if ARDUINO
-		if (netif_enabled[netif_idx])
+		//if (netif_enabled[netif_idx])
 		{
 		    netif_enabled[netif_idx] = 0;
-		    netif_status_changed(netif);
+		    //netif_status_changed(netif) was here but is now called from lwIP by netif->status_callback()
 		}
 #endif
 	}
