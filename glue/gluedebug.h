@@ -58,7 +58,7 @@ extern void (*phy_capture) (int netif_idx, const char* data, size_t len, int out
 
 #include <osapi.h> // os_printf* definitions + ICACHE_RODATA_ATTR
 
-#if defined(ARDUINO) && !defined(LWIP14GLUE)
+#if defined(ARDUINO)
 // os_printf() does not understand ("%hhx",0x12345678) => "78") and prints 'h' instead
 // now hacking/using ::printf() from updated and patched esp-quick-toolchain-by-Earle
 #include <stdio.h>
