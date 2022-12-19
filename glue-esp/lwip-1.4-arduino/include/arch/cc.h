@@ -40,16 +40,10 @@
 #include "osapi.h"
 #define EFAULT 14
 #include <sys/pgmspace.h>
-//#include <../../../cores/esp8266/core_esp8266_features.h>
 
-//#define LWIP_PROVIDE_ERRNO
-
-#if (1)
+#ifndef BYTE_ORDER
 #define BYTE_ORDER LITTLE_ENDIAN
-#else
-#define BYTE_ORDER BIG_ENDIAN
 #endif
-
 
 typedef unsigned   char    u8_t;
 typedef signed     char    s8_t;
