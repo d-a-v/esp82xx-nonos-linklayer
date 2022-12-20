@@ -329,7 +329,7 @@ index 26c26a91..c8948b9c 100644
 +  struct napt_table *t;
 +
 +  LWIP_DEBUGF(NAPT_DEBUG, ("ip_napt_find\n"));
-+  LWIP_DEBUGF(NAPT_DEBUG, ("looking up in table %s: %"U16_F".%"U16_F".%"U16_F".%"U16_F", port: %lu, mport: %lu\n",
++  LWIP_DEBUGF(NAPT_DEBUG, ("looking up in table %s: %"U16_F".%"U16_F".%"U16_F".%"U16_F", port: %u, mport: %u\n",
 +			   (dest ? "dest" : "src"),
 +			   ((const u8_t*) (&addr))[0], ((const u8_t*) (&addr))[1],
 +			   ((const u8_t*) (&addr))[2], ((const u8_t*) (&addr))[3],

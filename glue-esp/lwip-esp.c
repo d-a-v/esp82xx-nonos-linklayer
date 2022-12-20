@@ -759,7 +759,7 @@ void glue2esp_ifupdown (int netif_idx, uint32_t ip, uint32_t mask, uint32_t gw)
 	oldmask = netif->netmask;
 	oldgw = netif->gw;
 	        
-	uprint(DBG "glue2esp_ifupdown new %d.%d.%d.%d old %ld.%ld.%ld.%ld\n",
+	uprint(DBG "glue2esp_ifupdown new %d.%d.%d.%d old %d.%d.%d.%d\n",
 		        ip & 0xff,         (ip >> 8) & 0xff,         (ip >> 16) & 0xff,         ip >> 24,
 		oldip.addr & 0xff, (oldip.addr >> 8) & 0xff, (oldip.addr >> 16) & 0xff, oldip.addr >> 24);
 
