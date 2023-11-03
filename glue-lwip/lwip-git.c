@@ -286,15 +286,6 @@ void esp2glue_pbuf_freed (void* pbuf)
 	pbuf_free((struct pbuf*)pbuf);
 }
 
-static err_t new_input (struct pbuf *p, struct netif *inp)
-{
-	(void)p;
-	(void)inp;
-	//uerror("internal error, new-netif->input() cannot be called\n");
-	uassert(0);
-	return ERR_ABRT;
-}
-
 void esp2glue_netif_set_default (int netif_idx)
 {
 	if (netif_idx == STATION_IF || netif_idx == SOFTAP_IF)
@@ -354,9 +345,6 @@ static void netif_sta_status_callback (struct netif* netif)
 static void netif_init_common (struct netif* netif)
 {
 	netif->flags |= NETIF_FLAG_IGMP;
-	// irrelevant,not used since esp-lwip receive data and call esp2glue_ethernet_input()
-	netif->input = new_input;
-	// meaningfull:
 	netif->output = etharp_output;
 	netif->linkoutput = new_linkoutput;
 
@@ -453,7 +441,7 @@ void esp2glue_lwip_init (void)
 	{
 		netif_add(&netif_git[i], &aip, &amask, &agw, /*state*/NULL,
 		          i == STATION_IF? netif_init_sta: netif_init_ap,
-		          /*useless input*/NULL);
+		          ethernet_input);
 		netif_git[i].hwaddr_len = NETIF_MAX_HWADDR_LEN;
 		memset(netif_git[i].hwaddr, 0, NETIF_MAX_HWADDR_LEN);
 	}
@@ -491,7 +479,8 @@ err_glue_t esp2glue_ethernet_input (int netif_idx, void* received)
 	//display_ip32(" ip=", netif_git[netif_idx].ip_addr.addr);
 	//nl();
 	
-	return git2glue_err(ethernet_input((struct pbuf*)received, &netif_git[netif_idx]));
+	struct netif* netif = &netif_git[netif_idx];
+	return git2glue_err(netif->input((struct pbuf*)received, netif));
 }
 
 void esp2glue_dhcps_start (struct ip_info* info)

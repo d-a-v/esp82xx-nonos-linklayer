@@ -442,8 +442,6 @@ static int netif_is_new (struct netif* netif)
 	else
 		netif->num = SOFTAP_IF;
 
-	netif->input = ethernet_input;
-
 	if (netif_esp[netif->num] == netif)
 	{
 		uprint(DBG "netif (%d): already added\n", netif->num);
@@ -505,9 +503,7 @@ struct netif* netif_add (
 		#endif /* ENABLE_LOOPBACK */
 	netif->state = state;
 
-	uassert(packet_incoming == ethernet_input);
-	(void)packet_incoming;
-	netif->input = ethernet_input;
+	netif->input = packet_incoming;
 
 		#if LWIP_NETIF_HWADDRHINT
 		#error
@@ -559,7 +555,6 @@ void netif_set_addr (struct netif* netif, ip_addr_t* ipaddr, ip_addr_t* netmask,
 	netif->ip_addr.addr = ipaddr->addr;
 	netif->netmask.addr = netmask->addr;
 	netif->gw.addr = gw->addr;
-	uassert(netif->input == ethernet_input);
 
 	// ask blobs
 	struct ip_info set;
