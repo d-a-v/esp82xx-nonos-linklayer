@@ -1,17 +1,19 @@
-
-OBJ = \
-	$(patsubst %.c,$(BUILD)/%.o,$(wildcard glue-esp/*.c))
-
-ifeq ($(LWIP_ESP),)
-$(error LWIP_ESP must point to espressif sdk lwip/include)
+ifndef SDK
+$(error SDK must point to espressif sdk folder)
 endif
 
-BUILD_INCLUDES = -I$(BUILD) -I$(SDK)/include -I$(LWIP_ESP) -Iglue
+ifndef LWIP14_INCLUDE_DIR
+$(error LWIP14_INCLUDE_DIR must point to espressif sdk lwip/include)
+endif
+
+SRC = $(wildcard glue-esp/*.c)
+
+BUILD_INCLUDES = -I$(BUILD_ROOT) -I$(SDK)/include -I$(LWIP14_INCLUDE_DIR) -I$(ROOT)/glue
 BUILD_FLAGS += -DLWIP14GLUE
 
-include makefiles/Makefile.defs
-include makefiles/Makefile.rules
+include makefiles/include/defs.mk
+include makefiles/include/rules.mk
 
 -include $(BUILD)/glue-esp/*.d
 
-all: $(LWIP_LIB)
+.DEFAULT: all

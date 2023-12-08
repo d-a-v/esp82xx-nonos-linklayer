@@ -1,25 +1,26 @@
 
 # this one is executed from directory lwip2-src/src/
 
-OBJ = \
-	$(patsubst %.c,$(BUILD)/%.o,$(wildcard netif/ethernet.c)) \
-	$(patsubst %.c,$(BUILD)/%.o,$(wildcard netif/ppp/*.c)) \
-	$(patsubst %.c,$(BUILD)/%.o,$(wildcard core/*.c)) \
-	$(patsubst %.c,$(BUILD)/%.o,$(wildcard core/ipv4/*.c)) \
-	$(patsubst %.c,$(BUILD)/%.o,$(wildcard core/ipv6/*.c)) \
-	$(patsubst %.c,$(BUILD)/%.o,$(wildcard api/*.c)) \
-	$(patsubst %.c,$(BUILD)/%.o,$(wildcard apps/sntp/*.c)) \
-	$(patsubst %.c,$(BUILD)/%.o,$(wildcard apps/mdns/*.c)) \
-#	$(subst ../../lwip2-contrib-src/,contrib/, \
-#		$(patsubst %.c,$(BUILD)/%.o,$(wildcard ../../lwip2-contrib-src/apps/ping/*.c)))
+SRC = \
+	netif/ethernet.c \
+	$(wildcard netif/ppp/*.c) \
+	$(wildcard core/*.c) \
+	$(wildcard core/ipv4/*.c) \
+	$(wildcard core/ipv6/*.c) \
+	$(wildcard api/*.c) \
+	$(wildcard apps/sntp/*.c) \
+	$(wildcard apps/mdns/*.c)
 
-BUILD_INCLUDES = -I$(BUILD) -I$(SDK)/include -Iinclude -I../../glue -I../../glue-lwip -I../../glue-lwip/$(target)
-#BUILD_INCLUDES += -I../../lwip2-contrib-src/apps/ping
+BUILD_INCLUDES = \
+	-I$(BUILD_ROOT) \
+	-I$(SDK)/include \
+	-I$(ROOT)/glue \
+	-I$(ROOT)/glue-lwip \
+	-I$(ROOT)/glue-lwip/$(target) \
+	-I$(LWIP_ROOT)/src/include
 
-all: $(LWIP_LIB)
-
-include ../../makefiles/Makefile.defs
-include ../../makefiles/Makefile.rules
+include $(ROOT)/makefiles/include/defs.mk
+include $(ROOT)/makefiles/include/rules.mk
 
 -include $(BUILD)/*/*.d
 -include $(BUILD)/*/*/*.d
