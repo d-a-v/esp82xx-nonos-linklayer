@@ -2,7 +2,7 @@
 #ifndef MYLWIPOPTS_H
 #define MYLWIPOPTS_H
 
-// opt.h version lwip-2.1.0rc1 for esp8266
+/* opt.h version lwip-2.1.3 for esp8266 */
 
 /**
  * @file
@@ -1552,15 +1552,23 @@
  * TCP_MSS, IP header, and link header.
  */
 #if !defined PBUF_POOL_BUFSIZE || defined __DOXYGEN__
-#define PBUF_POOL_BUFSIZE               LWIP_MEM_ALIGN_SIZE(TCP_MSS+40+PBUF_LINK_ENCAPSULATION_HLEN+PBUF_LINK_HLEN)
+#define PBUF_POOL_BUFSIZE               LWIP_MEM_ALIGN_SIZE(TCP_MSS+PBUF_IP_HLEN+PBUF_TRANSPORT_HLEN+PBUF_LINK_ENCAPSULATION_HLEN+PBUF_LINK_HLEN)
 #endif
 
 /**
  * LWIP_PBUF_REF_T: Refcount type in pbuf.
  * Default width of u8_t can be increased if 255 refs are not enough for you.
  */
-#ifndef LWIP_PBUF_REF_T
+#if !defined LWIP_PBUF_REF_T || defined __DOXYGEN__
 #define LWIP_PBUF_REF_T                 u8_t
+#endif
+
+/**
+ * LWIP_PBUF_CUSTOM_DATA: Store private data on pbufs (e.g. timestamps)
+ * This extends struct pbuf so user can store custom data on every pbuf.
+ */
+#if !defined LWIP_PBUF_CUSTOM_DATA || defined __DOXYGEN__
+#define LWIP_PBUF_CUSTOM_DATA
 #endif
 /**
  * @}
@@ -1608,7 +1616,7 @@
 #endif
 
 /**
- * LWIP_NETIF_EXT_STATUS_CALLBACK==1: Support an extended callback function
+ * LWIP_NETIF_EXT_STATUS_CALLBACK==1: Support an extended callback function 
  * for several netif related event that supports multiple subscribers.
  * @see netif_ext_status_callback
  */
@@ -1919,11 +1927,8 @@
 
 /** LWIP_NETCONN_FULLDUPLEX==1: Enable code that allows reading from one thread,
  * writing from a 2nd thread and closing from a 3rd thread at the same time.
- * ATTENTION: This is currently really alpha! Some requirements:
- * - LWIP_NETCONN_SEM_PER_THREAD==1 is required to use one socket/netconn from
- *   multiple threads at once
- * - sys_mbox_free() has to unblock receive tasks waiting on recvmbox/acceptmbox
- *   and prevent a task pending on this during/after deletion
+ * LWIP_NETCONN_SEM_PER_THREAD==1 is required to use one socket/netconn from
+ * multiple threads at once!
  */
 #if !defined LWIP_NETCONN_FULLDUPLEX || defined __DOXYGEN__
 #define LWIP_NETCONN_FULLDUPLEX         0
@@ -2396,7 +2401,7 @@
  * All addresses that have a scope according to the default policy (link-local
  * unicast addresses, interface-local and link-local multicast addresses) should
  * now have a zone set on them before being passed to the core API, although
- * lwIP will currently attempt to select a zone on the caller's behalf when
+ * lwIP will currently attempt to select a zone on the caller's behalf when 
  * necessary. Applications that directly assign IPv6 addresses to interfaces
  * (which is NOT recommended) must now ensure that link-local addresses carry
  * the netif's zone. See the new ip6_zone.h header file for more information and
@@ -2498,7 +2503,9 @@
 
 /**
  * LWIP_ICMP6_DATASIZE: bytes from original packet to send back in
- * ICMPv6 error messages.
+ * ICMPv6 error messages (0 = default of IP6_MIN_MTU_LENGTH)
+ * ATTENTION: RFC4443 section 2.4 says IP6_MIN_MTU_LENGTH is a MUST,
+ * so override this only if you absolutely have to!
  */
 #if !defined LWIP_ICMP6_DATASIZE || defined __DOXYGEN__
 #define LWIP_ICMP6_DATASIZE             8
@@ -2665,7 +2672,7 @@
  * servers to the DNS module.
  */
 #if !defined LWIP_ND6_RDNSS_MAX_DNS_SERVERS || defined __DOXYGEN__
-#define LWIP_ND6_RDNSS_MAX_DNS_SERVERS  0 // 0
+#define LWIP_ND6_RDNSS_MAX_DNS_SERVERS  0
 #endif
 /**
  * @}
@@ -3034,8 +3041,8 @@
  * - src: source eth address
  * - dst: destination eth address
  * - eth_type: ethernet type to packet to be sent\n
- *
- *
+ * 
+ * 
  * Return values:
  * - &lt;0: Packet shall not contain VLAN header.
  * - 0 &lt;= return value &lt;= 0xFFFF: Packet shall contain VLAN header. Return value is prio_vid in host byte order.
@@ -3491,9 +3498,6 @@
 #if !defined DHCP6_DEBUG || defined __DOXYGEN__
 #define DHCP6_DEBUG                     LWIP_DBG_OFF
 #endif
-/**
- * @}
- */
 
 /**
  * NAPT_DEBUG: Enable debugging for NAPT.
@@ -3501,6 +3505,10 @@
 #ifndef NAPT_DEBUG
 #define NAPT_DEBUG                       LWIP_DBG_OFF
 #endif
+
+/**
+ * @}
+ */
 
 /**
  * LWIP_TESTMODE: Changes to make unit test possible
@@ -3550,9 +3558,9 @@
 // so we do not define it. sntp server can come from dhcp server, or by
 // user.
 //#define SNTP_SERVER_ADDRESS	"pool.ntp.org"   // default
-//#define SNTP_GET_SERVERS_FROM_DHCP	// implicitely enabled by LWIP_DHCP_GET_NTP_SRV
+//#define SNTP_GET_SERVERS_FROM_DHCP        // implicitely enabled by LWIP_DHCP_GET_NTP_SRV
 
-#define SNTP_SERVER_DNS			1        // enable SNTP support DNS names through sntp_setservername / sntp_getservername
+#define SNTP_SERVER_DNS 1                   // enable SNTP support DNS names through sntp_setservername / sntp_getservername
 
 #define SNTP_SET_SYSTEM_TIME(t)		(sntp_set_system_time(t))	// implemented in lwip2-sntp.c
 
@@ -3561,9 +3569,8 @@
 #define SNTP_MAX_SERVERS                3
 #endif
 
-// turn off random delay before sntp request
-// when SNTP_STARTUP_DELAY is not defined,
-// LWIP_RAND is used to set a delay
+// no delay by default before sntp request
+// https://github.com/esp8266/Arduino/pull/5564
 // from sntp_opts.h:
 /** According to the RFC, this shall be a random delay
  * between 1 and 5 minutes (in milliseconds) to prevent load peaks.
@@ -3590,6 +3597,9 @@ struct netif;
 #endif
 //#define LWIP_ERR_T s8_t
 LWIP_ERR_T lwip_unhandled_packet (struct pbuf* pbuf, struct netif* netif);
+
+// called when STA OR AP is set up or down
+void netif_status_changed (struct netif*);
 
 /*
    --------------------------------------------------
