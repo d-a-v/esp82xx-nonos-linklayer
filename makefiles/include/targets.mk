@@ -107,13 +107,13 @@ INSTALL_GLUE_HEADERS = $(addprefix $(INC)/,$(notdir $(GLUE_HEADERS)))
 
 LWIP_INCLUDE = $(LWIP_ROOT)/src/include
 LWIP_HEADERS = \
-	$(LWIP_INCLUDE)/lwip/apps/sntp.h \
-	$(wildcard $(LWIP_INCLUDE)/netif/*.h) \
-	$(wildcard $(LWIP_INCLUDE)/netif/ppp/*.h) \
 	$(wildcard $(LWIP_INCLUDE)/lwip/*.h) \
-	$(wildcard $(LWIP_INCLUDE)/lwip/apps/*.h) \
+	$(wildcard $(LWIP_INCLUDE)/lwip/apps/mdns*.h) \
+	$(wildcard $(LWIP_INCLUDE)/lwip/apps/sntp*.h) \
 	$(wildcard $(LWIP_INCLUDE)/lwip/priv/*.h) \
-	$(wildcard $(LWIP_INCLUDE)/lwip/prot/*.h)
+	$(wildcard $(LWIP_INCLUDE)/lwip/prot/*.h) \
+	$(wildcard $(LWIP_INCLUDE)/netif/*.h) \
+	$(wildcard $(LWIP_INCLUDE)/netif/ppp/*.h)
 
 define COPY_HEADERS_LWIP
 $$(subst $$(LWIP_INCLUDE)/,$$(INC)/,$(1)): $(1)
