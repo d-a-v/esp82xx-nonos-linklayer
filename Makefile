@@ -17,9 +17,9 @@ all: arduino
 
 lwip/upstream:
 	@if test ! -e "$(LWIP_ROOT)" ; then \
-		@mkdir $(LWIP_ROOT); \
-		@git -C $(LWIP_ROOT) init ; \
-		@git -C $(LWIP_ROOT) remote add origin $(LWIP_GIT_REPO) ; \
+		mkdir $(LWIP_ROOT); \
+		git -C $(LWIP_ROOT) init ; \
+		git -C $(LWIP_ROOT) remote add origin $(LWIP_GIT_REPO) ; \
 	fi
 
 	@git -C $(LWIP_ROOT) fetch origin $(UPSTREAM_VERSION)
