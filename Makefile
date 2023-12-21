@@ -22,7 +22,7 @@ lwip/upstream:
 		git -C $(LWIP_ROOT) remote add origin $(LWIP_GIT_REPO) ; \
 	fi
 
-	@git -C $(LWIP_ROOT) fetch origin $(UPSTREAM_VERSION)
+	@git -C $(LWIP_ROOT) fetch origin $(UPSTREAM_VERSION):refs/tags/$(UPSTREAM_VERSION)
 
 lwip/clean:
 	@git -C $(LWIP_ROOT) clean -f
