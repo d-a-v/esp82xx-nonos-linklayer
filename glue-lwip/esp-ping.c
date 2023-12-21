@@ -79,7 +79,7 @@ static void ICACHE_FLASH_ATTR ping_timeout(void* arg)
 	struct ping_msg *pingmsg = (struct ping_msg *)arg;
 	pingmsg->timeout_count ++;
 	if (pingmsg->ping_opt->recv_function == NULL){
-		os_printf("ping timeout\n");
+		LWIP_DEBUGF( PING_DEBUG, ("ping timeout\n"));
 	} else {
 		struct ping_resp pingresp;
 		os_bzero(&pingresp, sizeof(struct ping_resp));
@@ -161,7 +161,7 @@ ping_recv(void *arg, struct raw_pcb *pcb, struct pbuf *p, const ip_addr_t *addr)
 			  ip_addr_copy_from_ip4(source_ip, iphdr->src);
 			  ipaddr_ntoa_r(&source_ip,ipaddrstr, sizeof(ipaddrstr));
 			  if (pingmsg->ping_opt->recv_function == NULL){
-				  os_printf("recv %s: byte = %d, time = %d ms, seq = %d\n",ipaddrstr, PING_DATA_SIZE, delay, ntohs(iecho->seqno));
+				  LWIP_DEBUGF( PING_DEBUG, ("recv %s: byte = %d, time = %d ms, seq = %d\n", ipaddrstr, PING_DATA_SIZE, delay, ntohs(iecho->seqno)));
 			  } else {
 				  struct ping_resp pingresp;
 				  os_bzero(&pingresp, sizeof(struct ping_resp));
@@ -181,7 +181,7 @@ ping_recv(void *arg, struct raw_pcb *pcb, struct pbuf *p, const ip_addr_t *addr)
     }
 //    } else if(iecho->type == ICMP_ECHO){
 //        struct pbuf *q = NULL;
-//        os_printf("receive ping request:seq=%d\n", ntohs(iecho->seqno));
+//        LWIP_DEBUGF( PING_DEBUG, ("receive ping request:seq=%d\n", ntohs(iecho->seqno)));
 //        q = pbuf_alloc(PBUF_IP, (u16_t)p->tot_len, PBUF_RAM);
 //        if (q!=NULL) {
 //            pbuf_copy(q, p);
@@ -249,8 +249,8 @@ ping_coarse_tmr(void *arg)
 		delay /= PING_COARSE;
 //		ping_seq_num = 0;
 		if (ping_opt->sent_function == NULL){
-			os_printf("ping %d, timeout %d, total payload %d bytes, %d ms\n",
-					pingmsg->max_count, pingmsg->timeout_count, PING_DATA_SIZE*(pingmsg->max_count - pingmsg->timeout_count),delay);
+			LWIP_DEBUGF( PING_DEBUG, ("ping %d, timeout %d, total payload %d bytes, %d ms\n",
+					pingmsg->max_count, pingmsg->timeout_count, PING_DATA_SIZE*(pingmsg->max_count - pingmsg->timeout_count),delay));
 		} else {
 			os_bzero(&pingresp, sizeof(struct ping_resp));
 			pingresp.total_count = pingmsg->max_count;
