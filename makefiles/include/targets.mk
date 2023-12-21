@@ -40,35 +40,35 @@ $(BUILD_ROOT)/liblwip2-536.a:
 		$@
 
 $(BUILD_ROOT)/liblwip2-1460.a:
-	@$(MAKE) -f makefiles/Makefile.build-lwip2 \
+	$(MAKE) -f makefiles/Makefile.build-lwip2 \
 		TCP_MSS=1460 \
 		LWIP_FEATURES=0 \
 		LWIP_IPV6=0 \
 		$@
 
 $(BUILD_ROOT)/liblwip2-536-feat.a:
-	@$(MAKE) -f makefiles/Makefile.build-lwip2 \
+	$(MAKE) -f makefiles/Makefile.build-lwip2 \
 		TCP_MSS=536 \
 		LWIP_FEATURES=1 \
 		LWIP_IPV6=0 \
 		$@
 
 $(BUILD_ROOT)/liblwip2-1460-feat.a:
-	@$(MAKE) -f makefiles/Makefile.build-lwip2 \
+	$(MAKE) -f makefiles/Makefile.build-lwip2 \
 		TCP_MSS=1460 \
 		LWIP_FEATURES=1 \
 		LWIP_IPV6=0 \
 		$@
 
 $(BUILD_ROOT)/liblwip6-536-feat.a:
-	@$(MAKE) -f makefiles/Makefile.build-lwip2 \
+	$(MAKE) -f makefiles/Makefile.build-lwip2 \
 		TCP_MSS=536 \
 		LWIP_FEATURES=1 \
 		LWIP_IPV6=1 \
 		$@
 
 $(BUILD_ROOT)/liblwip6-1460-feat.a:
-	@$(MAKE) -f makefiles/Makefile.build-lwip2 \
+	$(MAKE) -f makefiles/Makefile.build-lwip2 \
 		TCP_MSS=1460 \
 		LWIP_FEATURES=1 \
 		LWIP_IPV6=1 \
@@ -127,7 +127,7 @@ INSTALL_HEADERS = $(INSTALL_LWIP_HEADERS) $(INSTALL_GLUE_HEADERS) $(INC)/arch/cc
 
 INSTALL_DIRS = $(sort $(dir $(INSTALL_HEADERS)))
 $(INSTALL_DIRS):
-	mkdir -p $@
+	@mkdir -p $@
 
 $(INSTALL_HEADERS): | $(INSTALL_DIRS)
 

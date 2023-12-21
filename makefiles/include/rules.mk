@@ -15,7 +15,7 @@ $(OBJ): $(BUILD)/%.o: %.c
 
 OBJDIRS := $(sort $(dir $(OBJ)))
 $(OBJDIRS): $(SRC)
-	mkdir -p $@
+	@mkdir -p $@
 
 $(OBJ): | $(OBJDIRS) $(BUILD)
 build: $(OBJ)
