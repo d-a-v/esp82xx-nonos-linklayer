@@ -1,4 +1,4 @@
-name: CMake build
+name: Test build
 
 on:
   push:
@@ -48,7 +48,7 @@ jobs:
         env:
           ESP8266_ARDUINO_CORE_DIR: ${{ github.workspace }}/esp8266
         run: |
-          make -C repo/ -j$(nproc) PREFIX=${ESP8266_ARDUINO_CORE_DIR}
+          make -C repo/ -j$(nproc) PREFIX=${ESP8266_ARDUINO_CORE_DIR} arduino/upstream
 
   cmake-build:
     runs-on: ubuntu-latest
