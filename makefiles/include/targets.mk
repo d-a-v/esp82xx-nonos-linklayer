@@ -15,14 +15,22 @@ $(BUILD_TARGETS): $(BUILD_ROOT)/user_config.h $(BUILD_HEADERS) | $(BUILD_ROOT)
 $(BUILD_ROOT):
 	@mkdir -p $@
 
+ifeq ($(V), 0)
+VERBGEN = @echo "GEN $@";
+else
+VERBGEN =
+endif
+
+GEN = $(VERBGEN)
+
 $(BUILD_ROOT)/user_config.h: | $(BUILD_ROOT)
-	@touch $@
+	$(GEN) touch $@
 
 $(BUILD_ROOT)/lwip-err-t.h: $(LWIP14_INCLUDE_DIR)/arch/cc.h | $(BUILD_ROOT)
-	@/usr/bin/env bash makefiles/make-err-t $< > $@
+	$(GEN) /usr/bin/env bash makefiles/make-err-t $< > $@
 
 $(BUILD_ROOT)/lwip-git-hash.h: $(GLUE_GIT_HEAD) $(LWIP_GIT_HEAD) | $(BUILD_ROOT)
-	@/usr/bin/env bash makefiles/make-lwip-hash $(LWIP_ROOT) > $@
+	$(GEN) /usr/bin/env bash makefiles/make-lwip-hash $(LWIP_ROOT) > $@
 
 $(BUILD_ROOT)/liblwip2-536.a:
 	$(MAKE) -f makefiles/Makefile.build-lwip2 \
