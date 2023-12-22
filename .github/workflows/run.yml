@@ -48,18 +48,8 @@ jobs:
           ESP8266_ARDUINO_CORE_DIR: ${{ github.workspace }}/esp8266
         run: |
           make -C repo/ -j$(nproc) \
-            LIBS=${{ github.workspace }}/install \
-            INC=${{ github.workspace }}/install/include \
             PREFIX=${ESP8266_ARDUINO_CORE_DIR} \
             arduino/upstream
-          pushd install
-          zip --quiet --recurse-paths ../lwip2-build.zip ./
-          popd
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: Build
-          path: lwip2-build.zip
 
   cmake-build:
     runs-on: ubuntu-latest
