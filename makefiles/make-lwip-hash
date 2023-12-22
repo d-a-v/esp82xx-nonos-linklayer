@@ -1,7 +1,7 @@
 #!/bin/sh
 
 
-gluehash=$(git describe --tag 2>/dev/null)
+gluehash=$(git describe --tag --always 2>/dev/null)
 hash=$(git -C "$1" describe --tag 2>/dev/null)
 
 cat << EOF
