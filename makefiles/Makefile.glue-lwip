@@ -1,0 +1,37 @@
+
+# compiling glue-lwip/
+
+include makefiles/include/defs.mk
+
+ifndef SDK
+$(error must provide SDK path)
+endif
+
+SRC = \
+	glue/uprint.c \
+	glue-lwip/lwip-git.c \
+	glue-lwip/esp-ping.c \
+	glue-lwip/espconn.c \
+	glue-lwip/espconn_buf.c \
+	glue-lwip/espconn_tcp.c \
+	glue-lwip/espconn_udp.c
+
+ifneq ($(target),arduino)
+SRC += \
+	glue-lwip/esp-dhcpserver.c \
+	glue-lwip/esp-time.c \
+	glue-lwip/esp-millis.c
+endif
+
+BUILD_INCLUDES = \
+	-I$(BUILD_ROOT) \
+	-I$(ROOT)/glue \
+	-I$(ROOT)/glue-lwip \
+	-I$(ROOT)/glue-lwip/$(target) \
+	-I$(LWIP_ROOT)/src/include \
+	-I$(SDK)/include
+
+include makefiles/include/rules.mk
+
+-include $(BUILD)/glue/*.d
+-include $(BUILD)/glue-lwip/*.d

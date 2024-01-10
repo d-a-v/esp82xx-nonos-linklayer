@@ -1,4 +1,4 @@
-name: CMake build
+name: Test build
 
 on:
   push:
@@ -12,7 +12,46 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  make-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: repo
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - uses: actions/cache@v3
+        with:
+          path: |
+            repo/build/lwip2-src
+            esp8266/tools/dist
+          key: ${{ runner.os }}-make-${{ hashFiles('repo/makefiles/Makefile.*', 'repo/makefiles/include/*.mk', 'repo/Makefile*') }}
+
+      - name: Fetch ESP8266 Core
+        uses: actions/checkout@v3
+        with:
+          path: esp8266
+          repository: esp8266/Arduino
+          fetch-depth: 1
+          submodules: false
+
+      - name: Get toolchain files
+        run: |
+          cd esp8266/tools
+          python get.py -q
+
+      - name: Build
+        env:
+          ESP8266_ARDUINO_CORE_DIR: ${{ github.workspace }}/esp8266
+        run: |
+          make -C repo/ -j$(nproc) \
+            PREFIX=${ESP8266_ARDUINO_CORE_DIR} \
+            arduino/upstream
+
+  cmake-build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

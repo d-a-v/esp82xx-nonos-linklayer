@@ -1,22 +1,20 @@
-PREFIX ?= ../../../xtensa-lx106-elf
+.PHONY: clean build install
+.DEFAULT: all
 
-%:
-	for v6 in 0 1; do \
-	for mss in 536 1460; do \
-	for feat in 0 1; do \
-		test \( $$feat = 0 \) -a \( $$v6 = 1 \) && continue; \
-		featname= ;\
-		test $$feat = 1 && featname=-feat ;\
-		make -f makefiles/Makefile.build-lwip2 \
-			target=arduino \
-			DEFINE_TARGET=ARDUINO \
-			SDK=../.. \
-			LWIP_ESP=glue-esp/lwip-1.4-arduino/include \
-			LWIP_LIB=liblwip$$((2+4*v6))-$$mss$$featname.a \
-			LWIP_LIB_RELEASE=../../lib/liblwip$$((2+4*v6))-$$mss$$featname.a \
-			LWIP_INCLUDES_RELEASE=../include \
-			TOOLS=$(abspath $(wildcard $(PREFIX)))/bin/xtensa-lx106-elf- \
-			TCP_MSS=$$mss LWIP_FEATURES=$$feat LWIP_IPV6=$$v6 \
-			BUILD=build-$$mss$$featname-v$$((4+2*v6)) \
-			$@ ; \
-	done; done; done
+ifndef PREFIX
+$(error "$$PREFIX must be set to esp8266 Core root directory")
+endif
+
+include makefiles/include/common.mk
+
+export TOOLS ?= $(PREFIX)/tools/xtensa-lx106-elf/bin/xtensa-lx106-elf-
+export SDK ?= $(PREFIX)/tools/sdk
+export LIBS ?= $(PREFIX)/tools/sdk/lib
+export INC ?= $(SDK)/lwip2/include
+
+export LWIP14_INCLUDE_DIR ?= $(ROOT)/glue-esp/lwip-1.4-arduino/include
+
+export target = arduino
+export DEFINE_TARGET = ARDUINO
+
+include makefiles/include/targets.mk
