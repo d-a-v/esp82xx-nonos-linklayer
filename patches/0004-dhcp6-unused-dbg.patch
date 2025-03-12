@@ -1,0 +1,20 @@
+diff --git a/src/core/ipv6/dhcp6.c b/src/core/ipv6/dhcp6.c
+index e6a7e64d..90f81fbc 100644
+--- a/src/core/ipv6/dhcp6.c
++++ b/src/core/ipv6/dhcp6.c
+@@ -216,6 +216,7 @@ void dhcp6_cleanup(struct netif *netif)
+ static struct dhcp6*
+ dhcp6_get_struct(struct netif *netif, const char *dbg_requester)
+ {
++  LWIP_UNUSED_ARG(dbg_requester);
+   struct dhcp6 *dhcp6 = netif_dhcp6_data(netif);
+   if (dhcp6 == NULL) {
+     LWIP_DEBUGF(DHCP6_DEBUG | LWIP_DBG_TRACE, ("%s: mallocing new DHCPv6 client\n", dbg_requester));
+@@ -253,6 +254,7 @@ dhcp6_get_struct(struct netif *netif, const char *dbg_requester)
+ static void
+ dhcp6_set_state(struct dhcp6 *dhcp6, u8_t new_state, const char *dbg_caller)
+ {
++  LWIP_UNUSED_ARG(dbg_caller);
+   LWIP_DEBUGF(DHCP6_DEBUG | LWIP_DBG_TRACE | LWIP_DBG_STATE, ("DHCPv6 state: %d -> %d (%s)\n",
+     dhcp6->state, new_state, dbg_caller));
+   if (new_state != dhcp6->state) {

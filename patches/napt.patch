@@ -11,7 +11,7 @@ index b3737a35..9c2d1dcf 100644
  #include "netif/ppp/ppp_opts.h"
  #include "netif/ppp/ppp_impl.h"
 diff --git a/src/core/ipv4/ip4.c b/src/core/ipv4/ip4.c
-index 26c26a91..c8948b9c 100644
+index e044bff2..9b56664f 100644
 --- a/src/core/ipv4/ip4.c
 +++ b/src/core/ipv4/ip4.c
 @@ -42,6 +42,7 @@
@@ -782,21 +782,21 @@ index 26c26a91..c8948b9c 100644
    /* Incrementally update the IP checksum. */
    if (IPH_CHKSUM(iphdr) >= PP_HTONS(0xffffU - 0x100)) {
      IPH_CHKSUM_SET(iphdr, (u16_t)(IPH_CHKSUM(iphdr) + PP_HTONS(0x100) + 1));
-@@ -511,6 +1251,13 @@ ip4_input(struct pbuf *p, struct netif *inp)
+@@ -545,6 +1285,13 @@ ip4_input(struct pbuf *p, struct netif *inp)
    }
  #endif
  
 +#if IP_NAPT
 +  /* for unicast packet, check NAPT table and modify dest if needed */
 +  /* iphdr is const, use p->payload instead */
-+  if (!inp->napt && ip4_addr_cmp(&iphdr->dest, netif_ip4_addr(inp)))
++  if (!inp->napt && ip4_addr_eq(&iphdr->dest, netif_ip4_addr(inp)))
 +    ip_napt_recv(p, (struct ip_hdr *)p->payload);
 +#endif
 +
    /* copy IP addresses to aligned ip_addr_t */
    ip_addr_copy_from_ip4(ip_data.current_iphdr_dest, iphdr->dest);
    ip_addr_copy_from_ip4(ip_data.current_iphdr_src, iphdr->src);
-@@ -621,6 +1368,16 @@ ip4_input(struct pbuf *p, struct netif *inp)
+@@ -655,6 +1402,16 @@ ip4_input(struct pbuf *p, struct netif *inp)
  #if IP_FORWARD
      /* non-broadcast packet? */
      if (!ip4_addr_isbroadcast(ip4_current_dest_addr(), inp)) {
@@ -814,13 +814,13 @@ index 26c26a91..c8948b9c 100644
        ip4_forward(p, (struct ip_hdr *)p->payload, inp);
      } else
 diff --git a/src/core/netif.c b/src/core/netif.c
-index 15200a27..c52fea26 100644
+index 98e0553f..8a6f1f01 100644
 --- a/src/core/netif.c
 +++ b/src/core/netif.c
-@@ -363,6 +363,10 @@ netif_add(struct netif *netif,
-   netif->loop_cnt_current = 0;
- #endif /* ENABLE_LOOPBACK && LWIP_LOOPBACK_MAX_PBUFS */
- 
+@@ -380,6 +380,10 @@ netif_add(struct netif *netif,
+ #endif /* LWIP_NETIF_LOOPBACK_MULTITHREADING */
+ #endif /* ENABLE_LOOPBACK */
+
 +#if IP_NAPT
 +  netif->napt = 0;
 +#endif /* IP_NAPT */
@@ -829,44 +829,44 @@ index 15200a27..c52fea26 100644
    netif_set_addr(netif, ipaddr, netmask, gw);
  #endif /* LWIP_IPV4 */
 diff --git a/src/include/lwip/ip.h b/src/include/lwip/ip.h
-index 653c3b2f..230bfdcf 100644
+index 668d8317..1f16e121 100644
 --- a/src/include/lwip/ip.h
 +++ b/src/include/lwip/ip.h
-@@ -189,6 +189,12 @@ extern struct ip_globals ip_data;
+@@ -200,6 +200,12 @@ extern struct ip_globals ip_data;
  /** Destination IP4 address of current_header */
  #define ip4_current_dest_addr()    (&ip_data.current_iphdr_dest)
- 
+
 +#if NAPT_DEBUG
-+void napt_debug_print()ICACHE_FLASH_ATTR;
++void napt_debug_print();
 +#else
 +#define napt_debug_print(p)
 +#endif /* NAPT_DEBUG */
 +
  #elif LWIP_IPV6 /* LWIP_IPV4 && LWIP_IPV6 */
- 
+
  /** Get the IPv6 header of the current packet.
 diff --git a/src/include/lwip/netif.h b/src/include/lwip/netif.h
-index 911196ab..c29a9876 100644
+index 0cde2c2a..a1e90538 100644
 --- a/src/include/lwip/netif.h
 +++ b/src/include/lwip/netif.h
-@@ -387,6 +387,9 @@ struct netif {
-   u16_t loop_cnt_current;
- #endif /* LWIP_LOOPBACK_MAX_PBUFS */
+@@ -403,6 +403,9 @@ struct netif {
+   u8_t reschedule_poll;
+ #endif /* LWIP_NETIF_LOOPBACK_MULTITHREADING */
  #endif /* ENABLE_LOOPBACK */
 +#if LWIP_IPV4 && IP_NAPT
 +  u8_t napt;
 +#endif
  };
- 
+
  #if LWIP_CHECKSUM_CTRL_PER_NETIF
 diff --git a/src/include/lwip/opt.h b/src/include/lwip/opt.h
-index 82c420c1..371286b6 100644
+index 2573285f..857c6a3a 100644
 --- a/src/include/lwip/opt.h
 +++ b/src/include/lwip/opt.h
-@@ -764,6 +764,10 @@
+@@ -789,6 +789,10 @@
  #define IP_FRAG                         0
  #endif /* !LWIP_IPV4 */
- 
+
 +#ifndef IP_NAPT
 +#define IP_NAPT                         0
 +#endif
@@ -874,7 +874,7 @@ index 82c420c1..371286b6 100644
  /**
   * IP_OPTIONS_ALLOWED: Defines the behavior for IP options.
   *      IP_OPTIONS_ALLOWED==0: All packets with IP options are dropped.
-@@ -3484,6 +3488,14 @@
+@@ -3590,6 +3594,14 @@
  #if !defined DHCP6_DEBUG || defined __DOXYGEN__
  #define DHCP6_DEBUG                     LWIP_DBG_OFF
  #endif
@@ -883,7 +883,7 @@ index 82c420c1..371286b6 100644
 + * NAPT_DEBUG: Enable debugging for NAPT.
 + */
 +#ifndef NAPT_DEBUG
-+#define NAPT_DEBUG                       LWIP_DBG_OFF
++#define NAPT_DEBUG                      LWIP_DBG_OFF
 +#endif
 +
  /**

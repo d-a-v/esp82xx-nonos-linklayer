@@ -28,10 +28,10 @@ Tests:
  1 file changed, 33 insertions(+), 19 deletions(-)
 
 diff --git a/src/apps/sntp/sntp.c b/src/apps/sntp/sntp.c
-index a6c4ff07..494971ca 100644
+index 36375305..ec74b808 100644
 --- a/src/apps/sntp/sntp.c
 +++ b/src/apps/sntp/sntp.c
-@@ -819,20 +819,28 @@ sntp_setserver(u8_t idx, const ip_addr_t *server)
+@@ -825,20 +825,28 @@ sntp_setserver(u8_t idx, const ip_addr_t *server)
   * @param server IP address of the NTP server to set
   */
  void
@@ -71,7 +71,7 @@ index a6c4ff07..494971ca 100644
      }
    }
  }
-@@ -852,14 +860,20 @@ dhcp6_set_ntp_servers(u8_t num_ntp_servers, ip_addr_t* ntp_server_addrs)
+@@ -858,14 +866,20 @@ dhcp6_set_ntp_servers(u8_t num_ntp_servers, ip_addr_t* ntp_server_addrs)
                                   (sntp_set_servers_from_dhcp ? "Got" : "Rejected"),
                                   num_ntp_servers));
    if (sntp_set_servers_from_dhcp && num_ntp_servers) {
@@ -101,5 +101,5 @@ index a6c4ff07..494971ca 100644
    }
  }
 -- 
-2.21.0
+2.48.1
 

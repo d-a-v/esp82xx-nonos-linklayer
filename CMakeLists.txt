@@ -24,7 +24,7 @@ add_compile_options(
     -Os
     -g)
 
-set(UPSTREAM_VERSION "STABLE-2_1_3_RELEASE")
+set(UPSTREAM_VERSION "STABLE-2_2_1_RELEASE")
 set(LWIP_TAG ${UPSTREAM_VERSION})
 
 # TODO: never assume this is in-tree of esp8266/Arduino, force to give some path
@@ -45,7 +45,7 @@ message(STATUS "patches: " "${LWIP_PATCHES}")
 include(FetchContent)
 FetchContent_Declare(
     lwip2
-    GIT_REPOSITORY https://git.savannah.nongnu.org/git/lwip.git
+    GIT_REPOSITORY https://github.com/lwip-tcpip/lwip.git
     GIT_TAG ${LWIP_TAG}
     GIT_CONFIG core.autocrlf=false core.eol=lf
     PATCH_COMMAND git reset --hard && git clean -f && git apply --3way --recount --whitespace=fix ${LWIP_PATCHES}
