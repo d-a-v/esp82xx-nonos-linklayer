@@ -1,18 +1,17 @@
-.PHONY: clean build install
-.DEFAULT: all
+-include .config.mk
+include makefiles/include/common.mk
 
-ifndef PREFIX
-$(error "$$PREFIX must be set")
-endif
+maybe-prefix = $(if $(PREFIX),$(PREFIX)/$(1),$(error prefix must be set))
+maybe-sdk = $(if $(SDK),$(SDK)/$(1),$(error sdk path must be set))
 
-export SDK ?= $(PREFIX)/xtensa-lx106-elf/sysroot/usr
-export LIBS ?= $(SDK)/lib
-export INC ?= $(SDK)/include/lwip2
+export SDK ?= $(call maybe-prefix,xtensa-lx106-elf/sysroot/usr)
+export LIBS ?= $(call maybe-sdk,lib)
+export INC ?= $(call maybe-sdk,include/lwip2)
 
-export LWIP14_INCLUDE_DIR=$(PREFIX)/../sdk/third_party/include
+export LWIP14_INCLUDE_DIR := $(call maybe-prefix,../sdk/third_party/include)
 
-export PREFIX_TARGET = open
-export DEFINE_TARGET = OPENSDK
+export PREFIX_TARGET := open
+export DEFINE_TARGET := OPENSDK
 
 $(shell scripts/patch-vendor-lwip14.sh \
 	$(LWIP14_INCLUDE_DIR) \
@@ -22,4 +21,4 @@ $(shell scripts/patch-non-local-includes.sh \
 	$(PREFIX)/xtensa-lx106-elf/sysroot/usr/include \
 )
 
-include makefiles/include/targets.mk
+include makefiles/include/install.mk

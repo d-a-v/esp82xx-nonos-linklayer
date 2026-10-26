@@ -1,24 +1,16 @@
-.PHONY: clean build install
-.DEFAULT: all
-
-ifndef PREFIX
-$(error $$PREFIX must be set to esp8266 Core root directory)
-endif
-
-ifeq ($(PREFIX),)
-$(error $$PREFIX cannot be empty)
-endif
-
+-include .config.mk
 include makefiles/include/common.mk
 
-export TOOLS ?= $(PREFIX)/tools/xtensa-lx106-elf/bin/
-export SDK ?= $(PREFIX)/tools/sdk
-export LIBS ?= $(PREFIX)/tools/sdk/lib
-export INC ?= $(SDK)/lwip2/include
+maybe-prefix = $(if $(PREFIX),$(PREFIX)/$(1),$(error prefix must be set to esp8266 Core root directory))
+
+export TOOLS ?= $(call maybe-prefix,tools/xtensa-lx106-elf/bin)
+export SDK ?= $(call maybe-prefix,tools/sdk)
+export LIBS ?= $(call maybe-prefix,tools/sdk/lib)
+export INC ?= $(call maybe-prefix,lwip2/include)
 
 export LWIP14_INCLUDE_DIR ?= $(ROOT)/glue-esp/lwip-1.4-arduino/include
 
-export PREFIX_TARGET = arduino
-export DEFINE_TARGET = ARDUINO
+export PREFIX_TARGET := arduino
+export DEFINE_TARGET := ARDUINO
 
-include makefiles/include/targets.mk
+include makefiles/include/install.mk

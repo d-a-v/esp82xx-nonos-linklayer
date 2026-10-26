@@ -1,45 +1,3 @@
-ifeq ($(PREFIX_TARGET),)
-$(error $$PREFIX_TARGET cannot be empty)
-endif
-
-TARGETS = \
-	liblwip2-536.a \
-	liblwip2-536-feat.a \
-	liblwip6-536-feat.a \
-	liblwip2-1460.a \
-	liblwip2-1460-feat.a \
-	liblwip6-1460-feat.a
-
-TARGET_FLAGS_liblwip2-536.a = \
-	TCP_MSS=536 \
-	LWIP_FEATURES=0 \
-	LWIP_IPV6=0
-
-TARGET_FLAGS_liblwip2-1460.a = \
-	TCP_MSS=1460 \
-	LWIP_FEATURES=0 \
-	LWIP_IPV6=0
-
-TARGET_FLAGS_liblwip2-536-feat.a = \
-	TCP_MSS=536 \
-	LWIP_FEATURES=1 \
-	LWIP_IPV6=0
-
-TARGET_FLAGS_liblwip2-1460-feat.a = \
-	TCP_MSS=1460 \
-	LWIP_FEATURES=1 \
-	LWIP_IPV6=0
-
-TARGET_FLAGS_liblwip6-536-feat.a = \
-	TCP_MSS=536 \
-	LWIP_FEATURES=1 \
-	LWIP_IPV6=1
-
-TARGET_FLAGS_liblwip6-1460-feat.a = \
-	TCP_MSS=1460 \
-	LWIP_FEATURES=1 \
-	LWIP_IPV6=1
-
 BUILD_TARGETS = $(addprefix $(BUILD_ROOT)/,$(TARGETS))
 
 BUILD_HEADERS = $(BUILD_ROOT)/lwip-git-hash.h $(BUILD_ROOT)/lwip-err-t.h
@@ -80,7 +38,7 @@ $(BUILD_ROOT)/lwip-git-hash.h: $(GLUE_GIT_HEAD) $(LWIP_GIT_HEAD) $(ROOT)/glue-lw
 
 define build-target-archive
 $$(BUILD_ROOT)/$(1):
-	$$(MAKE) -f makefiles/Makefile.build-lwip2 $$(or $$(TARGET_FLAGS_$(1)),$$(error no target flags defined for $(1))) $$@
+	$$(MAKE) -f makefiles/Makefile.build-lwip2 $$(or $$($(1)_FLAGS),$$(error no flags defined for $(1))) $$@
 endef
 $(foreach target,$(TARGETS),$(eval $(call build-target-archive,$(target))))
 
@@ -106,7 +64,7 @@ GLUE_HEADERS = \
 	$(ROOT)/glue/gluedebug.h \
 	$(ROOT)/glue-lwip/$(PREFIX_TARGET)/lwipopts.h
 
-ifneq ($(PREFIX_TARGET), arduino)
+ifneq ($(PREFIX_TARGET),arduino)
 GLUE_HEADERS += \
 	$(ROOT)/glue-lwip/lwip/apps-esp/dhcpserver.h
 endif

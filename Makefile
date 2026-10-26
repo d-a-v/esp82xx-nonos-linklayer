@@ -1,3 +1,8 @@
+.config.mk:
+	@cp makefiles/default-config.mk $@
+
+include .config.mk
+
 include makefiles/include/common.mk
 include makefiles/include/version.mk
 
