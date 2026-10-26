@@ -60,18 +60,27 @@ GEN = $(VERBGEN)
 $(BUILD_ROOT):
 	@mkdir -p $@
 
+# no-op, but required for sdk headers
 $(BUILD_ROOT)/user_config.h: | $(BUILD_ROOT)
 	$(GEN) touch $@
 
-$(BUILD_ROOT)/lwip-err-t.h: $(LWIP14_INCLUDE_DIR)/arch/cc.h | $(BUILD_ROOT)
-	$(GEN) /usr/bin/env bash makefiles/make-err-t $< > $@
+# legacy typedefs from arch/cc.h
+$(BUILD_ROOT)/lwip-err-t.h: $(LWIP14_INCLUDE_DIR)/arch/cc.h $(ROOT)/glue-lwip/lwip-err-t.h.in | $(BUILD_ROOT)
+	$(GEN) /usr/bin/env bash scripts/make-err-t.sh \
+		"$(LWIP14_INCLUDE_DIR)/arch/cc.h" \
+		"$(ROOT)/glue-lwip/lwip-err-t.h.in" \
+		"$@"
 
-$(BUILD_ROOT)/lwip-git-hash.h: $(GLUE_GIT_HEAD) $(LWIP_GIT_HEAD) | $(BUILD_ROOT)
-	$(GEN) /usr/bin/env bash makefiles/make-lwip-hash $(LWIP_ROOT) > $@
+# version info string
+$(BUILD_ROOT)/lwip-git-hash.h: $(GLUE_GIT_HEAD) $(LWIP_GIT_HEAD) $(ROOT)/glue-lwip/lwip-git-hash.h.in | $(BUILD_ROOT)
+	$(GEN) /usr/bin/env bash scripts/make-lwip-hash.sh \
+		"$(LWIP_ROOT)" \
+		"$(ROOT)/glue-lwip/lwip-git-hash.h.in" \
+		"$@"
 
 define build-target-archive
 $$(BUILD_ROOT)/$(1):
-	$$(MAKE) -f makefiles/Makefile.build-lwip2 $$(TARGET_FLAGS_$(1)) $$@
+	$$(MAKE) -f makefiles/Makefile.build-lwip2 $$(or $$(TARGET_FLAGS_$(1)),$$(error no target flags defined for $(1))) $$@
 endef
 $(foreach target,$(TARGETS),$(eval $(call build-target-archive,$(target))))
 
@@ -80,8 +89,9 @@ INSTALL_TARGETS = $(addprefix $(LIBS)/,$(TARGETS))
 $(INSTALL_TARGETS): $(LIBS)/%.a: $(BUILD_ROOT)/%.a
 	$(CP) $< $@
 
+# xxx: no-op for arduino, but note that we ship another one w/ the Core includes
 $(INC)/espconn.h: $(ROOT)/glue-lwip/lwip/apps-esp/espconn.h
-ifneq ($(PREFIX_TARGET), arduino)
+ifneq ($(PREFIX_TARGET),arduino)
 	$(CP) $< $@
 else
 	$(GEN) touch $@
