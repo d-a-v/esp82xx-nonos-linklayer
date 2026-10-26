@@ -14,11 +14,11 @@ export LWIP14_INCLUDE_DIR=$(PREFIX)/../sdk/third_party/include
 export PREFIX_TARGET = open
 export DEFINE_TARGET = OPENSDK
 
-$(shell makefiles/patch-vendor-lwip14 \
+$(shell scripts/patch-vendor-lwip14.sh \
 	$(LWIP14_INCLUDE_DIR) \
 )
 
-$(shell makefiles/patch-non-local-includes \
+$(shell scripts/patch-non-local-includes.sh \
 	$(PREFIX)/xtensa-lx106-elf/sysroot/usr/include \
 )
 
