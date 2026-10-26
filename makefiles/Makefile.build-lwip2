@@ -3,6 +3,9 @@ include makefiles/include/defs.mk
 export BUILD
 export LWIP_LIB
 
+export CFLAGS += $(LWIP_CFLAGS)
+export CPPFLAGS += $(LWIP_CPPFLAGS)
+
 $(BUILD_ROOT)/%.a: BUILD=$(BUILD_ROOT)/build_$(@F)
 $(BUILD_ROOT)/%.a: LWIP_LIB=$(BUILD_ROOT)/$(@F)
 $(BUILD_ROOT)/%.a:

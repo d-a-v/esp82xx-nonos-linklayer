@@ -11,6 +11,6 @@ export INC ?= $(call maybe-prefix,lwip2/include)
 export LWIP14_INCLUDE_DIR ?= $(ROOT)/glue-esp/lwip-1.4-arduino/include
 
 export PREFIX_TARGET := arduino
-export DEFINE_TARGET := ARDUINO
+export CPPFLAGS += -DARDUINO=1
 
 include makefiles/include/install.mk

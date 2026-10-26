@@ -18,12 +18,7 @@ $(BUILD):
 	@mkdir -p $(BUILD)
 
 $(OBJ): $(BUILD)/%.o: %.c
-	$(CC) \
-        -c \
-        $(BUILD_FLAGS) \
-        $(BUILD_DEFINES) \
-        $(BUILD_INCLUDES) \
-        $< -o $@
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
 
 OBJDIRS := $(sort $(dir $(OBJ)))
 $(OBJDIRS): $(SRC)

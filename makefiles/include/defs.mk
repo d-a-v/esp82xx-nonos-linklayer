@@ -7,12 +7,15 @@ VERBAR :=
 endif
 
 TOOLS ?=
-TARGET := xtensa-lx106-elf
+TRIPLE := xtensa-lx106-elf
 
-CC = $(VERBCC) $(TOOLS)$(TARGET)-gcc
-AR = $(VERBAR) $(TOOLS)$(TARGET)-ar
+TRIPLE_GCC := $(if $(TOOLS),$(TOOLS)/$(TRIPLE)-gcc,$(TRIPLE)-gcc)
+TRIPLE_AR := $(if $(TOOLS),$(TOOLS)/$(TRIPLE)-ar,$(TRIPLE)-ar)
 
-BUILD_FLAGS += \
+CC = $(VERBCC) $(TRIPLE_GCC)
+AR = $(VERBAR) $(TRIPLE_AR)
+
+CFLAGS += \
 	-std=gnu99 \
 	-MMD \
 	-Wall \
@@ -30,18 +33,10 @@ BUILD_FLAGS += \
 	-ffunction-sections \
 	-fdata-sections
 
-ifeq ($(DEFINE_TARGET),)
-$(error $$DEFINE_TARGET cannot be empty)
-endif
-
-BUILD_DEFINES = \
+CPPFLAGS += \
 	-U__STRICT_ANSI__ \
 	-D__ets__ \
 	-DICACHE_FLASH \
 	-DLWIP_OPEN_SRC \
 	-DLWIP_BUILD \
-	-DUSE_OPTIMIZE_PRINTF \
-	-D$(DEFINE_TARGET)=1 \
-	-DTCP_MSS=$(TCP_MSS) \
-	-DLWIP_FEATURES=$(LWIP_FEATURES) \
-	-DLWIP_IPV6=$(LWIP_IPV6)
+	-DUSE_OPTIMIZE_PRINTF

@@ -11,7 +11,7 @@ export INC ?= $(call maybe-sdk,include/lwip2)
 export LWIP14_INCLUDE_DIR := $(call maybe-prefix,../sdk/third_party/include)
 
 export PREFIX_TARGET := open
-export DEFINE_TARGET := OPENSDK
+export CPPFLAGS += -DOPENSDK=1
 
 $(shell scripts/patch-vendor-lwip14.sh \
 	$(LWIP14_INCLUDE_DIR) \

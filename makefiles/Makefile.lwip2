@@ -1,7 +1,7 @@
 
 # this one is executed from directory lwip2-src/src/
 
-SRC = \
+SRC := \
 	netif/ethernet.c \
 	$(wildcard netif/ppp/*.c) \
 	$(wildcard core/*.c) \
@@ -11,7 +11,7 @@ SRC = \
 	$(wildcard apps/sntp/*.c) \
 	$(wildcard apps/mdns/*.c)
 
-BUILD_INCLUDES = \
+CPPFLAGS += \
 	-I$(BUILD_ROOT) \
 	-I$(SDK)/include \
 	-I$(ROOT)/glue \

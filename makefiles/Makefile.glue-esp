@@ -8,10 +8,10 @@ ifndef LWIP14_INCLUDE_DIR
 $(error LWIP14_INCLUDE_DIR must point to espressif sdk lwip/include)
 endif
 
-SRC = $(wildcard glue-esp/*.c)
+SRC := $(wildcard glue-esp/*.c)
 
-BUILD_INCLUDES = -I$(BUILD_ROOT) -I$(SDK)/include -I$(LWIP14_INCLUDE_DIR) -I$(ROOT)/glue
-BUILD_FLAGS += -DLWIP14GLUE
+CPPFLAGS += -I$(BUILD_ROOT) -I$(SDK)/include -I$(LWIP14_INCLUDE_DIR) -I$(ROOT)/glue
+CPPFLAGS += -DLWIP14GLUE
 
 BUILD_COMPONENT := glue-esp
 

@@ -1,12 +1,10 @@
 # recipe is part of the build-lwip2
 
-include makefiles/include/defs.mk
-
 ifndef SDK
 $(error must provide SDK path)
 endif
 
-SRC = \
+SRC := \
 	glue/uprint.c \
 	glue-lwip/lwip-git.c \
 	glue-lwip/esp-ping.c \
@@ -22,7 +20,7 @@ SRC += \
 	glue-lwip/esp-millis.c
 endif
 
-BUILD_INCLUDES = \
+CPPFLAGS += \
 	-I$(BUILD_ROOT) \
 	-I$(ROOT)/glue \
 	-I$(ROOT)/glue-lwip \
@@ -32,6 +30,7 @@ BUILD_INCLUDES = \
 
 BUILD_COMPONENT := glue-lwip
 
+include makefiles/include/defs.mk
 include makefiles/include/rules.mk
 
 -include $(BUILD)/glue/*.d

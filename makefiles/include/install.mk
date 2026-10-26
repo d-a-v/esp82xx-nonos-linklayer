@@ -1,6 +1,6 @@
-BUILD_TARGETS = $(addprefix $(BUILD_ROOT)/,$(TARGETS))
+BUILD_TARGETS := $(addprefix $(BUILD_ROOT)/,$(TARGETS))
 
-BUILD_HEADERS = $(BUILD_ROOT)/lwip-git-hash.h $(BUILD_ROOT)/lwip-err-t.h
+BUILD_HEADERS := $(BUILD_ROOT)/lwip-git-hash.h $(BUILD_ROOT)/lwip-err-t.h
 
 $(BUILD_TARGETS): $(BUILD_ROOT)/user_config.h $(BUILD_HEADERS) | $(BUILD_ROOT)
 
@@ -37,12 +37,18 @@ $(BUILD_ROOT)/lwip-git-hash.h: $(GLUE_GIT_HEAD) $(LWIP_GIT_HEAD) $(ROOT)/glue-lw
 		"$@"
 
 define build-target-archive
+$$(BUILD_ROOT)/$(1): LWIP_CFLAGS=$$($(1)_CFLAGS)
+$$(BUILD_ROOT)/$(1): LWIP_CPPFLAGS=$$($(1)_CPPFLAGS)
 $$(BUILD_ROOT)/$(1):
-	$$(MAKE) -f makefiles/Makefile.build-lwip2 $$(or $$($(1)_FLAGS),$$(error no flags defined for $(1))) $$@
+	$$(MAKE) -f makefiles/Makefile.build-lwip2 \
+		LWIP_CFLAGS="$$(LWIP_CFLAGS)" \
+		LWIP_CPPFLAGS="$$(LWIP_CPPFLAGS)" \
+		$$@
+
 endef
 $(foreach target,$(TARGETS),$(eval $(call build-target-archive,$(target))))
 
-INSTALL_TARGETS = $(addprefix $(LIBS)/,$(TARGETS))
+INSTALL_TARGETS := $(addprefix $(LIBS)/,$(TARGETS))
 
 $(INSTALL_TARGETS): $(LIBS)/%.a: $(BUILD_ROOT)/%.a
 	$(CP) $< $@
@@ -75,10 +81,10 @@ $$(addprefix $$(INC)/,$$(notdir $(1))): $(1)
 endef
 $(foreach header,$(GLUE_HEADERS),$(eval $(call copy-headers-plain,$(header))))
 
-INSTALL_GLUE_HEADERS = $(addprefix $(INC)/,$(notdir $(GLUE_HEADERS)))
+INSTALL_GLUE_HEADERS := $(addprefix $(INC)/,$(notdir $(GLUE_HEADERS)))
 
-LWIP_INCLUDE = $(LWIP_ROOT)/src/include
-LWIP_HEADERS = \
+LWIP_INCLUDE := $(LWIP_ROOT)/src/include
+LWIP_HEADERS := \
 	$(wildcard $(LWIP_INCLUDE)/lwip/*.h) \
 	$(wildcard $(LWIP_INCLUDE)/lwip/apps/mdns*.h) \
 	$(wildcard $(LWIP_INCLUDE)/lwip/apps/sntp*.h) \
@@ -93,11 +99,11 @@ $$(subst $$(LWIP_INCLUDE)/,$$(INC)/,$(1)): $(1)
 endef
 $(foreach header,$(LWIP_HEADERS),$(eval $(call copy-headers-lwip,$(header))))
 
-INSTALL_LWIP_HEADERS = $(subst $(LWIP_INCLUDE)/,$(INC)/,$(LWIP_HEADERS))
+INSTALL_LWIP_HEADERS := $(subst $(LWIP_INCLUDE)/,$(INC)/,$(LWIP_HEADERS))
 
-INSTALL_HEADERS = $(INSTALL_LWIP_HEADERS) $(INSTALL_GLUE_HEADERS) $(INC)/arch/cc.h $(INC)/espconn.h
+INSTALL_HEADERS := $(INSTALL_LWIP_HEADERS) $(INSTALL_GLUE_HEADERS) $(INC)/arch/cc.h $(INC)/espconn.h
 
-INSTALL_DIRS = $(sort $(dir $(INSTALL_HEADERS)))
+INSTALL_DIRS := $(sort $(dir $(INSTALL_HEADERS)))
 $(INSTALL_DIRS):
 	@mkdir -p $@
 
