@@ -1,11 +1,21 @@
-OBJ = $(shell find $(BUILD) -name "*.o")
-
-$(BUILD)/$(LWIP_LIB): $(OBJ)
-	$(AR) cru $@ $?
-
-$(BUILD_ROOT)/$(LWIP_LIB): $(BUILD)/$(LWIP_LIB)
-	@cp $< $@
-
-all: $(BUILD_ROOT)/$(LWIP_LIB)
+# recipe is part of the build-lwip2
 
 include $(ROOT)/makefiles/include/defs.mk
+
+include $(BUILD)/glue-esp.d
+include $(BUILD)/glue-lwip.d
+include $(BUILD)/lwip2.d
+
+.PHONY: all
+all: $(LWIP_LIB)
+
+# .a is a flat archive, make sure .o is unique
+# .o paths expected to mirror source locations
+$(LWIP_LIB):
+	mkdir -p $(BUILD)/archive_$(notdir $(LWIP_LIB))
+	(set -e; cd $(BUILD)/archive_$(notdir $(LWIP_LIB)); \
+		for f in $?; do \
+			cp $$f $$(realpath --relative-to="$(BUILD)" $$f | tr '/-' '_'); \
+		done)
+	$(AR) cDr $@ $(BUILD)/archive_$(notdir $(LWIP_LIB))/*.o
+	rm -rf $(BUILD)/archive_$(notdir $(LWIP_LIB))

@@ -1,13 +1,12 @@
-include makefiles/include/version.mk
 include makefiles/include/defs.mk
 
 export BUILD
 export LWIP_LIB
 
-$(BUILD_ROOT)/%.a: LWIP_LIB = $(@F)
-$(BUILD_ROOT)/%.a: BUILD = $(BUILD_ROOT)/build_$(@F)
+$(BUILD_ROOT)/%.a: BUILD=$(BUILD_ROOT)/build_$(@F)
+$(BUILD_ROOT)/%.a: LWIP_LIB=$(BUILD_ROOT)/$(@F)
 $(BUILD_ROOT)/%.a:
 	$(MAKE) -f makefiles/Makefile.glue-esp build
 	$(MAKE) -f makefiles/Makefile.glue-lwip build
 	$(MAKE) -C $(LWIP_ROOT)/src -f $(ROOT)/makefiles/Makefile.lwip2 build
-	$(MAKE) -f makefiles/Makefile.archive-lwip2 $@
+	$(MAKE) -f makefiles/Makefile.archive-lwip2

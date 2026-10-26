@@ -19,6 +19,8 @@ BUILD_INCLUDES = \
 	-I$(ROOT)/glue-lwip/$(PREFIX_TARGET) \
 	-I$(LWIP_ROOT)/src/include
 
+BUILD_COMPONENT := lwip2
+
 include $(ROOT)/makefiles/include/defs.mk
 include $(ROOT)/makefiles/include/rules.mk
 

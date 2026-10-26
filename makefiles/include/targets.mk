@@ -46,16 +46,19 @@ BUILD_HEADERS = $(BUILD_ROOT)/lwip-git-hash.h $(BUILD_ROOT)/lwip-err-t.h
 
 $(BUILD_TARGETS): $(BUILD_ROOT)/user_config.h $(BUILD_HEADERS) | $(BUILD_ROOT)
 
-$(BUILD_ROOT):
-	@mkdir -p $@
-
 ifeq ($(V), 0)
+VERBCP = @echo "CP $@";
 VERBGEN = @echo "GEN $@";
 else
-VERBGEN =
+VERBCP :=
+VERBGEN :=
 endif
 
+CP = $(VERBCP) cp
 GEN = $(VERBGEN)
+
+$(BUILD_ROOT):
+	@mkdir -p $@
 
 $(BUILD_ROOT)/user_config.h: | $(BUILD_ROOT)
 	$(GEN) touch $@
@@ -66,33 +69,26 @@ $(BUILD_ROOT)/lwip-err-t.h: $(LWIP14_INCLUDE_DIR)/arch/cc.h | $(BUILD_ROOT)
 $(BUILD_ROOT)/lwip-git-hash.h: $(GLUE_GIT_HEAD) $(LWIP_GIT_HEAD) | $(BUILD_ROOT)
 	$(GEN) /usr/bin/env bash makefiles/make-lwip-hash $(LWIP_ROOT) > $@
 
-define BUILD_TARGET_ARCHIVE
+define build-target-archive
 $$(BUILD_ROOT)/$(1):
 	$$(MAKE) -f makefiles/Makefile.build-lwip2 $$(TARGET_FLAGS_$(1)) $$@
 endef
-$(foreach target,$(TARGETS),$(eval $(call BUILD_TARGET_ARCHIVE,$(target))))
-
-ifeq ($(V), 0)
-VERBCOPY = @echo "CP $@";
-else
-VERBCOPY =
-endif
-
-COPY = $(VERBCOPY) cp
+$(foreach target,$(TARGETS),$(eval $(call build-target-archive,$(target))))
 
 INSTALL_TARGETS = $(addprefix $(LIBS)/,$(TARGETS))
+
 $(INSTALL_TARGETS): $(LIBS)/%.a: $(BUILD_ROOT)/%.a
-	$(COPY) $< $@
+	$(CP) $< $@
 
 $(INC)/espconn.h: $(ROOT)/glue-lwip/lwip/apps-esp/espconn.h
 ifneq ($(PREFIX_TARGET), arduino)
-	$(COPY) $< $@
+	$(CP) $< $@
 else
 	$(GEN) touch $@
 endif
 
 $(INC)/arch/cc.h: $(ROOT)/glue-lwip/arch/cc.h
-	$(COPY) $< $@
+	$(CP) $< $@
 
 GLUE_HEADERS = \
 	$(BUILD_HEADERS) \
@@ -105,11 +101,11 @@ GLUE_HEADERS += \
 	$(ROOT)/glue-lwip/lwip/apps-esp/dhcpserver.h
 endif
 
-define COPY_HEADERS_PLAIN
+define copy-headers-plain
 $$(addprefix $$(INC)/,$$(notdir $(1))): $(1)
-	$$(COPY) $$< $$@
+	$$(CP) $$< $$@
 endef
-$(foreach header,$(GLUE_HEADERS),$(eval $(call COPY_HEADERS_PLAIN,$(header))))
+$(foreach header,$(GLUE_HEADERS),$(eval $(call copy-headers-plain,$(header))))
 
 INSTALL_GLUE_HEADERS = $(addprefix $(INC)/,$(notdir $(GLUE_HEADERS)))
 
@@ -123,11 +119,11 @@ LWIP_HEADERS = \
 	$(wildcard $(LWIP_INCLUDE)/netif/*.h) \
 	$(wildcard $(LWIP_INCLUDE)/netif/ppp/*.h)
 
-define COPY_HEADERS_LWIP
+define copy-headers-lwip
 $$(subst $$(LWIP_INCLUDE)/,$$(INC)/,$(1)): $(1)
-	$$(COPY) $$< $$@
+	$$(CP) $$< $$@
 endef
-$(foreach header,$(LWIP_HEADERS),$(eval $(call COPY_HEADERS_LWIP,$(header))))
+$(foreach header,$(LWIP_HEADERS),$(eval $(call copy-headers-lwip,$(header))))
 
 INSTALL_LWIP_HEADERS = $(subst $(LWIP_INCLUDE)/,$(INC)/,$(LWIP_HEADERS))
 
@@ -140,13 +136,13 @@ $(INSTALL_DIRS):
 $(INSTALL_HEADERS): | $(INSTALL_DIRS)
 
 build: $(BUILD_TARGETS)
-install: $(INSTALL_TARGETS) $(INSTALL_HEADERS)
 
+.PHONY: install clean all
+
+install: $(INSTALL_TARGETS) $(INSTALL_HEADERS)
 clean:
-	-rm -r $(BUILD_ROOT)
-	-rm -r $(INC)
-	-for lib in $(INSTALL_TARGETS) ; do \
-		rm $$lib; \
-	done
+	@-rm -r $(BUILD_ROOT)
+	@-rm -r $(INC)
+	@-rm $(INSTALL_TARGETS)
 
 all: $(INSTALL_TARGETS) $(INSTALL_HEADERS)

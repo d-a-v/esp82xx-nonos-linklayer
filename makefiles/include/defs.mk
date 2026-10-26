@@ -1,16 +1,16 @@
 ifeq ($(V), 0)
-VERBC = @echo "CC $@";
+VERBCC = @echo "CC $@";
 VERBAR = @echo "AR $@";
 else
-VERBC =
-VERBAR = 
+VERBCC :=
+VERBAR :=
 endif
 
-CC = $(VERBC) $(TOOLS)gcc
+TOOLS ?=
+TARGET := xtensa-lx106-elf
 
-AR = $(VERBAR) $(TOOLS)ar
-OC = $(TOOLS)objcopy
-OD = $(TOOLS)objdump
+CC = $(VERBCC) $(TOOLS)$(TARGET)-gcc
+AR = $(VERBAR) $(TOOLS)$(TARGET)-ar
 
 BUILD_FLAGS += \
 	-std=gnu99 \
@@ -20,8 +20,9 @@ BUILD_FLAGS += \
 	-Wpointer-arith \
 	-Os \
 	-g \
-	-free -fipa-pta -Wl,-EL \
-	-fno-inline-functions \
+	-free \
+	-fipa-pta \
+	-Wl,-EL \
 	-nostdlib \
 	-mlongcalls \
 	-mtext-section-literals \

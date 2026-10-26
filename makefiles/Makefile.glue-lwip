@@ -1,5 +1,4 @@
-
-# compiling glue-lwip/
+# recipe is part of the build-lwip2
 
 include makefiles/include/defs.mk
 
@@ -30,6 +29,8 @@ BUILD_INCLUDES = \
 	-I$(ROOT)/glue-lwip/$(PREFIX_TARGET) \
 	-I$(LWIP_ROOT)/src/include \
 	-I$(SDK)/include
+
+BUILD_COMPONENT := glue-lwip
 
 include makefiles/include/rules.mk
 

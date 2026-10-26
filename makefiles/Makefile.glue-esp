@@ -1,3 +1,5 @@
+# recipe is part of the build-lwip2
+
 ifndef SDK
 $(error SDK must point to espressif sdk folder)
 endif
@@ -11,9 +13,9 @@ SRC = $(wildcard glue-esp/*.c)
 BUILD_INCLUDES = -I$(BUILD_ROOT) -I$(SDK)/include -I$(LWIP14_INCLUDE_DIR) -I$(ROOT)/glue
 BUILD_FLAGS += -DLWIP14GLUE
 
+BUILD_COMPONENT := glue-esp
+
 include makefiles/include/defs.mk
 include makefiles/include/rules.mk
 
 -include $(BUILD)/glue-esp/*.d
-
-.DEFAULT: all

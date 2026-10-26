@@ -11,7 +11,7 @@ endif
 
 include makefiles/include/common.mk
 
-export TOOLS ?= $(PREFIX)/tools/xtensa-lx106-elf/bin/xtensa-lx106-elf-
+export TOOLS ?= $(PREFIX)/tools/xtensa-lx106-elf/bin/
 export SDK ?= $(PREFIX)/tools/sdk
 export LIBS ?= $(PREFIX)/tools/sdk/lib
 export INC ?= $(SDK)/lwip2/include
