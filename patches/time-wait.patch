@@ -1,44 +1,70 @@
-diff --git a/src/core/tcp.c b/src/core/tcp.c
-index 34e1ac2..4894c50 100644
---- a/src/core/tcp.c
-+++ b/src/core/tcp.c
-@@ -1786,7 +1786,7 @@ tcp_kill_state(enum tcp_state state)
-  * Kills the oldest connection that is in TIME_WAIT state.
-  * Called from tcp_alloc() if no more connections are available.
-  */
--static void
-+void
- tcp_kill_timewait(void)
- {
-   struct tcp_pcb *pcb, *inactive;
 diff --git a/src/core/tcp_in.c b/src/core/tcp_in.c
-index 2202e38..bb021c8 100644
+index 2202e381..43834a53 100644
 --- a/src/core/tcp_in.c
 +++ b/src/core/tcp_in.c
-@@ -997,6 +997,8 @@ tcp_process(struct tcp_pcb *pcb)
+@@ -65,6 +65,40 @@
+ #include LWIP_HOOK_FILENAME
+ #endif
+ 
++/*
++   --------------------------------------------------
++   ----------------- TIME-WAIT tweak ----------------
++   --------------------------------------------------
++   port @me-no-dev time-wait tweak
++   https://github.com/esp8266/Arduino/commit/07f4d4c241df2c552899857f39a4295164f686f2#diff-f8258e71e25fb9985ca3799e3d8b88ecR399
++
++   port @scardus patch to limit already waiting pcbs
++   https://github.com/d-a-v/esp82xx-nonos-linklayer/commit/42d4cc2e2d83f10d8a34502ae1303b3bb45eb030
++*/
++
++/* tcp.c internal non-static func not exported by tcp_priv.h */
++void tcp_kill_timewait (void);
++
++static inline void
++tcp_kill_timewait_limit(u32_t limit)
++{
++  if (!tcp_tw_pcbs)
++    return;
++
++  u32_t count = 0;
++  for (struct tcp_pcb* tmp = tcp_tw_pcbs; tmp != NULL; tmp = tmp->next)
++    ++count;
++
++  /* lt vs. le, always process the most recent one */
++  if (count < limit)
++    return;
++
++  /* kills the oldest pcb in TW state, one at a time */
++  count -= limit;
++  for (u32_t n = 0; n < count; ++n)
++    tcp_kill_timewait();
++}
++
+ /** Initial CWND calculation as defined RFC 2581 */
+ #define LWIP_TCP_CALC_INITIAL_CWND(mss) ((tcpwnd_size_t)LWIP_MIN((4U * (mss)), LWIP_MAX((2U * (mss)), 4380U)))
+ 
+@@ -997,6 +1031,7 @@ tcp_process(struct tcp_pcb *pcb)
            tcp_pcb_purge(pcb);
            TCP_RMV_ACTIVE(pcb);
            pcb->state = TIME_WAIT;
-+          /* limit before TCP_REG, so tcp_kill_timewait() cannot pick this pcb */
-+          TCP_TW_LIMIT(MEMP_NUM_TCP_PCB_TIME_WAIT - 1);
++          tcp_kill_timewait_limit(MEMP_NUM_TCP_PCB_TIME_WAIT);
            TCP_REG(&tcp_tw_pcbs, pcb);
          } else {
            tcp_ack_now(pcb);
-@@ -1015,6 +1017,8 @@ tcp_process(struct tcp_pcb *pcb)
+@@ -1015,6 +1050,7 @@ tcp_process(struct tcp_pcb *pcb)
          tcp_pcb_purge(pcb);
          TCP_RMV_ACTIVE(pcb);
          pcb->state = TIME_WAIT;
-+        /* limit before TCP_REG, so tcp_kill_timewait() cannot pick this pcb */
-+        TCP_TW_LIMIT(MEMP_NUM_TCP_PCB_TIME_WAIT - 1);
++        tcp_kill_timewait_limit(MEMP_NUM_TCP_PCB_TIME_WAIT);
          TCP_REG(&tcp_tw_pcbs, pcb);
        }
        break;
-@@ -1025,6 +1029,8 @@ tcp_process(struct tcp_pcb *pcb)
+@@ -1025,6 +1061,7 @@ tcp_process(struct tcp_pcb *pcb)
          tcp_pcb_purge(pcb);
          TCP_RMV_ACTIVE(pcb);
          pcb->state = TIME_WAIT;
-+        /* limit before TCP_REG, so tcp_kill_timewait() cannot pick this pcb */
-+        TCP_TW_LIMIT(MEMP_NUM_TCP_PCB_TIME_WAIT - 1);
++        tcp_kill_timewait_limit(MEMP_NUM_TCP_PCB_TIME_WAIT);
          TCP_REG(&tcp_tw_pcbs, pcb);
        }
        break;
+
