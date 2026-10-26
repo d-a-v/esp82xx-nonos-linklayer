@@ -8,16 +8,16 @@ include makefiles/include/version.mk
 
 .DEFAULT: all
 
-LWIP_GIT_REPO = https://github.com/lwip-tcpip/lwip
+LWIP_GIT_REPO := https://github.com/lwip-tcpip/lwip
 
-PATCHES = $(wildcard $(ROOT)/patches/*.patch)
-OPEN_SDK_PATCHES = $(ROOT)/patches/open/sdk-mem-macros.patch
+PATCHES := $(wildcard $(ROOT)/patches/*.patch)
+OPEN_SDK_PATCHES := $(ROOT)/patches/open/sdk-mem-macros.patch
 
 all: arduino
 
 lwip/upstream:
-	@if test ! -e "$(LWIP_ROOT)" ; then \
-		mkdir $(LWIP_ROOT); \
+	@if test ! -d "$(LWIP_ROOT)" ; then \
+		mkdir -p $(LWIP_ROOT); \
 		git -C $(LWIP_ROOT) init ; \
 		git -C $(LWIP_ROOT) remote add origin $(LWIP_GIT_REPO) ; \
 	fi
@@ -25,17 +25,17 @@ lwip/upstream:
 	@git -C $(LWIP_ROOT) fetch origin $(UPSTREAM_VERSION):refs/tags/$(UPSTREAM_VERSION)
 
 lwip/clean:
-	@git -C $(LWIP_ROOT) clean -f
+	@git -C $(LWIP_ROOT) clean -f -x -d
 	@git -C $(LWIP_ROOT) checkout -f $(UPSTREAM_VERSION)
 
 lwip/patch:
 	@for p in $(PATCHES); do \
-		echo "PATCH $$p"; patch -d $(LWIP_ROOT) -p1 < $$p; \
+		(set -ex; patch -d $(LWIP_ROOT) -p1 -i $$p); \
 	done
 
 lwip/patch-open: lwip/patch
 	@for p in $(OPEN_SDK_PATCHES); do \
-		echo "PATCH $$p"; patch -d $(LWIP_ROOT) -p1 < $$p; \
+		(set -ex; patch -d $(LWIP_ROOT) -p1 -i $$p); \
 	done
 
 lwip:
