@@ -1,4 +1,3 @@
-
 # this one is executed from directory lwip2-src/src/
 
 SRC := \
