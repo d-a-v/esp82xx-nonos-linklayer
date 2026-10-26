@@ -15,7 +15,7 @@ $(LWIP_LIB):
 	mkdir -p $(BUILD)/archive_$(notdir $(LWIP_LIB))
 	(set -e; cd $(BUILD)/archive_$(notdir $(LWIP_LIB)); \
 		for f in $?; do \
-			cp $$f $$(realpath --relative-to="$(BUILD)" $$f | tr '/-' '_'); \
+			cp -l $$f $$(realpath --relative-to="$(BUILD)" $$f | tr '/-' '_'); \
 		done)
 	$(AR) cDr $@ $(BUILD)/archive_$(notdir $(LWIP_LIB))/*.o
 	rm -rf $(BUILD)/archive_$(notdir $(LWIP_LIB))
