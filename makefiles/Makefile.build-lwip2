@@ -4,9 +4,12 @@ export LWIP_LIB
 export CFLAGS += $(LWIP_CFLAGS)
 export CPPFLAGS += $(LWIP_CPPFLAGS)
 
+.FORCE:
+	@:
+
 $(BUILD_ROOT)/%.a: BUILD=$(BUILD_ROOT)/build_$(@F)
 $(BUILD_ROOT)/%.a: LWIP_LIB=$(BUILD_ROOT)/$(@F)
-$(BUILD_ROOT)/%.a:
+$(BUILD_ROOT)/%.a: .FORCE
 	$(MAKE) -f makefiles/Makefile.glue-esp build
 	$(MAKE) -f makefiles/Makefile.glue-lwip build
 	$(MAKE) -C $(LWIP_ROOT)/src -f $(ROOT)/makefiles/Makefile.lwip2 build

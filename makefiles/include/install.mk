@@ -36,7 +36,11 @@ $(BUILD_ROOT)/lwip-git-hash.h: $(GLUE_GIT_HEAD) $(LWIP_GIT_HEAD) $(ROOT)/glue-lw
 		"$(ROOT)/glue-lwip/lwip-git-hash.h.in" \
 		"$@"
 
+.FORCE:
+	@:
+
 define build-target-archive
+$$(BUILD_ROOT)/$(1): .FORCE
 $$(BUILD_ROOT)/$(1): LWIP_CFLAGS=$$($(1)_CFLAGS)
 $$(BUILD_ROOT)/$(1): LWIP_CPPFLAGS=$$($(1)_CPPFLAGS)
 $$(BUILD_ROOT)/$(1):
@@ -109,7 +113,7 @@ $(INSTALL_DIRS):
 
 $(INSTALL_HEADERS): | $(INSTALL_DIRS)
 
-build: $(BUILD_TARGETS)
+liblwip2: $(BUILD_TARGETS)
 
 .PHONY: install clean all
 
