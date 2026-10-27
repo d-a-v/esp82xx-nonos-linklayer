@@ -22,6 +22,4 @@ BUILD_COMPONENT := lwip2-src
 include $(ROOT)/makefiles/include/defs.mk
 include $(ROOT)/makefiles/include/rules.mk
 
--include $(BUILD)/lwip2-src/*.d
--include $(BUILD)/lwip2-src/*/*.d
--include $(BUILD)/lwip2-src/*/*/*.d
+-include $(shell find $(BUILD)/lwip2-src/ -name "*.mk")
