@@ -1,4 +1,7 @@
-.PHONY: build clean
+.PHONY: all clean static
+
+all: static
+	@:
 
 ifndef BUILD
 $(error $$BUILD must be set)
@@ -12,7 +15,7 @@ ifndef LWIP_LIB
 $(error $$LWIP_LIB must be set)
 endif
 
-OBJ := $(patsubst %.c,$(BUILD)/%.o,$(SRC))
+OBJ := $(patsubst %.c,$(BUILD)/$(BUILD_SUBDIR)%.o,$(SRC))
 
 $(BUILD):
 	@mkdir -p $(BUILD)
@@ -25,7 +28,7 @@ $(OBJDIRS): $(SRC)
 	@mkdir -p $@
 
 $(OBJ): | $(OBJDIRS) $(BUILD)
-liblwip2: $(OBJ)
+static: $(OBJ)
 
 clean:
 	-rm -r $(OBJDIRS)
@@ -40,8 +43,5 @@ $(BUILD)/$(BUILD_COMPONENT).d: $(OBJ)
 	echo '-include $(BUILD)/$(BUILD_COMPONENT)/*.d' >> $@
 	echo '-include $(BUILD)/$(BUILD_COMPONENT)/*/*.d' >> $@
 	echo '-include $(BUILD)/$(BUILD_COMPONENT)/*/*/*.d' >> $@
-ifeq ($(BUILD_COMPONENT),glue-lwip)
-	echo '-include $(BUILD)/glue/*.d' >> $@
-endif
 
-liblwip2: $(BUILD)/$(BUILD_COMPONENT).d
+static: $(BUILD)/$(BUILD_COMPONENT).d

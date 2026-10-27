@@ -2,9 +2,10 @@
 
 include $(ROOT)/makefiles/include/defs.mk
 
+include $(BUILD)/glue.d
 include $(BUILD)/glue-esp.d
 include $(BUILD)/glue-lwip.d
-include $(BUILD)/lwip2.d
+include $(BUILD)/lwip2-src.d
 
 .PHONY: all
 all: $(LWIP_LIB)

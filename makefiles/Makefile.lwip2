@@ -1,11 +1,12 @@
 # this one is executed from directory lwip2-src/src/
 
-LWIPDIR := .
+LWIPDIR := lwip2-src/src
 
-include Filelists.mk
+include $(LWIPDIR)/Filelists.mk
 
 SRC := \
 	$(LWIPNOAPPSFILES) \
+	$(MDNSFILES) \
 	$(SNTPFILES)
 
 CPPFLAGS += \
@@ -16,11 +17,11 @@ CPPFLAGS += \
 	-I$(ROOT)/glue-lwip/$(PREFIX_TARGET) \
 	-I$(LWIP_ROOT)/src/include
 
-BUILD_COMPONENT := lwip2
+BUILD_COMPONENT := lwip2-src
 
 include $(ROOT)/makefiles/include/defs.mk
 include $(ROOT)/makefiles/include/rules.mk
 
--include $(BUILD)/*/*.d
--include $(BUILD)/*/*/*.d
--include $(BUILD)/*/*/*/*.d
+-include $(BUILD)/lwip2-src/*.d
+-include $(BUILD)/lwip2-src/*/*.d
+-include $(BUILD)/lwip2-src/*/*/*.d

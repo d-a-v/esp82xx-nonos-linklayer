@@ -1,0 +1,19 @@
+# recipe is part of the build-lwip2
+
+SRC := \
+	glue/uprint.c
+
+CPPFLAGS += \
+	-I$(BUILD_ROOT) \
+	-I$(ROOT)/glue \
+	-I$(ROOT)/glue-lwip \
+	-I$(ROOT)/glue-lwip/$(PREFIX_TARGET) \
+	-I$(LWIP_ROOT)/src/include \
+	-I$(SDK)/include
+
+BUILD_COMPONENT := glue
+
+include makefiles/include/defs.mk
+include makefiles/include/rules.mk
+
+-include $(BUILD)/glue/*.d

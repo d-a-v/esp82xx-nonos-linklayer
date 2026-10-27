@@ -5,7 +5,6 @@ $(error must provide SDK path)
 endif
 
 SRC := \
-	glue/uprint.c \
 	glue-lwip/lwip-git.c \
 	glue-lwip/esp-ping.c \
 	glue-lwip/espconn.c \
@@ -33,5 +32,4 @@ BUILD_COMPONENT := glue-lwip
 include makefiles/include/defs.mk
 include makefiles/include/rules.mk
 
--include $(BUILD)/glue/*.d
 -include $(BUILD)/glue-lwip/*.d

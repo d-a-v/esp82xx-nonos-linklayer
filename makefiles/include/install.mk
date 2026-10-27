@@ -1,4 +1,8 @@
+.PHONY: static
+
 BUILD_TARGETS := $(addprefix $(BUILD_ROOT)/,$(TARGETS))
+
+static: $(BUILD_TARGETS)
 
 BUILD_HEADERS := $(BUILD_ROOT)/lwip-git-hash.h $(BUILD_ROOT)/lwip-err-t.h
 
@@ -112,8 +116,6 @@ $(INSTALL_DIRS):
 	@mkdir -p $@
 
 $(INSTALL_HEADERS): | $(INSTALL_DIRS)
-
-liblwip2: $(BUILD_TARGETS)
 
 .PHONY: install clean all
 
