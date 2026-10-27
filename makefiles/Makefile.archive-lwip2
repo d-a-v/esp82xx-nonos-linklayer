@@ -12,11 +12,14 @@ all: $(LWIP_LIB)
 
 # .a is a flat archive, make sure .o is unique
 # .o paths expected to mirror source locations
+
+ARCHIVE := $(BUILD_ROOT)/archive_$(notdir $(LWIP_LIB))
+
 $(LWIP_LIB):
-	mkdir -p $(BUILD)/archive_$(notdir $(LWIP_LIB))
-	(set -e; cd $(BUILD)/archive_$(notdir $(LWIP_LIB)); \
+	mkdir -p $(ARCHIVE)
+	(set -e; cd $(ARCHIVE); \
 		for f in $^; do \
 			cp -l $$f $$(realpath --relative-to="$(BUILD)" $$f | tr '/-' '_'); \
 		done)
-	$(AR) cDr $@ $(BUILD)/archive_$(notdir $(LWIP_LIB))/*.o
-	rm -rf $(BUILD)/archive_$(notdir $(LWIP_LIB))
+	$(AR) cDr $@ $(ARCHIVE)/*.o
+	rm -rf $(ARCHIVE)
