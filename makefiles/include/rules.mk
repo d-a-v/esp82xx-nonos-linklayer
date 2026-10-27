@@ -40,6 +40,6 @@ $(BUILD)/$(BUILD_COMPONENT).d: $(OBJ)
 	echo '.PHONY: $(notdir $(LWIP_LIB))' > $@
 	echo '$(notdir $(LWIP_LIB)): $(LWIP_LIB)' >> $@
 	echo '$(LWIP_LIB): $(OBJ)' >> $@
-	echo '-include $$(shell find $(BUILD)/$(BUILD_COMPONENT)/ -name "*.mk")' >> $@
+	echo '-include $$(shell find $(BUILD)/$(BUILD_COMPONENT)/ -name "*.d")' >> $@
 
 static: $(BUILD)/$(BUILD_COMPONENT).d
