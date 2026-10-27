@@ -9,18 +9,26 @@ BUILD_HEADERS := $(BUILD_ROOT)/lwip-git-hash.h $(BUILD_ROOT)/lwip-err-t.h
 $(BUILD_TARGETS): $(BUILD_ROOT)/user_config.h $(BUILD_HEADERS) | $(BUILD_ROOT)
 
 ifeq ($(V), 0)
-VERBCP = @echo "CP $@";
 VERBGEN = @echo "GEN $@";
+VERBINSTALL = @echo "INSTALL $@";
+VERBMKDIR = @echo "MKDIR $@";
+VERBRM = @echo "RM $@";
 else
-VERBCP :=
 VERBGEN :=
+VERBINSTALL :=
+VERBMKDIR :=
+VERBRM :=
 endif
 
-CP = $(VERBCP) cp
 GEN = $(VERBGEN)
+INSTALL = $(VERBINSTALL) install
+MKDIR = $(VERBMKDIR) mkdir
+RM = $(VERBRM) rm
+
+INSTALL_FILE = $(INSTALL) -m 644
 
 $(BUILD_ROOT):
-	@mkdir -p $@
+	$(MKDIR) -p $@
 
 # no-op, but required for sdk headers
 $(BUILD_ROOT)/user_config.h: | $(BUILD_ROOT)
@@ -59,40 +67,58 @@ $$(BUILD_ROOT)/$(1):
 endef
 $(foreach target,$(TARGETS),$(eval $(call build-target-archive,$(target))))
 
-INSTALL_TARGETS := $(addprefix $(LIBS)/,$(TARGETS))
+.PHONY: install
 
-$(INSTALL_TARGETS): $(LIBS)/%.a: $(BUILD_ROOT)/%.a
-	$(CP) $< $@
+.PHONY: install-targets
 
-# xxx: no-op for arduino, but note that we ship another one w/ the Core includes
-$(INC)/espconn.h: $(ROOT)/glue-lwip/lwip/apps-esp/espconn.h
-ifneq ($(PREFIX_TARGET),arduino)
-	$(CP) $< $@
-else
-	$(GEN) touch $@
-endif
+install-targets: $(BUILD_TARGETS)
+	$(INSTALL_FILE) $? $(LIBS)/
 
-$(INC)/arch/cc.h: $(ROOT)/glue-lwip/arch/cc.h
-	$(CP) $< $@
+install: install-targets
 
-GLUE_HEADERS = \
+.PHONY: install-headers
+
+install: install-headers
+
+# always at the root
+GLUE_HEADERS := \
 	$(BUILD_HEADERS) \
 	$(ROOT)/glue/glue.h \
 	$(ROOT)/glue/gluedebug.h \
 	$(ROOT)/glue-lwip/$(PREFIX_TARGET)/lwipopts.h
 
+# hierarchy does not matter here, these replace sdk headers
+GLUE_APP_HEADERS += \
+	$(ROOT)/glue-lwip/lwip/apps-esp/dhcpserver.h \
+	$(ROOT)/glue-lwip/lwip/apps-esp/espconn.h
+
+.PHONY: install-glue-headers
+
+install-glue-headers: $(GLUE_HEADERS)
+	$(MKDIR) -p $(INC)
+	$(INSTALL_FILE) -C $? $(INC)/
+
+install-headers: install-glue-headers
+
+# xxx: no-op for arduino, we ship a different versions w/ the Core
 ifneq ($(PREFIX_TARGET),arduino)
-GLUE_HEADERS += \
-	$(ROOT)/glue-lwip/lwip/apps-esp/dhcpserver.h
+GLUE_HEADERS += $(GLUE_APP_HEADERS)
+else
+.PHONY: install-stubs
+install-stubs: $(GLUE_APP_HEADERS)
+	$(GEN) touch $(addprefix $(INC)/,$(notdir $(?)))
+
+install-headers: install-stubs
 endif
 
-define copy-headers-plain
-$$(addprefix $$(INC)/,$$(notdir $(1))): $(1)
-	$$(CP) $$< $$@
-endef
-$(foreach header,$(GLUE_HEADERS),$(eval $(call copy-headers-plain,$(header))))
+.PHONY: install-arch-cc-header
 
-INSTALL_GLUE_HEADERS := $(addprefix $(INC)/,$(notdir $(GLUE_HEADERS)))
+# system info, hierarchy matters
+install-arch-cc-header: $(ROOT)/glue-lwip/arch/cc.h
+	$(MKDIR) -p $(INC)/arch
+	$(INSTALL_FILE) -C $< $(INC)/arch
+
+install-headers: install-arch-cc-header
 
 LWIP_INCLUDE := $(LWIP_ROOT)/src/include
 LWIP_HEADERS := \
@@ -104,28 +130,31 @@ LWIP_HEADERS := \
 	$(wildcard $(LWIP_INCLUDE)/netif/*.h) \
 	$(wildcard $(LWIP_INCLUDE)/netif/ppp/*.h)
 
-define copy-headers-lwip
-$$(subst $$(LWIP_INCLUDE)/,$$(INC)/,$(1)): $(1)
-	$$(CP) $$< $$@
+.PHONY: install-lwip-headers
+
+define install-header
+	$(INSTALL_FILE) -C $(1) $(subst $(LWIP_INCLUDE)/,$(INC)/,$(1))
+
 endef
-$(foreach header,$(LWIP_HEADERS),$(eval $(call copy-headers-lwip,$(header))))
 
-INSTALL_LWIP_HEADERS := $(subst $(LWIP_INCLUDE)/,$(INC)/,$(LWIP_HEADERS))
+# lwip distribution, hierarchy matters
+install-lwip-headers: $(LWIP_HEADERS)
+	$(MKDIR) -p $(sort $(addprefix $(INC)/,$(dir $(subst $(LWIP_INCLUDE)/,,$(?)))))
+	$(foreach header,$(?),$(call install-header,$(header)))
 
-INSTALL_HEADERS := $(INSTALL_LWIP_HEADERS) $(INSTALL_GLUE_HEADERS) $(INC)/arch/cc.h $(INC)/espconn.h
+install-headers: install-lwip-headers
 
-INSTALL_DIRS := $(sort $(dir $(INSTALL_HEADERS)))
-$(INSTALL_DIRS):
-	@mkdir -p $@
+.PHONY: clean
 
-$(INSTALL_HEADERS): | $(INSTALL_DIRS)
-
-.PHONY: install clean all
-
-install: $(INSTALL_TARGETS) $(INSTALL_HEADERS)
 clean:
-	@-rm -r $(BUILD_ROOT)
-	@-rm -r $(INC)
-	@-rm $(INSTALL_TARGETS)
+	$(RM) -rf $(BUILD_ROOT)
 
-all: $(INSTALL_TARGETS) $(INSTALL_HEADERS)
+.PHONY: uninstall
+
+uninstall:
+	$(RM) -rf $(INC)
+	$(RM) -f $(addprefix $(LIB)/,$(TARGETS))
+
+.PHONY: all
+
+all: install
