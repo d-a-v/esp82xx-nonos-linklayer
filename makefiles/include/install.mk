@@ -44,6 +44,9 @@ $(BUILD_ROOT)/lwip-git-hash.h: $(GLUE_GIT_HEAD) $(LWIP_GIT_HEAD) $(ROOT)/glue-lw
 	@:
 
 define build-target-archive
+.PHONY: $(1)
+$(1): $$(BUILD_ROOT)/$(1)
+
 $$(BUILD_ROOT)/$(1): .FORCE
 $$(BUILD_ROOT)/$(1): LWIP_CFLAGS=$$($(1)_CFLAGS)
 $$(BUILD_ROOT)/$(1): LWIP_CPPFLAGS=$$($(1)_CPPFLAGS)
