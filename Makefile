@@ -6,10 +6,10 @@ include .config.mk
 include makefiles/include/common.mk
 include makefiles/include/version.mk
 
-.PHONY: arduino/upstream arduino
-.PHONY: open-sdk/upstream open-sdk
+.PHONY: arduino/uninstall arduino/upstream arduino
+.PHONY: open-sdk/uninstall open-sdk/upstream open-sdk
 .PHONY: lwip/clean lwip/patch lwip/patch-open lwip
-.PHONY: all
+.PHONY: all clean
 
 .DEFAULT: all
 
@@ -48,6 +48,9 @@ lwip:
 	$(MAKE) lwip/clean
 	$(MAKE) lwip/patch
 
+open-sdk/uninstall:
+	$(MAKE) -f Makefile.open uninstall
+
 open-sdk/upstream:
 	$(MAKE) lwip
 	$(MAKE) lwip/patch-open
@@ -55,7 +58,11 @@ open-sdk/upstream:
 
 open-sdk:
 	$(MAKE) -f Makefile.open clean
+	$(MAKE) -f Makefile.open uninstall
 	$(MAKE) -f Makefile.open install
+
+arduino/uninstall:
+	$(MAKE) -f Makefile.arduino uninstall
 
 arduino/upstream:
 	$(MAKE) lwip
@@ -63,4 +70,8 @@ arduino/upstream:
 
 arduino:
 	$(MAKE) -f Makefile.arduino clean
+	$(MAKE) -f Makefile.arduino uninstall
 	$(MAKE) -f Makefile.arduino install
+
+clean:
+	@-rm -rf $(BUILD_ROOT)/
