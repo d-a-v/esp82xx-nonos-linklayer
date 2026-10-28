@@ -12,7 +12,7 @@ MKDIR := mkdir
 RM := rm
 
 INSTALL := install
-INSTALL_FILE := $(INSTALL) -m 644
+INSTALL_DATA := $(INSTALL) -m 644
 
 $(BUILD_ROOT):
 	$(MKDIR) -p $@
@@ -59,7 +59,7 @@ $(foreach target,$(TARGETS),$(eval $(call build-target-archive,$(target))))
 .PHONY: install-targets
 
 install-targets: $(BUILD_TARGETS)
-	$(INSTALL_FILE) $? $(LIBS)/
+	$(INSTALL_DATA) $? $(LIBS)/
 
 install: install-targets
 
@@ -83,7 +83,7 @@ GLUE_APP_HEADERS += \
 
 install-glue-headers: $(GLUE_HEADERS)
 	$(MKDIR) -p $(INC)
-	$(INSTALL_FILE) -C $? $(INC)/
+	$(INSTALL_DATA) -C $? $(INC)/
 
 install-headers: install-glue-headers
 
@@ -104,7 +104,7 @@ endif
 # system info, hierarchy matters
 install-arch-cc-header: $(ROOT)/glue-lwip/arch/cc.h
 	$(MKDIR) -p $(INC)/arch
-	$(INSTALL_FILE) -C $< $(INC)/arch
+	$(INSTALL_DATA) -C $< $(INC)/arch
 
 install-headers: install-arch-cc-header
 
@@ -121,7 +121,7 @@ LWIP_HEADERS := \
 .PHONY: install-lwip-headers
 
 define install-header
-	$(INSTALL_FILE) -C $(1) $(subst $(LWIP_INCLUDE)/,$(INC)/,$(1))
+	$(INSTALL_DATA) -C $(1) $(subst $(LWIP_INCLUDE)/,$(INC)/,$(1))
 
 endef
 
