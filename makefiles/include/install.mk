@@ -8,42 +8,29 @@ BUILD_HEADERS := $(BUILD_ROOT)/lwip-git-hash.h $(BUILD_ROOT)/lwip-err-t.h
 
 $(BUILD_TARGETS): $(BUILD_ROOT)/user_config.h $(BUILD_HEADERS) | $(BUILD_ROOT)
 
-ifeq ($(V), 0)
-VERBGEN = @echo "GEN $@";
-VERBINSTALL = @echo "INSTALL $@";
-VERBMKDIR = @echo "MKDIR $@";
-VERBRM = @echo "RM $@";
-else
-VERBGEN :=
-VERBINSTALL :=
-VERBMKDIR :=
-VERBRM :=
-endif
+MKDIR := mkdir
+RM := rm
 
-GEN = $(VERBGEN)
-INSTALL = $(VERBINSTALL) install
-MKDIR = $(VERBMKDIR) mkdir
-RM = $(VERBRM) rm
-
-INSTALL_FILE = $(INSTALL) -m 644
+INSTALL := install
+INSTALL_FILE := $(INSTALL) -m 644
 
 $(BUILD_ROOT):
 	$(MKDIR) -p $@
 
 # no-op, but required for sdk headers
 $(BUILD_ROOT)/user_config.h: | $(BUILD_ROOT)
-	$(GEN) touch $@
+	touch $@
 
 # legacy typedefs from arch/cc.h
 $(BUILD_ROOT)/lwip-err-t.h: $(LWIP14_INCLUDE_DIR)/arch/cc.h $(ROOT)/glue-lwip/lwip-err-t.h.in | $(BUILD_ROOT)
-	$(GEN) /usr/bin/env bash scripts/make-err-t.sh \
+	/usr/bin/env bash scripts/make-err-t.sh \
 		"$(LWIP14_INCLUDE_DIR)/arch/cc.h" \
 		"$(ROOT)/glue-lwip/lwip-err-t.h.in" \
 		"$@"
 
 # version info string
 $(BUILD_ROOT)/lwip-git-hash.h: $(GLUE_GIT_HEAD) $(LWIP_GIT_HEAD) $(ROOT)/glue-lwip/lwip-git-hash.h.in | $(BUILD_ROOT)
-	$(GEN) /usr/bin/env bash scripts/make-lwip-hash.sh \
+	/usr/bin/env bash scripts/make-lwip-hash.sh \
 		"$(LWIP_ROOT)" \
 		"$(ROOT)/glue-lwip/lwip-git-hash.h.in" \
 		"$@"
@@ -106,7 +93,8 @@ GLUE_HEADERS += $(GLUE_APP_HEADERS)
 else
 .PHONY: install-stubs
 install-stubs: $(GLUE_APP_HEADERS)
-	$(GEN) touch $(addprefix $(INC)/,$(notdir $(?)))
+	$(MKDIR) -p $(INC)
+	touch $(addprefix $(INC)/,$(notdir $(?)))
 
 install-headers: install-stubs
 endif
