@@ -21,7 +21,7 @@ $(BUILD):
 	@mkdir -p $(BUILD)
 
 $(OBJ): $(BUILD)/%.o: %.c
-	$(CC) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
+	$(CC$(V)) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
 
 OBJDIRS := $(sort $(dir $(OBJ)))
 $(OBJDIRS): $(SRC)
@@ -31,15 +31,19 @@ $(OBJ): | $(OBJDIRS) $(BUILD)
 static: $(OBJ)
 
 clean:
-	-rm -r $(OBJDIRS)
-	-rm $(OBJ)
+	@rm -fr $(OBJDIRS)
+	@rm -f $(OBJ)
 
 -include $(BUILD)/$(BUILD_COMPONENT).d
 
+DEP0 = @echo "DEP $@";
+DEP1 =
+
 $(BUILD)/$(BUILD_COMPONENT).d: $(OBJ)
-	echo '.PHONY: $(notdir $(LWIP_LIB))' > $@
-	echo '$(notdir $(LWIP_LIB)): $(LWIP_LIB)' >> $@
-	echo '$(LWIP_LIB): $(OBJ)' >> $@
-	echo '-include $$(shell find $(BUILD)/$(BUILD_COMPONENT)/ -name "*.d")' >> $@
+	$(DEP$(V)) { \
+		echo '.PHONY: $(notdir $(LWIP_LIB))'; \
+		echo '$(notdir $(LWIP_LIB)): $(LWIP_LIB)'; \
+		echo '$(LWIP_LIB): $(OBJ)'; \
+		echo '-include $$(shell find $(BUILD)/$(BUILD_COMPONENT)/ -name "*.d")'; } >> $@
 
 static: $(BUILD)/$(BUILD_COMPONENT).d

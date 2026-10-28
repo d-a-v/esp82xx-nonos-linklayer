@@ -1,19 +1,17 @@
-ifeq ($(V), 0)
-VERBCC = @echo "CC $@";
-VERBAR = @echo "AR $@";
-else
-VERBCC :=
-VERBAR :=
-endif
+host_triplet := xtensa-lx106-elf
+host_cc := $(host_triplet)-gcc
+host_ar := $(host_triplet)-ar
 
-TOOLS ?=
-TRIPLE := xtensa-lx106-elf
+CC ?= $(host_cc)
+AR ?= $(host_ar)
 
-TRIPLE_GCC := $(if $(TOOLS),$(TOOLS)/$(TRIPLE)-gcc,$(TRIPLE)-gcc)
-TRIPLE_AR := $(if $(TOOLS),$(TOOLS)/$(TRIPLE)-ar,$(TRIPLE)-ar)
+# verbose compilation w/ V=1, hide compiler cmdline otherwise
+CC0 = @echo "CC $@"; $(CC)
+CC1 = $(CC)
 
-CC = $(VERBCC) $(TRIPLE_GCC)
-AR = $(VERBAR) $(TRIPLE_AR)
+# same for static archive generation
+AR0 = @echo "AR $@"; $(AR)
+AR1 = $(AR)
 
 CFLAGS += \
 	-std=gnu99 \

@@ -1,7 +1,7 @@
 # recipe is part of the build-lwip2
 
-ifndef SDK
-$(error must provide SDK path)
+ifndef sdkincludedir
+$(error SDK must point to espressif sdk include folder)
 endif
 
 SRC := \
@@ -25,7 +25,7 @@ CPPFLAGS += \
 	-I$(ROOT)/glue-lwip \
 	-I$(ROOT)/glue-lwip/$(PREFIX_TARGET) \
 	-I$(LWIP_ROOT)/src/include \
-	-I$(SDK)/include
+	-I$(sdkincludedir)
 
 BUILD_COMPONENT := glue-lwip
 

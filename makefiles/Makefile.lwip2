@@ -11,7 +11,7 @@ SRC := \
 
 CPPFLAGS += \
 	-I$(BUILD_ROOT) \
-	-I$(SDK)/include \
+	-I$(sdkincludedir) \
 	-I$(ROOT)/glue \
 	-I$(ROOT)/glue-lwip \
 	-I$(ROOT)/glue-lwip/$(PREFIX_TARGET) \

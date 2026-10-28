@@ -8,23 +8,23 @@ BUILD_HEADERS := $(BUILD_ROOT)/lwip-git-hash.h $(BUILD_ROOT)/lwip-err-t.h
 
 $(BUILD_TARGETS): $(BUILD_ROOT)/user_config.h $(BUILD_HEADERS) | $(BUILD_ROOT)
 
-MKDIR := mkdir
+MKDIR_P := mkdir -p
 RM := rm
 
 INSTALL := install
 INSTALL_DATA := $(INSTALL) -m 644
 
 $(BUILD_ROOT):
-	$(MKDIR) -p $@
+	$(MKDIR_P) $@
 
 # no-op, but required for sdk headers
 $(BUILD_ROOT)/user_config.h: | $(BUILD_ROOT)
 	touch $@
 
 # legacy typedefs from arch/cc.h
-$(BUILD_ROOT)/lwip-err-t.h: $(LWIP14_INCLUDE_DIR)/arch/cc.h $(ROOT)/glue-lwip/lwip-err-t.h.in | $(BUILD_ROOT)
+$(BUILD_ROOT)/lwip-err-t.h: $(lwip14includedir)/arch/cc.h $(ROOT)/glue-lwip/lwip-err-t.h.in | $(BUILD_ROOT)
 	/usr/bin/env bash scripts/make-err-t.sh \
-		"$(LWIP14_INCLUDE_DIR)/arch/cc.h" \
+		"$(lwip14includedir)/arch/cc.h" \
 		"$(ROOT)/glue-lwip/lwip-err-t.h.in" \
 		"$@"
 
@@ -58,11 +58,11 @@ $(foreach target,$(TARGETS),$(eval $(call build-target-archive,$(target))))
 
 .PHONY: install-targets
 
-$(LIBS):
-	$(MKDIR) -p $@
+$(libdir):
+	$(MKDIR_P) $@
 
-install-targets: $(BUILD_TARGETS) | $(LIBS)
-	$(INSTALL_DATA) $? $(LIBS)/
+install-targets: $(BUILD_TARGETS) | $(libdir)
+	$(INSTALL_DATA) $? $(libdir)/
 
 install: install-targets
 
@@ -84,11 +84,11 @@ GLUE_APP_HEADERS += \
 
 .PHONY: install-glue-headers
 
-$(INC):
-	$(MKDIR) -p $(INC)
+$(includedir):
+	$(MKDIR_P) $(includedir)
 
-install-glue-headers: $(GLUE_HEADERS) | $(INC)
-	$(INSTALL_DATA) -C $? $(INC)/
+install-glue-headers: $(GLUE_HEADERS) | $(includedir)
+	$(INSTALL_DATA) -C $? $(includedir)/
 
 install-headers: install-glue-headers
 
@@ -97,20 +97,20 @@ ifneq ($(PREFIX_TARGET),arduino)
 GLUE_HEADERS += $(GLUE_APP_HEADERS)
 else
 .PHONY: install-stubs
-install-stubs: $(GLUE_APP_HEADERS) | $(INC)
-	touch $(addprefix $(INC)/,$(notdir $(?)))
+install-stubs: $(GLUE_APP_HEADERS) | $(includedir)
+	touch $(addprefix $(includedir)/,$(notdir $(?)))
 
 install-headers: install-stubs
 endif
 
 .PHONY: install-arch-cc-header
 
-$(INC)/arch: | $(INC)
-	$(MKDIR) -p $(INC)/arch
+$(includedir)/arch: | $(includedir)
+	$(MKDIR_P) $(includedir)/arch
 
 # system info, hierarchy matters
-install-arch-cc-header: $(ROOT)/glue-lwip/arch/cc.h | $(INC)/arch
-	$(INSTALL_DATA) -C $< $(INC)/arch
+install-arch-cc-header: $(ROOT)/glue-lwip/arch/cc.h | $(includedir)/arch
+	$(INSTALL_DATA) -C $< $(includedir)/arch
 
 install-headers: install-arch-cc-header
 
@@ -127,13 +127,13 @@ LWIP_HEADERS := \
 .PHONY: install-lwip-headers
 
 define install-header
-	$(INSTALL_DATA) -C $(1) $(subst $(LWIP_INCLUDE)/,$(INC)/,$(1))
+	$(INSTALL_DATA) -C $(1) $(subst $(LWIP_INCLUDE)/,$(includedir)/,$(1))
 
 endef
 
-INSTALL_LWIP_HEADERS_DIRS := $(sort $(addprefix $(INC)/,$(dir $(subst $(LWIP_INCLUDE)/,,$(LWIP_HEADERS)))))
-$(INSTALL_LWIP_HEADERS_DIRS): | $(INC)
-	$(MKDIR) -p $@
+INSTALL_LWIP_HEADERS_DIRS := $(sort $(addprefix $(includedir)/,$(dir $(subst $(LWIP_INCLUDE)/,,$(LWIP_HEADERS)))))
+$(INSTALL_LWIP_HEADERS_DIRS): | $(includedir)
+	$(MKDIR_P) $@
 
 # lwip distribution, hierarchy matters
 install-lwip-headers: $(LWIP_HEADERS) | $(INSTALL_LWIP_HEADERS_DIRS)
@@ -149,9 +149,9 @@ clean:
 .PHONY: uninstall
 
 uninstall:
-	$(RM) -rf $(INC)
-	$(RM) -f $(addprefix $(LIBS)/,$(TARGETS))
+	$(RM) -rf $(includedir)
+	$(RM) -f $(addprefix $(libdir)/,$(TARGETS))
 
 .PHONY: all
 
-all: install
+all: static
