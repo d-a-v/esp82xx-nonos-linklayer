@@ -26,7 +26,7 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: |
-            repo/build/lwip2-src
+            repo/lwip2-src
             esp8266/tools/dist
           key: ${{ runner.os }}-make-${{ hashFiles('repo/Makefile*', 'repo/makefiles/*', 'repo/makefiles/include/*') }}
 
