@@ -9,10 +9,10 @@ SDK ?= $(call maybe-prefix,xtensa-lx106-elf/sysroot/usr)
 
 maybe-sdk = $(if $(SDK),$(SDK)/$(1),$(error sdk path must be set))
 
-export libdir ?= $(call maybe-sdk,lib)
-export includedir ?= $(call maybe-sdk,include/lwip2/)
+export libdir := $(call maybe-sdk,lib)
+export includedir := $(call maybe-sdk,include/lwip2/)
 
-export lwipoptsincludedir = $(ROOT)/glue-lwip/open/
+export lwipoptsincludedir := $(ROOT)/glue-lwip/open/
 
 export GLUE_HEADERS += \
 	$(ROOT)/glue-lwip/open/lwipopts.h
@@ -26,8 +26,8 @@ export GLUE_APP_HEADERS += \
 	$(ROOT)/glue-lwip/lwip/apps-esp/dhcpserver.h \
 	$(ROOT)/glue-lwip/lwip/apps-esp/espconn.h
 
-export CC ?= $(call maybe-prefix,bin/xtensa-lx106-elf-gcc)
-export AR ?= $(call maybe-prefix,bin/xtensa-lx106-elf-ar)
+export CC := $(call maybe-prefix,bin/xtensa-lx106-elf-gcc)
+export AR := $(call maybe-prefix,bin/xtensa-lx106-elf-ar)
 
 export CPPFLAGS += -DOPENSDK=1
 
