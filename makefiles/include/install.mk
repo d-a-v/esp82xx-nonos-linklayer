@@ -125,18 +125,14 @@ LWIP_HEADERS := \
 
 .PHONY: install-lwip-headers
 
-define install-header
-	$(INSTALL_DATA) -C $(1) $(subst $(LWIP_INCLUDE)/,$(includedir)/,$(1))
-
-endef
-
-INSTALL_LWIP_HEADERS_DIRS := $(sort $(addprefix $(includedir)/,$(dir $(subst $(LWIP_INCLUDE)/,,$(LWIP_HEADERS)))))
-$(INSTALL_LWIP_HEADERS_DIRS): | $(includedir)
-	$(MKDIR_P) $@
-
 # lwip distribution, hierarchy matters
-install-lwip-headers: $(LWIP_HEADERS) | $(INSTALL_LWIP_HEADERS_DIRS)
-	$(foreach header,$(?),$(call install-header,$(header)))
+install-lwip-headers: $(LWIP_HEADERS) | $(includedir)
+	for h in $(?); do \
+		hrel="$$(realpath --relative-to='$(LWIP_INCLUDE)' "$$h")"; \
+		drel="$(includedir)/$$(dirname $$hrel)"; \
+		test -d "$$drel" || $(MKDIR_P) "$$drel"; \
+		$(INSTALL_DATA) -C "$$h" "$(includedir)/$$hrel"; \
+	done
 
 install-headers: install-lwip-headers
 
