@@ -9,7 +9,7 @@ include makefiles/include/version.mk
 .PHONY: arduino/uninstall arduino/upstream arduino
 .PHONY: open-sdk/uninstall open-sdk/upstream open-sdk
 .PHONY: lwip/clean lwip/patch lwip/patch-open lwip
-.PHONY: all clean
+.PHONY: all clean distclean
 
 .DEFAULT: all
 
@@ -75,3 +75,6 @@ arduino:
 
 clean:
 	@-rm -rf $(BUILD_ROOT)/
+
+distclean: clean
+	@-rm -f .config.mk
