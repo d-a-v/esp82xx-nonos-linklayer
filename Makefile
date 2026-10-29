@@ -1,3 +1,8 @@
+.PHONY: all
+.DEFAULT: all
+
+all: arduino
+
 .config.mk:
 	@{ echo '$(warning using default config makefiles/include/default-config.mk)'; \
 		echo 'include makefiles/include/default-config.mk'; } > $@
@@ -10,16 +15,12 @@ include makefiles/include/version.mk
 .PHONY: arduino/uninstall arduino/upstream arduino
 .PHONY: open-sdk/uninstall open-sdk/upstream open-sdk
 .PHONY: lwip/clean lwip/patch lwip/patch-open lwip
-.PHONY: all clean distclean
-
-.DEFAULT: all
+.PHONY: clean distclean
 
 LWIP_GIT_REPO := https://github.com/lwip-tcpip/lwip
 
 PATCHES := $(wildcard $(ROOT)/patches/*.patch)
 OPEN_SDK_PATCHES := $(ROOT)/patches/open/sdk-mem-macros.patch
-
-all: arduino
 
 lwip/upstream:
 	@if test ! -d "$(LWIP_ROOT)" ; then \
