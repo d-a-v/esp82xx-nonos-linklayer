@@ -17,8 +17,10 @@ export GLUE_HEADERS += \
 export GLUE_STUB_HEADERS += \
 	espconn.h
 
+$(warning $(CC) $(AR))
 export CC ?= $(call maybe-prefix,tools/xtensa-lx106-elf/bin/xtensa-lx106-elf-gcc)
 export AR ?= $(call maybe-prefix,tools/xtensa-lx106-elf/bin/xtensa-lx106-elf-ar)
+$(warning $(CC) $(AR))
 
 export CPPFLAGS += -DARDUINO=1
 
