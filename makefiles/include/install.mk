@@ -21,16 +21,19 @@ $(BUILD_ROOT):
 $(BUILD_ROOT)/user_config.h: | $(BUILD_ROOT)
 	touch $@
 
+PRE0 = @echo "PRE $@";
+PRE1 =
+
 # legacy typedefs from arch/cc.h
 $(BUILD_ROOT)/lwip-err-t.h: $(lwip14includedir)/arch/cc.h $(ROOT)/glue-lwip/lwip-err-t.h.in | $(BUILD_ROOT)
-	/usr/bin/env bash scripts/make-err-t.sh \
+	$(PRE$(V)) /usr/bin/env bash scripts/make-err-t.sh \
 		"$(lwip14includedir)/arch/cc.h" \
 		"$(ROOT)/glue-lwip/lwip-err-t.h.in" \
 		"$@"
 
 # version info string
 $(BUILD_ROOT)/lwip-git-hash.h: $(GLUE_GIT_HEAD) $(LWIP_GIT_HEAD) $(ROOT)/glue-lwip/lwip-git-hash.h.in | $(BUILD_ROOT)
-	/usr/bin/env bash scripts/make-lwip-hash.sh \
+	$(PRE$(V)) /usr/bin/env bash scripts/make-lwip-hash.sh \
 		"$(LWIP_ROOT)" \
 		"$(ROOT)/glue-lwip/lwip-git-hash.h.in" \
 		"$@"
@@ -38,21 +41,21 @@ $(BUILD_ROOT)/lwip-git-hash.h: $(GLUE_GIT_HEAD) $(LWIP_GIT_HEAD) $(ROOT)/glue-lw
 .FORCE:
 	@:
 
-define build-target-archive
-.PHONY: $(1)
-$(1): $$(BUILD_ROOT)/$(1)
+$(BUILD_ROOT)/%.mk: TARGET=$(basename $(@F))
+$(BUILD_ROOT)/%.mk: $(MAKEFILE_LIST) | $(BUILD_ROOT)
+	@{ echo '.PHONY: $(TARGET)'; \
+		echo ''; \
+		echo '$(TARGET): $$(BUILD_ROOT)/$(TARGET)'; \
+		echo ''; \
+		echo '$$(BUILD_ROOT)/$(TARGET): LWIP_CFLAGS=$$($(TARGET)_CFLAGS)'; \
+		echo '$$(BUILD_ROOT)/$(TARGET): LWIP_CPPFLAGS=$$($(TARGET)_CPPFLAGS)'; \
+		echo '$$(BUILD_ROOT)/$(TARGET): .FORCE'; \
+		echo '	$$(MAKE) -f makefiles/Makefile \'; \
+		echo '		LWIP_CFLAGS="$$(LWIP_CFLAGS)" \'; \
+		echo '		LWIP_CPPFLAGS="$$(LWIP_CPPFLAGS)" \'; \
+		echo '		$$@'; } > $@
 
-$$(BUILD_ROOT)/$(1): .FORCE
-$$(BUILD_ROOT)/$(1): LWIP_CFLAGS=$$($(1)_CFLAGS)
-$$(BUILD_ROOT)/$(1): LWIP_CPPFLAGS=$$($(1)_CPPFLAGS)
-$$(BUILD_ROOT)/$(1):
-	$$(MAKE) -f makefiles/Makefile \
-		LWIP_CFLAGS="$$(LWIP_CFLAGS)" \
-		LWIP_CPPFLAGS="$$(LWIP_CPPFLAGS)" \
-		$$@
-
-endef
-$(foreach target,$(TARGETS),$(eval $(call build-target-archive,$(target))))
+include $(foreach target,$(TARGETS),$(BUILD_ROOT)/$(target).mk)
 
 .PHONY: install
 

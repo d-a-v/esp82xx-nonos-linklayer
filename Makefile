@@ -1,5 +1,6 @@
 .config.mk:
-	@cp makefiles/include/default-config.mk $@
+	@{ echo '$(warning using default config makefiles/include/default-config.mk)'; \
+		echo 'include makefiles/include/default-config.mk'; } > $@
 
 include .config.mk
 
