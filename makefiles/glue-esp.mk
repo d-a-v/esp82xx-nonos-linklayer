@@ -1,7 +1,7 @@
 # recipe is part of the makefiles/Makefile
 
 ifndef sdkincludedir
-$(error SDK must point to espressif sdk include folder)
+$(error $$sdkincludedir must point to espressif sdk include folder)
 endif
 
 ifndef lwip14includedir

@@ -9,10 +9,17 @@ export includedir ?= $(call maybe-prefix,tools/sdk/lwip2/include)
 export libdir ?= $(call maybe-prefix,tools/sdk/lib)
 export sdkincludedir ?= $(call maybe-prefix,tools/sdk/include)
 
+export lwipoptsincludedir := -I$(ROOT)/glue-lwip/arduino/
+
+export GLUE_HEADERS += \
+	$(ROOT)/glue-lwip/arduino/lwipopts.h
+
+export GLUE_STUB_HEADERS += \
+	espconn.h
+
 export CC ?= $(call maybe-prefix,tools/xtensa-lx106-elf/bin/xtensa-lx106-elf-gcc)
 export AR ?= $(call maybe-prefix,tools/xtensa-lx106-elf/bin/xtensa-lx106-elf-ar)
 
-export PREFIX_TARGET := arduino
 export CPPFLAGS += -DARDUINO=1
 
 include makefiles/include/install.mk

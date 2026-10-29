@@ -1,7 +1,11 @@
 # recipe is part of the makefiles/Makefile
 
 ifndef sdkincludedir
-$(error SDK must point to espressif sdk include folder)
+$(error $$sdkincludedir must point to espressif sdk include folder)
+endif
+
+ifndef lwipoptsincludedir
+$(error $$lwipoptsincludedir must point to folder that contains lwipopts)
 endif
 
 SRC := \
@@ -12,18 +16,13 @@ SRC := \
 	glue-lwip/espconn_tcp.c \
 	glue-lwip/espconn_udp.c
 
-ifneq ($(PREFIX_TARGET),arduino)
-SRC += \
-	glue-lwip/esp-dhcpserver.c \
-	glue-lwip/esp-time.c \
-	glue-lwip/esp-millis.c
-endif
+SRC += $(GLUE_LWIP_SRC)
 
 CPPFLAGS += \
 	-I$(BUILD_ROOT) \
 	-I$(ROOT)/glue \
 	-I$(ROOT)/glue-lwip \
-	-I$(ROOT)/glue-lwip/$(PREFIX_TARGET) \
+	-I$(lwipoptsincludedir) \
 	-I$(LWIP_ROOT)/src/include \
 	-I$(sdkincludedir)
 

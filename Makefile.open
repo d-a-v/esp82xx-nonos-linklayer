@@ -12,10 +12,23 @@ maybe-sdk = $(if $(SDK),$(SDK)/$(1),$(error sdk path must be set))
 export libdir ?= $(call maybe-sdk,lib)
 export includedir ?= $(call maybe-sdk,include/lwip2/)
 
-CC ?= $(call maybe-prefix,bin/xtensa-lx106-elf-gcc)
-AR ?= $(call maybe-prefix,bin/xtensa-lx106-elf-ar)
+export lwipoptsincludedir = -I$(ROOT)/glue-lwip/open/
 
-export PREFIX_TARGET := open
+export GLUE_HEADERS += \
+	$(ROOT)/glue-lwip/open/lwipopts.h
+
+export GLUE_LWIP_SRC += \
+	glue-lwip/esp-dhcpserver.c \
+	glue-lwip/esp-time.c \
+	glue-lwip/esp-millis.c
+
+export GLUE_APP_HEADERS += \
+	$(ROOT)/glue-lwip/lwip/apps-esp/dhcpserver.h \
+	$(ROOT)/glue-lwip/lwip/apps-esp/espconn.h
+
+export CC ?= $(call maybe-prefix,bin/xtensa-lx106-elf-gcc)
+export AR ?= $(call maybe-prefix,bin/xtensa-lx106-elf-ar)
+
 export CPPFLAGS += -DOPENSDK=1
 
 $(shell scripts/patch-vendor-lwip14.sh \

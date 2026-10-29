@@ -14,7 +14,7 @@ CPPFLAGS += \
 	-I$(sdkincludedir) \
 	-I$(ROOT)/glue \
 	-I$(ROOT)/glue-lwip \
-	-I$(ROOT)/glue-lwip/$(PREFIX_TARGET) \
+	-I$(lwipoptsincludedir) \
 	-I$(LWIP_ROOT)/src/include
 
 BUILD_COMPONENT := lwip2-src

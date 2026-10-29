@@ -74,13 +74,10 @@ install: install-headers
 GLUE_HEADERS := \
 	$(BUILD_HEADERS) \
 	$(ROOT)/glue/glue.h \
-	$(ROOT)/glue/gluedebug.h \
-	$(ROOT)/glue-lwip/$(PREFIX_TARGET)/lwipopts.h
+	$(ROOT)/glue/gluedebug.h
 
 # hierarchy does not matter here, these replace sdk headers
-GLUE_APP_HEADERS += \
-	$(ROOT)/glue-lwip/lwip/apps-esp/dhcpserver.h \
-	$(ROOT)/glue-lwip/lwip/apps-esp/espconn.h
+GLUE_HEADERS += $(GLUE_APP_HEADERS)
 
 .PHONY: install-glue-headers
 
@@ -92,13 +89,15 @@ install-glue-headers: $(GLUE_HEADERS) | $(includedir)
 
 install-headers: install-glue-headers
 
-# xxx: no-op for arduino, we ship a different versions w/ the Core
-ifneq ($(PREFIX_TARGET),arduino)
-GLUE_HEADERS += $(GLUE_APP_HEADERS)
-else
+ifneq ($(GLUE_STUB_HEADERS),)
+
+.PHONY: $(GLUE_STUB_HEADERS)
+$(GLUE_STUB_HEADERS): | $(includedir)
+	touch $(addprefix $(includedir)/,$(notdir $(@)))
+
 .PHONY: install-stubs
-install-stubs: $(GLUE_APP_HEADERS) | $(includedir)
-	touch $(addprefix $(includedir)/,$(notdir $(?)))
+install-stubs: $(GLUE_STUB_HEADERS)
+	@:
 
 install-headers: install-stubs
 endif
