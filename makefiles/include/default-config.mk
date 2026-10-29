@@ -1,3 +1,6 @@
+# `override CC := ...` or run with `make CC=...` to change the compiler
+# `override AR := ...` or run with `make AR=...` change the archiver
+
 # default targets matrix for .config.mk
 # TARGETS generates make recipes to build specific static archive flavour
 
@@ -9,8 +12,8 @@ TARGETS := \
 	liblwip2-1460-feat.a \
 	liblwip6-1460-feat.a
 
-# %TARGET%_CFLAGS => CFLAGS
-# %TARGET%_CPPFLAGS => CPPFLAGS
+# `%TARGET%_CFLAGS` translates into `CFLAGS`
+# `%TARGET%_CPPFLAGS` translates into `CPPFLAGS`
 
 liblwip2-536.a_CPPFLAGS := \
 	-DTCP_MSS=536 \
