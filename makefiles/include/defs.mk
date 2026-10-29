@@ -1,10 +1,3 @@
-host_triplet := xtensa-lx106-elf
-host_cc := $(host_triplet)-gcc
-host_ar := $(host_triplet)-ar
-
-CC ?= $(host_cc)
-AR ?= $(host_ar)
-
 # verbose compilation w/ V=1, hide compiler cmdline otherwise
 CC0 = @echo "CC $@"; $(CC)
 CC1 = $(CC)
