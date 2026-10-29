@@ -46,7 +46,7 @@ $$(BUILD_ROOT)/$(1): .FORCE
 $$(BUILD_ROOT)/$(1): LWIP_CFLAGS=$$($(1)_CFLAGS)
 $$(BUILD_ROOT)/$(1): LWIP_CPPFLAGS=$$($(1)_CPPFLAGS)
 $$(BUILD_ROOT)/$(1):
-	$$(MAKE) -f makefiles/Makefile.build-lwip2 \
+	$$(MAKE) -f makefiles/Makefile \
 		LWIP_CFLAGS="$$(LWIP_CFLAGS)" \
 		LWIP_CPPFLAGS="$$(LWIP_CPPFLAGS)" \
 		$$@

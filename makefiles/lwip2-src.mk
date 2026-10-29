@@ -1,4 +1,4 @@
-# this one is executed from directory lwip2-src/src/
+# recipe is part of the makefiles/Makefile
 
 LWIPDIR := lwip2-src/src
 

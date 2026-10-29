@@ -1,3 +1,5 @@
+# expected to be called via the top-level Makefile
+
 export BUILD
 export LWIP_LIB
 
@@ -10,8 +12,8 @@ export CPPFLAGS += $(LWIP_CPPFLAGS)
 $(BUILD_ROOT)/%.a: BUILD=$(BUILD_ROOT)/build_$(@F)
 $(BUILD_ROOT)/%.a: LWIP_LIB=$(BUILD_ROOT)/$(@F)
 $(BUILD_ROOT)/%.a: .FORCE
-	$(MAKE) -f makefiles/Makefile.glue
-	$(MAKE) -f makefiles/Makefile.glue-esp
-	$(MAKE) -f makefiles/Makefile.glue-lwip
-	$(MAKE) -f makefiles/Makefile.lwip2
-	$(MAKE) -f makefiles/Makefile.archive-lwip2
+	$(MAKE) -f makefiles/glue.mk
+	$(MAKE) -f makefiles/glue-esp.mk
+	$(MAKE) -f makefiles/glue-lwip.mk
+	$(MAKE) -f makefiles/lwip2-src.mk
+	$(MAKE) -f makefiles/static.mk

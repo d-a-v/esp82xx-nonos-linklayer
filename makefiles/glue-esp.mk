@@ -1,4 +1,4 @@
-# recipe is part of the build-lwip2
+# recipe is part of the makefiles/Makefile
 
 ifndef sdkincludedir
 $(error SDK must point to espressif sdk include folder)

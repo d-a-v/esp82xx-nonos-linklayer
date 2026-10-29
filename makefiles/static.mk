@@ -1,4 +1,4 @@
-# recipe is part of the build-lwip2
+# recipe is part of the makefiles/Makefile
 
 include $(ROOT)/makefiles/include/defs.mk
 
