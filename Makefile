@@ -1,5 +1,5 @@
 .config.mk:
-	@cp makefiles/default-config.mk $@
+	@cp makefiles/include/default-config.mk $@
 
 include .config.mk
 

@@ -1,4 +1,5 @@
-# default targets matrix
+# default targets matrix for .config.mk
+# TARGETS generates make recipes to build specific static archive flavour
 
 TARGETS := \
 	liblwip2-536.a \
@@ -7,6 +8,9 @@ TARGETS := \
 	liblwip2-1460.a \
 	liblwip2-1460-feat.a \
 	liblwip6-1460-feat.a
+
+# %TARGET%_CFLAGS => CFLAGS
+# %TARGET%_CPPFLAGS => CPPFLAGS
 
 liblwip2-536.a_CPPFLAGS := \
 	-DTCP_MSS=536 \
