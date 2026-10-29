@@ -9,7 +9,7 @@ export includedir ?= $(call maybe-prefix,tools/sdk/lwip2/include)
 export libdir ?= $(call maybe-prefix,tools/sdk/lib)
 export sdkincludedir ?= $(call maybe-prefix,tools/sdk/include)
 
-export lwipoptsincludedir := -I$(ROOT)/glue-lwip/arduino/
+export lwipoptsincludedir := $(ROOT)/glue-lwip/arduino/
 
 export GLUE_HEADERS += \
 	$(ROOT)/glue-lwip/arduino/lwipopts.h

@@ -12,7 +12,7 @@ maybe-sdk = $(if $(SDK),$(SDK)/$(1),$(error sdk path must be set))
 export libdir ?= $(call maybe-sdk,lib)
 export includedir ?= $(call maybe-sdk,include/lwip2/)
 
-export lwipoptsincludedir = -I$(ROOT)/glue-lwip/open/
+export lwipoptsincludedir = $(ROOT)/glue-lwip/open/
 
 export GLUE_HEADERS += \
 	$(ROOT)/glue-lwip/open/lwipopts.h
