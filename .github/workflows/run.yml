@@ -28,7 +28,7 @@ jobs:
           path: |
             repo/build/lwip2-src
             esp8266/tools/dist
-          key: ${{ runner.os }}-make-${{ hashFiles('repo/makefiles/Makefile.*', 'repo/makefiles/include/*.mk', 'repo/Makefile*') }}
+          key: ${{ runner.os }}-make-${{ hashFiles('repo/Makefile*', 'repo/makefiles/*', 'repo/makefiles/include/*') }}
 
       - name: Fetch ESP8266 Core
         uses: actions/checkout@v3
