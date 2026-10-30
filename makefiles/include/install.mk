@@ -148,7 +148,7 @@ clean:
 
 uninstall:
 	$(RM) -rf $(includedir)
-	$(RM) -f $(addprefix $(libdir)/,$(TARGETS))
+	$(RM) -f $(libdir)/liblwip2*.a
 
 .PHONY: all
 

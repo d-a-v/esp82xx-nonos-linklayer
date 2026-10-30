@@ -17,7 +17,11 @@ lwIP version currently used: [STABLE\_2.1.3](http://git.savannah.nongnu.org/cgit
 * NAT support (patch for lwIP-2.1.2, based on previous works, check in `patches/`)
 * [esp-open-sdk fork with lwip2](https://github.com/someburner/esp-open-sdk) ([oldref](https://github.com/pfalcon/esp-open-sdk/pull/271))
 
-# Build
+# Build & install
+
+> [!WARNING]
+> `gmake arduino` default rule, which always calls `gmake -f Makefile.arduino uninstall`, would remove existing lwip2 libraries located at `tools/sdk/lib` and everything at `tools/sdk/lwip2/include`
+> modify `PREFIX` of the selected configuration, or change `libdir` and `includedir` respectively to install to a different path
 
 - with Arduino:
   - Install the [git version](https://arduino-esp8266.readthedocs.io/en/stable/installing.html#using-git-version) of the esp8266 arduino core
@@ -31,6 +35,9 @@ lwIP version currently used: [STABLE\_2.1.3](http://git.savannah.nongnu.org/cgit
     - `PREFIX=/path/to/.platformio/packages/framework-arduinoespressif8266` (inspect `pio run --verbose` output)
     - `CC=/path/to/.platformio/packages/toolchain-xtensa/bin/xtensa-lx106-elf-gcc`
     - `AR=/path/to/.platformio/packages/toolchain-xtensa/bin/xtensa-lx106-elf-ar`
+
+- other build systems:
+  - see [`Makefile`](Makefile), [`Makefile.arduino`](Makefile.arduino) and [`Makefile.open`](Makefile.open)
 
 # MSS
 
