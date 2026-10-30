@@ -21,12 +21,16 @@ lwIP version currently used: [STABLE\_2.1.3](http://git.savannah.nongnu.org/cgit
 
 - with Arduino:
   - Install the [git version](https://arduino-esp8266.readthedocs.io/en/stable/installing.html#using-git-version) of the esp8266 arduino core
-  - Head to [tools/sdk/lwip2/](https://github.com/esp8266/Arduino/tree/master/tools/sdk/lwip2)
-  - Run `make install`
+  - Make sure to 'Download binary tools' by running [`tools/get.py --tool xtensa-lx106-elf`](https://github.com/esp8266/Arduino/blob/master/tools/get.py)
+  - Head to [`tools/sdk/lwip2/`](https://github.com/esp8266/Arduino/tree/master/tools/sdk/lwip2) and run `gmake`
 
 - with PlatformIO:
-  - Install the [git version](https://docs.platformio.org/en/latest/platforms/espressif8266.html#using-arduino-framework-with-staging-version)
-  - Run `make PREFIX=<path-to-the-toolchain-xtensa-package> install` (most common location is `~/.platformio/packages/toolchain-xtensa`)
+  - Install Arduino [git version](https://docs.platformio.org/en/latest/platforms/espressif8266.html#using-arduino-framework-with-staging-version)
+  - Try to build a project using git version platform package at least once
+  - Run `gmake arduino` from the current directory with additional parameters
+    - `PREFIX=/path/to/.platformio/packages/framework-arduinoespressif8266` (inspect `pio run --verbose` output)
+    - `CC=/path/to/.platformio/packages/toolchain-xtensa/bin/xtensa-lx106-elf-gcc`
+    - `AR=/path/to/.platformio/packages/toolchain-xtensa/bin/xtensa-lx106-elf-ar`
 
 # MSS
 

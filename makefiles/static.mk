@@ -1,0 +1,28 @@
+# recipe is part of the makefiles/Makefile
+
+include $(ROOT)/makefiles/include/defs.mk
+
+include $(BUILD)/glue.d
+include $(BUILD)/glue-esp.d
+include $(BUILD)/glue-lwip.d
+include $(BUILD)/lwip2-src.d
+
+.PHONY: all
+all: $(LWIP_LIB)
+
+# output .a is a flat archive, make sure .o is unique
+# input .o paths expected to mirror source locations
+
+ARCHIVE := $(BUILD_ROOT)/archive_$(notdir $(LWIP_LIB))
+
+GEN0 := @echo "GEN $(ARCHIVE)";
+GEN1 :=
+
+$(LWIP_LIB):
+	mkdir -p $(ARCHIVE)
+	$(GEN$(V)) (set -e; cd $(ARCHIVE); \
+		for f in $^; do \
+			cp -l $$f $$(realpath --relative-to="$(BUILD)" $$f | tr '/-' '_'); \
+		done)
+	$(AR$(V)) cDr $@ $(ARCHIVE)/*.o
+	rm -rf $(ARCHIVE)

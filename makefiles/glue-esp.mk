@@ -1,0 +1,26 @@
+# recipe is part of the makefiles/Makefile
+
+ifndef sdkincludedir
+$(error $$sdkincludedir must point to espressif sdk include folder)
+endif
+
+ifndef lwip14includedir
+$(error $$lwip14includedir must point to espressif sdk lwip/include folder)
+endif
+
+SRC := $(wildcard glue-esp/*.c)
+
+CPPFLAGS += \
+	-I$(BUILD_ROOT) \
+	-I$(sdkincludedir) \
+	-I$(lwip14includedir) \
+	-I$(ROOT)/glue
+
+CPPFLAGS += -DLWIP14GLUE
+
+BUILD_COMPONENT := glue-esp
+
+include makefiles/include/defs.mk
+include makefiles/include/rules.mk
+
+-include $(BUILD)/glue-esp/*.d

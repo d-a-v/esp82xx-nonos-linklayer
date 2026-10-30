@@ -1,22 +1,25 @@
-PREFIX ?= ../../../xtensa-lx106-elf
+-include .config.mk
+include makefiles/include/common.mk
 
-%:
-	for v6 in 0 1; do \
-	for mss in 536 1460; do \
-	for feat in 0 1; do \
-		test \( $$feat = 0 \) -a \( $$v6 = 1 \) && continue; \
-		featname= ;\
-		test $$feat = 1 && featname=-feat ;\
-		make -f makefiles/Makefile.build-lwip2 \
-			target=arduino \
-			DEFINE_TARGET=ARDUINO \
-			SDK=../.. \
-			LWIP_ESP=glue-esp/lwip-1.4-arduino/include \
-			LWIP_LIB=liblwip$$((2+4*v6))-$$mss$$featname.a \
-			LWIP_LIB_RELEASE=../../lib/liblwip$$((2+4*v6))-$$mss$$featname.a \
-			LWIP_INCLUDES_RELEASE=../include \
-			TOOLS=$(abspath $(wildcard $(PREFIX)))/bin/xtensa-lx106-elf- \
-			TCP_MSS=$$mss LWIP_FEATURES=$$feat LWIP_IPV6=$$v6 \
-			BUILD=build-$$mss$$featname-v$$((4+2*v6)) \
-			$@ ; \
-	done; done; done
+export lwip14includedir := $(ROOT)/glue-esp/lwip-1.4-arduino/include
+
+maybe-prefix = $(if $(PREFIX),$(PREFIX)/$(1),$(error prefix must be set to esp8266 Core root directory))
+
+export includedir := $(call maybe-prefix,tools/sdk/lwip2/include)
+export libdir := $(call maybe-prefix,tools/sdk/lib)
+export sdkincludedir := $(call maybe-prefix,tools/sdk/include)
+
+export lwipoptsincludedir := $(ROOT)/glue-lwip/arduino/
+
+export GLUE_HEADERS += \
+	$(ROOT)/glue-lwip/arduino/lwipopts.h
+
+export GLUE_STUB_HEADERS += \
+	espconn.h
+
+export CC := $(call maybe-prefix,tools/xtensa-lx106-elf/bin/xtensa-lx106-elf-gcc)
+export AR := $(call maybe-prefix,tools/xtensa-lx106-elf/bin/xtensa-lx106-elf-ar)
+
+export CPPFLAGS += -DARDUINO=1
+
+include makefiles/include/install.mk
