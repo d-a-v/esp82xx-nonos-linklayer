@@ -74,7 +74,7 @@ install: install-targets
 install: install-headers
 
 # always at the root
-GLUE_HEADERS := \
+GLUE_HEADERS += \
 	$(BUILD_HEADERS) \
 	$(ROOT)/glue/glue.h \
 	$(ROOT)/glue/gluedebug.h
