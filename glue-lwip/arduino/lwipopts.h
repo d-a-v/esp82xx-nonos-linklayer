@@ -46,6 +46,9 @@
  * without this, doxygen does not see the actual #define
  */
 
+//#if !defined LWIP_HDR_OPT_H
+//#define LWIP_HDR_OPT_H
+
 /*
  * Include user defined options first. Anything not defined in these files
  * will be set to standard values. Override anything you don't like!
