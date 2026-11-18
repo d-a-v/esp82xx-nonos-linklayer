@@ -45,7 +45,7 @@ message(STATUS "patches: " "${LWIP_PATCHES}")
 include(FetchContent)
 FetchContent_Declare(
     lwip2
-    GIT_REPOSITORY https://git.savannah.nongnu.org/git/lwip.git
+    GIT_REPOSITORY https://github.com/lwip-tcpip/lwip.git
     GIT_TAG ${LWIP_TAG}
     GIT_CONFIG core.autocrlf=false core.eol=lf
     PATCH_COMMAND git reset --hard && git clean -f && git apply --3way --recount --whitespace=fix ${LWIP_PATCHES}
