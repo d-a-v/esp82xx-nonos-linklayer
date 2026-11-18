@@ -58,7 +58,7 @@ void sntp_set_system_time (uint32_t t);
 
 #include "mem.h" // useful for os_malloc used in esp-arduino's mDNS
 
-#include "glue.h" // include sys arch locking helpers used below
+#include "glue.h" // include assembly locking macro used below
 typedef uint32_t sys_prot_t;
 #define SYS_ARCH_DECL_PROTECT(lev) sys_prot_t lev
 #define SYS_ARCH_PROTECT(lev) lev = lwip_xt_rsil(15)

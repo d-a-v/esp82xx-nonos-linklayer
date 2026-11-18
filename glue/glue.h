@@ -112,28 +112,10 @@ err_glue_t	glue2esp_linkoutput		(int netif_idx, void* ref2save, void* data, size
 // fixed definitions from esp8266/arduino
 // renamed with lwip_ to avoid name collision
 // reference and credits: https://github.com/esp8266/Arduino/pull/6301
-
-static inline uint32_t __lwip_xt_rsil(uint32_t level) __attribute__((always_inline, warn_unused_result));
-static inline uint32_t __lwip_xt_rsil(uint32_t level) {
-    uint32_t state;
-    __asm__ __volatile__ (
-        "rsil %0,%1\n\t"
-        : "=a" (state) : "i" (level) : "memory"
-    );
-
-    return state;
-}
-
-static inline void __lwip_xt_wsr_ps(uint32_t state) __attribute__((always_inline));
-static inline void __lwip_xt_wsr_ps(uint32_t state) {
-    __asm__ __volatile__ (
-        "wsr %0,ps\n\t"
-        "isync\n\t"
-        :: "a" (state) : "memory"
-    );
-}
-
-#define lwip_xt_rsil(level) __lwip_xt_rsil(level)
-#define lwip_xt_wsr_ps(state)  __lwip_xt_wsr_ps(state)
+#ifndef __STRINGIFY
+#define __STRINGIFY(a) #a
+#endif
+#define lwip_xt_rsil(level) (__extension__({uint32_t state; __asm__ __volatile__("rsil %0," __STRINGIFY(level) : "=a" (state) :: "memory"); state;}))
+#define lwip_xt_wsr_ps(state)  __asm__ __volatile__("wsr %0,ps; isync" :: "a" (state) : "memory")
 
 #endif // GLUE_H
