@@ -1,3 +1,12 @@
+From e001cd2f787fa6ad255e43cabdbf1870194ad67e Mon Sep 17 00:00:00 2001
+From: David Gauchard <gauchard@laas.fr>
+Date: Fri, 22 Mar 2019 13:56:13 +0100
+Subject: [PATCH 09/10] fix d-a-v/esp82xx-nonos-linklayer#31
+
+---
+ src/core/tcp.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
 diff --git a/src/core/tcp.c b/src/core/tcp.c
 index ea95ffee..7233fe13 100644
 --- a/src/core/tcp.c
@@ -18,3 +27,6 @@ index ea95ffee..7233fe13 100644
    /* Check all PCB lists. */
    for (i = 0; i < NUM_TCP_PCB_LISTS; i++) {
      for (pcb = *tcp_pcb_lists[i]; pcb != NULL; pcb = pcb->next) {
+-- 
+2.56.1
+

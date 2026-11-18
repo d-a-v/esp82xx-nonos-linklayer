@@ -1,8 +1,8 @@
-From 450bf1739ef0e1bce97ed28c4ed2b74ae6cdb9ca Mon Sep 17 00:00:00 2001
+From df50dd0f3fa31854daee85c03866af386d969ceb Mon Sep 17 00:00:00 2001
 From: "David J. Fiddes" <D.J@fiddes.net>
 Date: Sun, 29 Sep 2019 17:46:17 +0100
-Subject: [PATCH] sntp: Don't over-write IPv6 NTP server when processing DHCP
- updates
+Subject: [PATCH 01/10] sntp: Don't over-write IPv6 NTP server when processing
+ DHCP updates
 
 Currently when a DHCP or DHCPv6 updates containing NTP
 server addresses is processed all existing NTP server addresses
@@ -101,5 +101,5 @@ index 36375305..ec74b808 100644
    }
  }
 -- 
-2.48.1
+2.56.1
 

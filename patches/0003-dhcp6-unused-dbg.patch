@@ -1,5 +1,14 @@
+From a6ce198a9cf66f7e173fbc125c1e4844c8bcb207 Mon Sep 17 00:00:00 2001
+From: esp82xx-nonos-linklayer <>
+Date: Thu, 19 Nov 2026 00:51:09 +0300
+Subject: [PATCH 03/10] dhcp6 unused dbg_requester
+
+---
+ src/core/ipv6/dhcp6.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
 diff --git a/src/core/ipv6/dhcp6.c b/src/core/ipv6/dhcp6.c
-index e6a7e64d..90f81fbc 100644
+index 9df7e24c..90f81fbc 100644
 --- a/src/core/ipv6/dhcp6.c
 +++ b/src/core/ipv6/dhcp6.c
 @@ -216,6 +216,7 @@ void dhcp6_cleanup(struct netif *netif)
@@ -18,3 +27,6 @@ index e6a7e64d..90f81fbc 100644
    LWIP_DEBUGF(DHCP6_DEBUG | LWIP_DBG_TRACE | LWIP_DBG_STATE, ("DHCPv6 state: %d -> %d (%s)\n",
      dhcp6->state, new_state, dbg_caller));
    if (new_state != dhcp6->state) {
+-- 
+2.56.1
+

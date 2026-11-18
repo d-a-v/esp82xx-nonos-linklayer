@@ -257,9 +257,9 @@
 #define MEM_LIBC_MALLOC                 1 // 0
 //#elif MEM_LIBC_MALLOC
 #define MEM_CUSTOM_ALLOCATOR            1
-#define MEM_CUSTOM_FREE                 free
-#define MEM_CUSTOM_MALLOC               malloc
-#define MEM_CUSTOM_CALLOC               calloc
+#define MEM_CUSTOM_FREE(s)              vPortFree(s, "", 0)
+#define MEM_CUSTOM_MALLOC(s)            pvPortMalloc(s, "", 0)
+#define MEM_CUSTOM_CALLOC(s)            pvPortCalloc(l, s, "", 0)
 #endif
 
 /**

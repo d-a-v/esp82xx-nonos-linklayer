@@ -18,8 +18,8 @@ clean:
 
 PATCHES := $(wildcard $(ROOT)/patches/*.patch)
 
-ifeq ($(CONFIG),open)
-PATCHES += $(ROOT)/patches/open/sdk-mem-macros.patch
+ifneq ($(CONFIG),)
+PATCHES += $(wildcard $(ROOT)/patches/$(CONFIG)/*.patch)
 endif
 
 .PHONY: lwip/checkout lwip/reset lwip/patch lwip
