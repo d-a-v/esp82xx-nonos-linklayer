@@ -19,16 +19,28 @@ lwIP version currently used: **STABLE\_2.2.1**
 * NAT support (patch for lwIP-2.1.2, based on previous works, check in `patches/`)
 * [esp-open-sdk fork with lwip2](https://github.com/someburner/esp-open-sdk) ([oldref](https://github.com/pfalcon/esp-open-sdk/pull/271))
 
-# Build
+# Build & install
+
+> [!WARNING]
+> Arduino `tools/sdk/lwip2` builder `gmake` w/o arguments always removes existing lwip2 libraries located at `tools/sdk/lib` and headers located at `tools/sdk/lwip2/include`
+> Call `gmake static` to skip installation, modify `PREFIX` of the selected configuration, or change `libdir` and `includedir` respectively to use a different path
 
 - with Arduino:
   - Install the [git version](https://arduino-esp8266.readthedocs.io/en/stable/installing.html#using-git-version) of the esp8266 arduino core
-  - Head to [tools/sdk/lwip2/](https://github.com/esp8266/Arduino/tree/master/tools/sdk/lwip2)
-  - Run `make install`
+  - Make sure to 'Download binary tools' by running [`tools/get.py --tool xtensa-lx106-elf`](https://github.com/esp8266/Arduino/blob/master/tools/get.py)
+  - Head to [`tools/sdk/lwip2/`](https://github.com/esp8266/Arduino/tree/master/tools/sdk/lwip2) and run `gmake`
 
 - with PlatformIO:
-  - Install the [git version](https://docs.platformio.org/en/latest/platforms/espressif8266.html#using-arduino-framework-with-staging-version)
-  - Run `make PREFIX=<path-to-the-toolchain-xtensa-package> install` (most common location is `~/.platformio/packages/toolchain-xtensa`)
+  - Install Arduino [git version](https://docs.platformio.org/en/latest/platforms/espressif8266.html#using-arduino-framework-with-staging-version)
+  - Try to build a project using git version platform package at least once
+  - Run `gmake` from the current directory with additional parameters
+    - `PREFIX=/path/to/.platformio/packages/framework-arduinoespressif8266` (inspect `pio run --verbose` output)
+    - `CC=/path/to/.platformio/packages/toolchain-xtensa/bin/xtensa-lx106-elf-gcc`
+    - `AR=/path/to/.platformio/packages/toolchain-xtensa/bin/xtensa-lx106-elf-ar`
+
+- other build systems:
+  - see [`Makefile`](Makefile), [`makefiles/config/arduino.mk`](makefiles/config/arduino.mk) (default) and [`makefiles/config/open.mk`](makefiles/config/open.mk)
+    `gmake CONFIG=...` to use a different configuration
 
 # MSS
 

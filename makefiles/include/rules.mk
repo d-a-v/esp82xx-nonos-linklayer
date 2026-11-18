@@ -1,25 +1,50 @@
-.PHONY: build clean
+.PHONY: all clean static
 
-OBJ := $(patsubst %.c,$(BUILD)/%.o,$(SRC))
+all: static
+	@:
+
+ifndef BUILD
+$(error $$BUILD must be set)
+endif
+
+ifndef SRC
+$(error $$SRC must be set)
+endif
+
+ifndef LWIP_LIB
+$(error $$LWIP_LIB must be set)
+endif
+
+OBJ := $(patsubst %.c,$(BUILD)/$(BUILD_SUBDIR)%.o,$(SRC))
 
 $(BUILD):
 	@mkdir -p $(BUILD)
 
 $(OBJ): $(BUILD)/%.o: %.c
-	$(CC) \
-        -c \
-        $(BUILD_FLAGS) \
-        $(BUILD_DEFINES) \
-        $(BUILD_INCLUDES) \
-        $< -o $@
+	$(V_CC$(V)) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
 
 OBJDIRS := $(sort $(dir $(OBJ)))
 $(OBJDIRS): $(SRC)
 	@mkdir -p $@
 
 $(OBJ): | $(OBJDIRS) $(BUILD)
-build: $(OBJ)
+static: $(OBJ)
 
 clean:
-	rm -r $(OBJDIRS) || echo -n
-	rm $(OBJ) || echo -n
+	@rm -fr $(OBJDIRS)
+	@rm -f $(OBJ)
+
+-include $(BUILD)/$(BUILD_COMPONENT).d
+
+V_DEP0 = @echo "DEP $@";
+V_DEP1 =
+V_DEP = $(V_DEP0)
+
+$(BUILD)/$(BUILD_COMPONENT).d: $(OBJ)
+	$(V_DEP$(V)) { \
+		echo '.PHONY: $(notdir $(LWIP_LIB))'; \
+		echo '$(notdir $(LWIP_LIB)): $(LWIP_LIB)'; \
+		echo '$(LWIP_LIB): $(OBJ)'; \
+		echo '-include $$(shell find $(BUILD)/$(BUILD_COMPONENT)/ -name "*.d")'; } >> $@
+
+static: $(BUILD)/$(BUILD_COMPONENT).d

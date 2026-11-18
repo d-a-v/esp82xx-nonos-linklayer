@@ -26,9 +26,9 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: |
-            repo/build/lwip2-src
+            repo/lwip2-src
             esp8266/tools/dist
-          key: ${{ runner.os }}-make-${{ hashFiles('repo/makefiles/Makefile.*', 'repo/makefiles/include/*.mk', 'repo/Makefile*') }}
+          key: ${{ runner.os }}-make-${{ hashFiles('repo/Makefile*', 'repo/makefiles/*', 'repo/makefiles/include/*') }}
 
       - name: Fetch ESP8266 Core
         uses: actions/checkout@v3
@@ -41,15 +41,15 @@ jobs:
       - name: Get toolchain files
         run: |
           cd esp8266/tools
-          python get.py -q
+          python get.py --quiet --tool xtensa-lx106-elf
 
       - name: Build
         env:
           ESP8266_ARDUINO_CORE_DIR: ${{ github.workspace }}/esp8266
         run: |
-          make -C repo/ -j$(nproc) \
-            PREFIX=${ESP8266_ARDUINO_CORE_DIR} \
-            arduino/upstream
+          export PREFIX="${ESP8266_ARDUINO_CORE_DIR}"
+          export PATH="${ESP8266_ARDUINO_CORE_DIR}/tools/xtensa-lx106-elf/bin/:${PATH}"
+          make -C repo/ -j$(nproc) all
 
   cmake-build:
     runs-on: ubuntu-latest
@@ -81,7 +81,7 @@ jobs:
       - name: Get toolchain files
         run: |
           cd esp8266/tools
-          python get.py -q
+          python get.py --quiet --tool xtensa-lx106-elf
 
       - name: Build
         env:

@@ -1,18 +1,13 @@
-ifeq ($(V), 0)
-VERBC = @echo "CC $@";
-VERBAR = @echo "AR $@";
-else
-VERBC =
-VERBAR = 
-endif
+# assume in PATH, override via cmdline or through config .mk
+CC := xtensa-lx106-elf-gcc
+AR := xtensa-lx106-elf-ar
 
-CC = $(VERBC) $(TOOLS)gcc
+# verbose compilation w/ V=1, hide compiler cmdline otherwise
+V_CC0 = @echo "CC $(notdir $@)"; $(CC)
+V_CC1 = $(CC)
+V_CC = $(V_CC0)
 
-AR = $(VERBAR) $(TOOLS)ar
-OC = $(TOOLS)objcopy
-OD = $(TOOLS)objdump
-
-BUILD_FLAGS += \
+CFLAGS += \
 	-std=gnu99 \
 	-MMD \
 	-Wall \
@@ -20,8 +15,9 @@ BUILD_FLAGS += \
 	-Wpointer-arith \
 	-Os \
 	-g \
-	-free -fipa-pta -Wl,-EL \
-	-fno-inline-functions \
+	-free \
+	-fipa-pta \
+	-Wl,-EL \
 	-nostdlib \
 	-mlongcalls \
 	-mtext-section-literals \
@@ -29,18 +25,10 @@ BUILD_FLAGS += \
 	-ffunction-sections \
 	-fdata-sections
 
-ifeq ($(DEFINE_TARGET),)
-$(error $$DEFINE_TARGET cannot be empty)
-endif
-
-BUILD_DEFINES = \
+CPPFLAGS += \
 	-U__STRICT_ANSI__ \
 	-D__ets__ \
 	-DICACHE_FLASH \
 	-DLWIP_OPEN_SRC \
 	-DLWIP_BUILD \
-	-DUSE_OPTIMIZE_PRINTF \
-	-D$(DEFINE_TARGET)=1 \
-	-DTCP_MSS=$(TCP_MSS) \
-	-DLWIP_FEATURES=$(LWIP_FEATURES) \
-	-DLWIP_IPV6=$(LWIP_IPV6)
+	-DUSE_OPTIMIZE_PRINTF

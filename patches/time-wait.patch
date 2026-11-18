@@ -1,8 +1,8 @@
 diff --git a/src/core/tcp.c b/src/core/tcp.c
-index ea95ffee..15cc8d8f 100644
+index 34e1ac2..4894c50 100644
 --- a/src/core/tcp.c
 +++ b/src/core/tcp.c
-@@ -1784,7 +1789,7 @@ tcp_kill_state(enum tcp_state state)
+@@ -1786,7 +1786,7 @@ tcp_kill_state(enum tcp_state state)
   * Kills the oldest connection that is in TIME_WAIT state.
   * Called from tcp_alloc() if no more connections are available.
   */
@@ -12,30 +12,33 @@ index ea95ffee..15cc8d8f 100644
  {
    struct tcp_pcb *pcb, *inactive;
 diff --git a/src/core/tcp_in.c b/src/core/tcp_in.c
-index 1b17e40f..61175eb7 100644
+index 2202e38..bb021c8 100644
 --- a/src/core/tcp_in.c
 +++ b/src/core/tcp_in.c
-@@ -1010,6 +1010,7 @@ tcp_process(struct tcp_pcb *pcb)
+@@ -997,6 +997,8 @@ tcp_process(struct tcp_pcb *pcb)
+           tcp_pcb_purge(pcb);
            TCP_RMV_ACTIVE(pcb);
            pcb->state = TIME_WAIT;
++          /* limit before TCP_REG, so tcp_kill_timewait() cannot pick this pcb */
++          TCP_TW_LIMIT(MEMP_NUM_TCP_PCB_TIME_WAIT - 1);
            TCP_REG(&tcp_tw_pcbs, pcb);
-+          TCP_TW_LIMIT(MEMP_NUM_TCP_PCB_TIME_WAIT);
          } else {
            tcp_ack_now(pcb);
-           pcb->state = CLOSING;
-@@ -1028,6 +1029,7 @@ tcp_process(struct tcp_pcb *pcb)
+@@ -1015,6 +1017,8 @@ tcp_process(struct tcp_pcb *pcb)
+         tcp_pcb_purge(pcb);
          TCP_RMV_ACTIVE(pcb);
          pcb->state = TIME_WAIT;
++        /* limit before TCP_REG, so tcp_kill_timewait() cannot pick this pcb */
++        TCP_TW_LIMIT(MEMP_NUM_TCP_PCB_TIME_WAIT - 1);
          TCP_REG(&tcp_tw_pcbs, pcb);
-+        TCP_TW_LIMIT(MEMP_NUM_TCP_PCB_TIME_WAIT);
        }
        break;
-     case CLOSING:
-@@ -1038,6 +1040,7 @@ tcp_process(struct tcp_pcb *pcb)
+@@ -1025,6 +1029,8 @@ tcp_process(struct tcp_pcb *pcb)
+         tcp_pcb_purge(pcb);
          TCP_RMV_ACTIVE(pcb);
          pcb->state = TIME_WAIT;
++        /* limit before TCP_REG, so tcp_kill_timewait() cannot pick this pcb */
++        TCP_TW_LIMIT(MEMP_NUM_TCP_PCB_TIME_WAIT - 1);
          TCP_REG(&tcp_tw_pcbs, pcb);
-+        TCP_TW_LIMIT(MEMP_NUM_TCP_PCB_TIME_WAIT);
        }
        break;
-     case LAST_ACK:

@@ -1,61 +1,62 @@
-include makefiles/include/common.mk
-include makefiles/include/version.mk
+LWIP_GIT ?= https://github.com/lwip-tcpip/lwip
+LWIP_REF ?= refs/tags/STABLE-2_1_3_RELEASE
 
-.PHONY: arduino/upstream arduino
-.PHONY: open-sdk/upstream open-sdk
-.PHONY: lwip/clean lwip/patch lwip/patch-open lwip
+CONFIG ?= arduino
+
 .PHONY: all
 
-.DEFAULT: all
+all:
+	$(MAKE) lwip
+	$(MAKE) static
 
-LWIP_GIT_REPO = https://github.com/lwip-tcpip/lwip
+.PHONY: clean
 
-PATCHES = $(wildcard $(ROOT)/patches/*.patch)
-OPEN_SDK_PATCHES = $(ROOT)/patches/open/sdk-mem-macros.patch
+include makefiles/include/common.mk
 
-all: arduino
+clean:
+	$(RM) -r $(BUILD_ROOT)
 
-lwip/upstream:
-	@if test ! -e "$(LWIP_ROOT)" ; then \
-		mkdir $(LWIP_ROOT); \
-		git -C $(LWIP_ROOT) init ; \
-		git -C $(LWIP_ROOT) remote add origin $(LWIP_GIT_REPO) ; \
-	fi
+PATCHES := $(wildcard $(ROOT)/patches/*.patch)
 
-	@git -C $(LWIP_ROOT) fetch origin $(UPSTREAM_VERSION):refs/tags/$(UPSTREAM_VERSION)
+ifeq ($(CONFIG),open)
+PATCHES += $(ROOT)/patches/open/sdk-mem-macros.patch
+endif
 
-lwip/clean:
-	@git -C $(LWIP_ROOT) clean -f
-	@git -C $(LWIP_ROOT) checkout -f $(UPSTREAM_VERSION)
+.PHONY: lwip/checkout lwip/reset lwip/patch lwip
+
+lwip/checkout:
+	@test -r "$(LWIP_ROOT)"/.git \
+		|| (mkdir -p "$(LWIP_ROOT)" \
+			&& cd "$(LWIP_ROOT)" \
+			&& git init \
+			&& git remote add origin $(LWIP_GIT) )
+	@cd "$(LWIP_ROOT)" \
+		&& if ! git checkout -f $(LWIP_REF) -- ; then \
+			case "$(LWIP_REF)" in \
+			  refs/tags/*) git fetch --no-tags origin $(LWIP_REF):$(LWIP_REF) ;; \
+			  *) git fetch origin $(LWIP_REF) ;; \
+			esac \
+			&& git checkout -f $(LWIP_REF) -- ; \
+		fi
+
+lwip/reset:
+	@test -r "$(LWIP_ROOT)"/.git
+	@cd "$(LWIP_ROOT)" \
+		&& git reset --hard \
+		&& git clean -x -f -d
 
 lwip/patch:
-	@for p in $(PATCHES); do \
-		echo "PATCH $$p"; patch -d $(LWIP_ROOT) -p1 < $$p; \
-	done
-
-lwip/patch-open: lwip/patch
-	@for p in $(OPEN_SDK_PATCHES); do \
-		echo "PATCH $$p"; patch -d $(LWIP_ROOT) -p1 < $$p; \
+	@set -e; for p in $(PATCHES) ; do \
+		(set -x; patch -d "$(LWIP_ROOT)" -p1 -i $$p ); \
 	done
 
 lwip:
-	$(MAKE) lwip/upstream
-	$(MAKE) lwip/clean
+	$(MAKE) lwip/checkout
+	$(MAKE) lwip/reset
 	$(MAKE) lwip/patch
 
-open-sdk/upstream:
-	$(MAKE) lwip
-	$(MAKE) lwip/patch-open
-	$(MAKE) open-sdk
+include makefiles/config/$(CONFIG).mk
+include makefiles/targets/*.mk
 
-open-sdk:
-	$(MAKE) -f Makefile.open clean
-	$(MAKE) -f Makefile.open install
-
-arduino/upstream:
-	$(MAKE) lwip
-	$(MAKE) arduino
-
-arduino:
-	$(MAKE) -f Makefile.arduino clean
-	$(MAKE) -f Makefile.arduino install
+include makefiles/include/exports.mk
+include makefiles/include/install.mk
