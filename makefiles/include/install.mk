@@ -20,12 +20,13 @@ $(BUILD_ROOT):
 $(BUILD_ROOT)/user_config.h: | $(BUILD_ROOT)
 	touch $@
 
-PRE0 = @echo "PRE $@";
-PRE1 =
+V_PRE0 = @echo "PRE $@";
+V_PRE1 =
+V_PRE = $(V_PRE0)
 
 # legacy typedefs from arch/cc.h
 $(BUILD_ROOT)/lwip-err-t.h: $(lwip14includedir)/arch/cc.h $(ROOT)/glue-lwip/lwip-err-t.h.in | $(BUILD_ROOT)
-	$(PRE$(V)) /usr/bin/env bash scripts/make-err-t.sh \
+	$(V_PRE$(V)) /usr/bin/env bash scripts/make-err-t.sh \
 		"$(lwip14includedir)/arch/cc.h" \
 		"$(ROOT)/glue-lwip/lwip-err-t.h.in" \
 		"$@"
@@ -35,7 +36,7 @@ LWIP_GIT_HEAD := $(LWIP_ROOT)/.git/HEAD
 
 # version info string
 $(BUILD_ROOT)/lwip-git-hash.h: $(GLUE_GIT_HEAD) $(LWIP_GIT_HEAD) $(ROOT)/glue-lwip/lwip-git-hash.h.in | $(BUILD_ROOT)
-	$(PRE$(V)) /usr/bin/env bash scripts/make-lwip-hash.sh \
+	$(V_PRE$(V)) /usr/bin/env bash scripts/make-lwip-hash.sh \
 		"$(LWIP_ROOT)" \
 		"$(ROOT)/glue-lwip/lwip-git-hash.h.in" \
 		"$@"

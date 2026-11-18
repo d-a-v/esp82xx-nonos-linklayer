@@ -21,7 +21,7 @@ $(BUILD):
 	@mkdir -p $(BUILD)
 
 $(OBJ): $(BUILD)/%.o: %.c
-	$(CC$(V)) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
+	$(V_CC$(V)) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
 
 OBJDIRS := $(sort $(dir $(OBJ)))
 $(OBJDIRS): $(SRC)
@@ -36,11 +36,12 @@ clean:
 
 -include $(BUILD)/$(BUILD_COMPONENT).d
 
-DEP0 = @echo "DEP $@";
-DEP1 =
+V_DEP0 = @echo "DEP $@";
+V_DEP1 =
+V_DEP = $(V_DEP0)
 
 $(BUILD)/$(BUILD_COMPONENT).d: $(OBJ)
-	$(DEP$(V)) { \
+	$(V_DEP$(V)) { \
 		echo '.PHONY: $(notdir $(LWIP_LIB))'; \
 		echo '$(notdir $(LWIP_LIB)): $(LWIP_LIB)'; \
 		echo '$(LWIP_LIB): $(OBJ)'; \
