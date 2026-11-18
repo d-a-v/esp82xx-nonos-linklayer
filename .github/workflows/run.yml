@@ -49,7 +49,7 @@ jobs:
         run: |
           make -C repo/ -j$(nproc) \
             PREFIX=${ESP8266_ARDUINO_CORE_DIR} \
-            arduino/upstream
+            all
 
   cmake-build:
     runs-on: ubuntu-latest
