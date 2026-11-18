@@ -20,8 +20,8 @@ lwIP version currently used: [STABLE\_2.1.3](http://git.savannah.nongnu.org/cgit
 # Build & install
 
 > [!WARNING]
-> `gmake arduino` default rule, which always calls `gmake -f Makefile.arduino uninstall`, would remove existing lwip2 libraries located at `tools/sdk/lib` and everything at `tools/sdk/lwip2/include`
-> modify `PREFIX` of the selected configuration, or change `libdir` and `includedir` respectively to install to a different path
+> Calling `gmake` w/o arguments always removes existing lwip2 libraries located at `tools/sdk/lib` and headers located at `tools/sdk/lwip2/include`
+> Use specific recipe, modify `PREFIX` of the selected configuration, or change `libdir` and `includedir` respectively to use a different path
 
 - with Arduino:
   - Install the [git version](https://arduino-esp8266.readthedocs.io/en/stable/installing.html#using-git-version) of the esp8266 arduino core
@@ -31,13 +31,14 @@ lwIP version currently used: [STABLE\_2.1.3](http://git.savannah.nongnu.org/cgit
 - with PlatformIO:
   - Install Arduino [git version](https://docs.platformio.org/en/latest/platforms/espressif8266.html#using-arduino-framework-with-staging-version)
   - Try to build a project using git version platform package at least once
-  - Run `gmake arduino` from the current directory with additional parameters
+  - Run `gmake` from the current directory with additional parameters
     - `PREFIX=/path/to/.platformio/packages/framework-arduinoespressif8266` (inspect `pio run --verbose` output)
     - `CC=/path/to/.platformio/packages/toolchain-xtensa/bin/xtensa-lx106-elf-gcc`
     - `AR=/path/to/.platformio/packages/toolchain-xtensa/bin/xtensa-lx106-elf-ar`
 
 - other build systems:
-  - see [`Makefile`](Makefile), [`Makefile.arduino`](Makefile.arduino) and [`Makefile.open`](Makefile.open)
+  - see [`Makefile`](Makefile), [`makefiles/config/arduino.mk`](makefiles/config/arduino.mk) (default) and [`makefiles/config/open.mk`](makefiles/config/open.mk)
+    `gmake CONFIG=...` to use a different configuration
 
 # MSS
 
