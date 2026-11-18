@@ -15,9 +15,13 @@ all: $(LWIP_LIB)
 
 ARCHIVE := $(BUILD_ROOT)/archive_$(notdir $(LWIP_LIB))
 
-V_GEN0 := @echo "GEN $(ARCHIVE)";
+V_GEN0 := @echo "GEN $(notdir $(ARCHIVE))";
 V_GEN1 :=
 V_GEN := $(V_GEN0)
+
+V_AR0 = @echo "AR $(notdir $@)";
+V_AR1 = $(AR)
+V_AR = $(V_AR0)
 
 $(LWIP_LIB):
 	mkdir -p $(ARCHIVE)
@@ -25,5 +29,5 @@ $(LWIP_LIB):
 		for f in $^; do \
 			cp -l $$f $$(realpath --relative-to="$(BUILD)" $$f | tr '/-' '_'); \
 		done)
-	$(V_AR$(V)) cDr $@ $(ARCHIVE)/*.o
+	$(V_AR$(V)) ( find $(ARCHIVE)/ -name '*.o' -print0 | sort -z | xargs -0 $(AR) cDr $@ )
 	rm -rf $(ARCHIVE)
