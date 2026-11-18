@@ -31,9 +31,9 @@ lwip/checkout:
 			&& git init \
 			&& git remote add origin $(LWIP_GIT) )
 	@cd "$(LWIP_ROOT)" \
-		&& if ! git checkout -f $(LWIP_REF) ; then \
-			git fetch origin $(LWIP_REF) ; \
-			git checkout -f $(LWIP_REF) ; \
+		&& if ! git checkout -f $(LWIP_REF) -- ; then \
+			git fetch --no-tags origin $(LWIP_REF):$(LWIP_REF) ; \
+			git checkout -f $(LWIP_REF) -- ; \
 			fi
 
 lwip/reset:
