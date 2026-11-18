@@ -32,7 +32,11 @@ $(BUILD_ROOT)/lwip-err-t.h: $(lwip14includedir)/arch/cc.h $(ROOT)/glue-lwip/lwip
 		"$@"
 
 GLUE_GIT_HEAD := $(ROOT)/.git/HEAD
+$(GLUE_GIT_HEAD): | $(ROOT)
+
 LWIP_GIT_HEAD := $(LWIP_ROOT)/.git/HEAD
+$(LWIP_GIT_HEAD): | $(LWIP_ROOT)
+$(LWIP_ROOT): | lwip
 
 # version info string
 $(BUILD_ROOT)/lwip-git-hash.h: $(GLUE_GIT_HEAD) $(LWIP_GIT_HEAD) $(ROOT)/glue-lwip/lwip-git-hash.h.in | $(BUILD_ROOT)
