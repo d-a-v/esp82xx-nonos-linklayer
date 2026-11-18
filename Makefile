@@ -32,9 +32,12 @@ lwip/checkout:
 			&& git remote add origin $(LWIP_GIT) )
 	@cd "$(LWIP_ROOT)" \
 		&& if ! git checkout -f $(LWIP_REF) -- ; then \
-			git fetch --no-tags origin $(LWIP_REF):$(LWIP_REF) ; \
-			git checkout -f $(LWIP_REF) -- ; \
-			fi
+			case "$(LWIP_REF)" in \
+			  refs/tags/*) git fetch --no-tags origin $(LWIP_REF):$(LWIP_REF) ;; \
+			  *) git fetch origin $(LWIP_REF) ;; \
+			esac \
+			&& git checkout -f $(LWIP_REF) -- ; \
+		fi
 
 lwip/reset:
 	@test -r "$(LWIP_ROOT)"/.git
