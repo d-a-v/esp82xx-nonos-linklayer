@@ -1,5 +1,5 @@
 LWIP_GIT ?= https://github.com/lwip-tcpip/lwip
-LWIP_REF ?= refs/tags/STABLE-2_1_3_RELEASE
+LWIP_REF ?= refs/tags/STABLE-2_2_1_RELEASE
 
 CONFIG ?= arduino
 
