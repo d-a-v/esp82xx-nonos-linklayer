@@ -75,6 +75,9 @@ const char netif_name[2][8] = { "station", "soft-ap" };
 
 int __attribute__((weak)) doprint_allow = 0; // for doprint()
 
+// generate default versions of sntp timer value 'getters'
+#include "lwip/apps/sntp_opts.h"
+
 uint32_t SNTP_UPDATE_DELAY __attribute__((weak));
 uint32_t SNTP_UPDATE_DELAY
 {

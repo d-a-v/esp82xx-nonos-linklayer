@@ -1,7 +1,27 @@
-#ifndef MYLWIPOPTS_H
-#define MYLWIPOPTS_H
+#if !defined MYLWIPOPTS_HEAD_H
+#define MYLWIPOPTS_HEAD_H
 
-/* opt.h version lwip-2.2.1 for esp8266 */
+#if !defined TCP_MSS
+#error TCP_MSS must be defined
+#endif
+
+#if !defined LWIP_IPV6
+#error LWIP_IPV6 must be defined
+#endif
+
+#if !defined LWIP_FEATURES
+#error LWIP_FEATURES must be defined
+#endif
+
+/* necessary since 2.2.x, otherwise these fallback to free/malloc/calloc */
+#define MEM_CUSTOM_ALLOCATOR    1
+#define MEM_CUSTOM_FREE(s)              vPortFree(s, "", 0)
+#define MEM_CUSTOM_MALLOC(s)            pvPortMalloc(s, "", 0)
+#define MEM_CUSTOM_CALLOC(l, s)         pvPortCalloc(l, s, "", 0)
+/* opt.h version lwip-2.2.1 for esp8266
+ *
+ * when building, override necessary values in the blocks above and below
+ * when merging, compare opt.h with the rest of the file contents */
 
 /**
  * @file
@@ -46,15 +66,15 @@
  * without this, doxygen does not see the actual #define
  */
 
-//#if !defined LWIP_HDR_OPT_H
-//#define LWIP_HDR_OPT_H
+#if !defined LWIPOPTS_LWIP_HDR_OPT_H
+#define LWIPOPTS_LWIP_HDR_OPT_H
 
 /*
  * Include user defined options first. Anything not defined in these files
  * will be set to standard values. Override anything you don't like!
  */
-//#include "lwip/debug.h"      // done at end of this file
-#include "gluedebug.h"
+//#include "lwipopts.h"
+//#include "lwip/debug.h"      // must be done at within lwipopts.h file
 
 /**
  * @defgroup lwip_opts Options (lwipopts.h)
@@ -255,11 +275,11 @@
  */
 #if !defined MEM_LIBC_MALLOC || defined __DOXYGEN__
 #define MEM_LIBC_MALLOC                 1 // 0
-//#elif MEM_LIBC_MALLOC
+#elif MEM_LIBC_MALLOC
 #define MEM_CUSTOM_ALLOCATOR            1
-#define MEM_CUSTOM_FREE(s)              vPortFree(s, "", 0)
-#define MEM_CUSTOM_MALLOC(s)            pvPortMalloc(s, "", 0)
-#define MEM_CUSTOM_CALLOC(s)            pvPortCalloc(l, s, "", 0)
+#define MEM_CUSTOM_FREE                 free
+#define MEM_CUSTOM_MALLOC               malloc
+#define MEM_CUSTOM_CALLOC               calloc
 #endif
 
 /**
@@ -1359,7 +1379,7 @@
  * an upper limit on the MSS advertised by the remote host.
  */
 #if !defined TCP_MSS || defined __DOXYGEN__
-#error TCP_MSS must be defined
+#define TCP_MSS                         536
 #endif
 
 /**
@@ -2373,12 +2393,6 @@
  * @{
  */
 /**
- * LWIP_CHKSUM_ALGORITHM==3: Checksum algorithm fastest for ESP8266
- */
-#if !defined LWIP_CHKSUM_ALGORITHM || defined __DOXYGEN__
-#define LWIP_CHKSUM_ALGORITHM           3 // 2
-#endif
-/**
  * LWIP_CHECKSUM_CTRL_PER_NETIF==1: Checksum generation/check can be enabled/disabled
  * per netif.
  * ATTENTION: if enabled, the CHECKSUM_GEN_* and CHECKSUM_CHECK_* defines must be enabled!
@@ -2482,7 +2496,7 @@
  * LWIP_IPV6==1: Enable IPv6
  */
 #if !defined LWIP_IPV6 || defined __DOXYGEN__
-#error LWIP_IPV6 must be defined
+#define LWIP_IPV6                       0
 #endif
 
 /**
@@ -3645,25 +3659,17 @@
  * @}
  */
 
-/*
-   --------------------------------------------------
-   ------------- End of original lwipopts -----------
-   --------------------------------------------------
-*/
+#endif /* LWIPOPTS_LWIP_HDR_OPT_H */
 
-#ifndef LWIP_FEATURES
-#error LWIP_FEATURES must be defined
-#endif
+#if !defined MYLWIPOPTS_TAIL_H
+#define MYLWIPOPTS_TAIL_H
 
-/*
-   --------------------------------------------------
-   ------------------ SNTP options ------------------
-   --------------------------------------------------
-*/
+/* see lwip/apps/sntp_opts.h. since it includes opts.h, override things here */
 
-// if SNTP_SERVER_ADDRESS is defined, it always overrides user's config
-// so we do not define it. sntp server can come from dhcp server, or by
-// user.
+/* if SNTP_SERVER_ADDRESS is defined, it always overrides user's config
+ * so we do not define it. sntp server can come from dhcp server, or by
+ * user. */
+
 //#define SNTP_SERVER_ADDRESS	"pool.ntp.org"   // default
 //#define SNTP_GET_SERVERS_FROM_DHCP        // implicitely enabled by LWIP_DHCP_GET_NTP_SRV
 
@@ -3672,7 +3678,7 @@
 #define SNTP_SET_SYSTEM_TIME(t)		(sntp_set_system_time(t))	// implemented in lwip2-sntp.c
 
 #if LWIP_FEATURES
-// lwip-1.4 had 3 possible SNTP servers (constant was harcoded)
+// lwip-1.4 had 3 possible SNTP servers (constant was hardcoded)
 #define SNTP_MAX_SERVERS                3
 #endif
 
@@ -3686,12 +3692,8 @@
  */
 #define SNTP_STARTUP_DELAY              0
 
-/*
-   --------------------------------------------------
-   ------------------- LOCAL FIXES ------------------
-   --------------------------------------------------
-*/
-
+/* necessary includes when sourcing opt.h or this file alone as an opt.h substitute */
+#include "gluedebug.h"
 #include "lwip/debug.h"
 #include "arch/cc.h"
 #include "lwip-git-hash.h"
@@ -3699,24 +3701,44 @@
 // allow to handle special packets (user redefinable)
 struct pbuf;
 struct netif;
+
 #ifndef LWIP_ERR_T
 #error LWIP_ERR_T definition should come from lwip1.4 from espressif
 #endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //#define LWIP_ERR_T s8_t
 LWIP_ERR_T lwip_unhandled_packet (struct pbuf* pbuf, struct netif* netif);
 
 // called when STA OR AP is set up or down
 void netif_status_changed (struct netif*);
 
-/*
-   --------------------------------------------------
-   ----------------- TIME-WAIT tweak ----------------
-   --------------------------------------------------
-   port @me-no-dev time-wait tweak
-   https://github.com/esp8266/Arduino/commit/07f4d4c241df2c552899857f39a4295164f686f2#diff-f8258e71e25fb9985ca3799e3d8b88ecR399
-*/
+#ifdef __cplusplus
+}  // extern "C"
+#endif
+
+/**
+ * see time-wait .patch
+ * MEMP_NUM_TCP_PCB_TIME_WAIT: the number of TCP pcbs in TIME_WAIT state.
+ * (requires the LWIP_TCP option, 0 = disabled)
+ */
+#ifndef MEMP_NUM_TCP_PCB_TIME_WAIT
+#define MEMP_NUM_TCP_PCB_TIME_WAIT       5
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void tcp_kill_timewait (void);
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
+
 #define TCP_TW_LIMIT(l)                \
   if (l) do {                          \
     u32_t count_plus_1 = 1;            \
@@ -3729,13 +3751,5 @@ void tcp_kill_timewait (void);
       /* pcb in TW state */            \
       tcp_kill_timewait();             \
   } while (0)
-
-/**
- * MEMP_NUM_TCP_PCB_TIME_WAIT: the number of TCP pcbs in TIME_WAIT state.
- * (requires the LWIP_TCP option, 0 = disabled)
- */
-#ifndef MEMP_NUM_TCP_PCB_TIME_WAIT
-#define MEMP_NUM_TCP_PCB_TIME_WAIT       5
-#endif
 
 #endif // MYLWIPOPTS_H
