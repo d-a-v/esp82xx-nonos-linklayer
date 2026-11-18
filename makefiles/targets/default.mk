@@ -1,12 +1,4 @@
-# `override CC := ...` or run with `make CC=...` to change the compiler
-# `override AR := ...` or run with `make AR=...` change the archiver
-
-export V = 0
-
-# default targets matrix for .config.mk
-# TARGETS generates make recipes to build specific static archive flavour
-
-TARGETS := \
+TARGETS += \
 	liblwip2-536.a \
 	liblwip2-536-feat.a \
 	liblwip6-536-feat.a \

@@ -1,3 +1,7 @@
+# assume in PATH, override via cmdline or through config .mk
+CC := xtensa-lx106-elf-gcc
+AR := xtensa-lx106-elf-ar
+
 # verbose compilation w/ V=1, hide compiler cmdline otherwise
 CC0 = @echo "CC $@"; $(CC)
 CC1 = $(CC)

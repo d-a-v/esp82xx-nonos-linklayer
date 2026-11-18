@@ -12,8 +12,6 @@ export CPPFLAGS += $(LWIP_CPPFLAGS)
 $(BUILD_ROOT)/%.a: BUILD=$(BUILD_ROOT)/build_$(@F)
 $(BUILD_ROOT)/%.a: LWIP_LIB=$(BUILD_ROOT)/$(@F)
 $(BUILD_ROOT)/%.a: .FORCE
-	$(MAKE) -f makefiles/glue.mk
-	$(MAKE) -f makefiles/glue-esp.mk
-	$(MAKE) -f makefiles/glue-lwip.mk
-	$(MAKE) -f makefiles/lwip2-src.mk
-	$(MAKE) -f makefiles/static.mk
+	for t in glue glue-esp glue-lwip lwip2-src static ; do \
+		$(MAKE) -f makefiles/build/$${t}.mk ; \
+	done

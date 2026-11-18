@@ -9,7 +9,6 @@ BUILD_HEADERS := $(BUILD_ROOT)/lwip-git-hash.h $(BUILD_ROOT)/lwip-err-t.h
 $(BUILD_TARGETS): $(BUILD_ROOT)/user_config.h $(BUILD_HEADERS) | $(BUILD_ROOT)
 
 MKDIR_P := mkdir -p
-RM := rm
 
 INSTALL := install
 INSTALL_DATA := $(INSTALL) -m 644
@@ -31,6 +30,9 @@ $(BUILD_ROOT)/lwip-err-t.h: $(lwip14includedir)/arch/cc.h $(ROOT)/glue-lwip/lwip
 		"$(ROOT)/glue-lwip/lwip-err-t.h.in" \
 		"$@"
 
+GLUE_GIT_HEAD := $(ROOT)/.git/HEAD
+LWIP_GIT_HEAD := $(LWIP_ROOT)/.git/HEAD
+
 # version info string
 $(BUILD_ROOT)/lwip-git-hash.h: $(GLUE_GIT_HEAD) $(LWIP_GIT_HEAD) $(ROOT)/glue-lwip/lwip-git-hash.h.in | $(BUILD_ROOT)
 	$(PRE$(V)) /usr/bin/env bash scripts/make-lwip-hash.sh \
@@ -50,7 +52,7 @@ $(BUILD_ROOT)/%.mk: $(MAKEFILE_LIST) | $(BUILD_ROOT)
 		echo '$$(BUILD_ROOT)/$(TARGET): LWIP_CFLAGS=$$($(TARGET)_CFLAGS)'; \
 		echo '$$(BUILD_ROOT)/$(TARGET): LWIP_CPPFLAGS=$$($(TARGET)_CPPFLAGS)'; \
 		echo '$$(BUILD_ROOT)/$(TARGET): .FORCE'; \
-		echo '	$$(MAKE) -f makefiles/Makefile \'; \
+		echo '	$$(MAKE) -f makefiles/build/Makefile \'; \
 		echo '		LWIP_CFLAGS="$$(LWIP_CFLAGS)" \'; \
 		echo '		LWIP_CPPFLAGS="$$(LWIP_CPPFLAGS)" \'; \
 		echo '		$$@'; } > $@
@@ -138,11 +140,6 @@ install-lwip-headers: $(LWIP_HEADERS) | $(includedir)
 	done
 
 install-headers: install-lwip-headers
-
-.PHONY: clean
-
-clean:
-	$(RM) -rf $(BUILD_ROOT)
 
 .PHONY: uninstall
 

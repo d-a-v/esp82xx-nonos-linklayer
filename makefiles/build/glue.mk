@@ -1,4 +1,4 @@
-# recipe is part of the makefiles/Makefile
+# recipe is part of the build/Makefile
 
 ifndef sdkincludedir
 $(error $$sdkincludedir must point to espressif sdk include folder)

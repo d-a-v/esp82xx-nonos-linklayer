@@ -1,4 +1,3 @@
 build/*
 lwip2-src
 lwip2-src/*
-.config.mk

@@ -1,4 +1,4 @@
-# recipe is part of the makefiles/Makefile
+# recipe is part of the build/Makefile
 
 LWIPDIR := lwip2-src/src
 
