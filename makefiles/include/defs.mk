@@ -3,12 +3,12 @@ CC := xtensa-lx106-elf-gcc
 AR := xtensa-lx106-elf-ar
 
 # verbose compilation w/ V=1, hide compiler cmdline otherwise
-V_CC0 = @echo "CC $@"; $(CC)
+V_CC0 = @echo "CC $(notdir $@)"; $(CC)
 V_CC1 = $(CC)
 V_CC = $(V_CC0)
 
 # same for static archive generation
-V_AR0 = @echo "AR $@"; $(AR)
+V_AR0 = @echo "AR $(notdir $@)"; $(AR)
 V_AR1 = $(AR)
 V_AR = $(V_AR0)
 

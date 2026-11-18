@@ -20,7 +20,7 @@ $(BUILD_ROOT):
 $(BUILD_ROOT)/user_config.h: | $(BUILD_ROOT)
 	touch $@
 
-V_PRE0 = @echo "PRE $@";
+V_PRE0 = @echo "PRE $(notdir $@)";
 V_PRE1 =
 V_PRE = $(V_PRE0)
 
@@ -43,17 +43,25 @@ $(GLUE_GIT_HEAD): GIT_REV=$(ROOT)
 LWIP_GIT_HEAD := $(BUILD_ROOT)/lwip_git.txt
 $(LWIP_GIT_HEAD): GIT_REV=$(LWIP_ROOT)
 
-$(LWIP_GIT_HEAD) $(GLUE_GIT_HEAD): .FORCE
-	rev="git -C $(GIT_REV) rev-parse --short HEAD" \
+V_GITREV0 = @echo "REV $(notdir $@)";
+V_GITREV1 =
+V_GITREV = $(V_GITREV0)
+
+$(LWIP_GIT_HEAD) $(GLUE_GIT_HEAD): .FORCE | $(BUILD_ROOT)
+	$(V_GITREV$(V)) rev="$$(git -C $(GIT_REV) rev-parse --short HEAD)" \
 		&& test -r "$@" \
-			&& ($$rev | diff -q $@ - || $$rev > $@) \
-			|| ($$rev > $@)
+			&& (echo "$$rev" | diff -q $@ - || echo "$$rev" > $@) \
+			|| (echo "$$rev" > $@)
 
 $(BUILD_ROOT)/lwip-git-hash.h: $(GLUE_GIT_HEAD) $(LWIP_GIT_HEAD) $(ROOT)/glue-lwip/lwip-git-hash.h.in | $(BUILD_ROOT)
 	$(V_PRE$(V)) /usr/bin/env bash scripts/make-lwip-hash.sh \
 		"$(LWIP_ROOT)" \
 		"$(ROOT)/glue-lwip/lwip-git-hash.h.in" \
 		"$@"
+
+V_MAKE0 = @echo "MAKE $(notdir $@)";
+V_MAKE1 =
+V_MAKE = $(V_MAKE0)
 
 $(BUILD_ROOT)/%.mk: TARGET=$(basename $(@F))
 $(BUILD_ROOT)/%.mk: $(MAKEFILE_LIST) | $(BUILD_ROOT)
@@ -64,7 +72,7 @@ $(BUILD_ROOT)/%.mk: $(MAKEFILE_LIST) | $(BUILD_ROOT)
 		echo '$$(BUILD_ROOT)/$(TARGET): LWIP_CFLAGS=$$($(TARGET)_CFLAGS)'; \
 		echo '$$(BUILD_ROOT)/$(TARGET): LWIP_CPPFLAGS=$$($(TARGET)_CPPFLAGS)'; \
 		echo '$$(BUILD_ROOT)/$(TARGET): .FORCE'; \
-		echo '	$$(MAKE) -f makefiles/build/Makefile \'; \
+		echo '	$$(V_MAKE$$(V)) $$(MAKE) -f makefiles/build/Makefile \'; \
 		echo '		LWIP_CFLAGS="$$(LWIP_CFLAGS)" \'; \
 		echo '		LWIP_CPPFLAGS="$$(LWIP_CPPFLAGS)" \'; \
 		echo '		$$@'; } > $@
