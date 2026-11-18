@@ -158,7 +158,3 @@ install-headers: install-lwip-headers
 uninstall:
 	$(RM) -rf $(includedir)
 	$(RM) -f $(libdir)/liblwip2*.a
-
-.PHONY: all
-
-all: static
