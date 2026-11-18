@@ -52,12 +52,8 @@ lwip:
 	$(MAKE) lwip/reset
 	$(MAKE) lwip/patch
 
-ifeq ($(filter clean lwip/checkout lwip/reset lwip/patch lwip,$(MAKECMDGOALS)),)
-
 include makefiles/config/$(CONFIG).mk
 include makefiles/targets/*.mk
 
 include makefiles/include/exports.mk
 include makefiles/include/install.mk
-
-endif

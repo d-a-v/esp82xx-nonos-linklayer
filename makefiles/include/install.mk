@@ -24,6 +24,10 @@ V_PRE0 = @echo "PRE $@";
 V_PRE1 =
 V_PRE = $(V_PRE0)
 
+# some recipes must be resolved before continuing
+.FORCE:
+	@:
+
 # legacy typedefs from arch/cc.h
 $(BUILD_ROOT)/lwip-err-t.h: $(lwip14includedir)/arch/cc.h $(ROOT)/glue-lwip/lwip-err-t.h.in | $(BUILD_ROOT)
 	$(V_PRE$(V)) /usr/bin/env bash scripts/make-err-t.sh \
@@ -31,22 +35,25 @@ $(BUILD_ROOT)/lwip-err-t.h: $(lwip14includedir)/arch/cc.h $(ROOT)/glue-lwip/lwip
 		"$(ROOT)/glue-lwip/lwip-err-t.h.in" \
 		"$@"
 
-GLUE_GIT_HEAD := $(ROOT)/.git/HEAD
-$(GLUE_GIT_HEAD): | $(ROOT)
+# version info strings
+GLUE_GIT_HEAD := $(BUILD_ROOT)/glue_git.txt
+$(GLUE_GIT_HEAD): GIT_REV=$(ROOT)
 
-LWIP_GIT_HEAD := $(LWIP_ROOT)/.git/HEAD
-$(LWIP_GIT_HEAD): | $(LWIP_ROOT)
-$(LWIP_ROOT): | lwip
 
-# version info string
+LWIP_GIT_HEAD := $(BUILD_ROOT)/lwip_git.txt
+$(LWIP_GIT_HEAD): GIT_REV=$(LWIP_ROOT)
+
+$(LWIP_GIT_HEAD) $(GLUE_GIT_HEAD): .FORCE
+	rev="git -C $(GIT_REV) rev-parse --short HEAD" \
+		&& test -r "$@" \
+			&& ($$rev | diff -q $@ - || $$rev > $@) \
+			|| ($$rev > $@)
+
 $(BUILD_ROOT)/lwip-git-hash.h: $(GLUE_GIT_HEAD) $(LWIP_GIT_HEAD) $(ROOT)/glue-lwip/lwip-git-hash.h.in | $(BUILD_ROOT)
 	$(V_PRE$(V)) /usr/bin/env bash scripts/make-lwip-hash.sh \
 		"$(LWIP_ROOT)" \
 		"$(ROOT)/glue-lwip/lwip-git-hash.h.in" \
 		"$@"
-
-.FORCE:
-	@:
 
 $(BUILD_ROOT)/%.mk: TARGET=$(basename $(@F))
 $(BUILD_ROOT)/%.mk: $(MAKEFILE_LIST) | $(BUILD_ROOT)

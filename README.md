@@ -20,8 +20,8 @@ lwIP version currently used: [STABLE\_2.1.3](http://git.savannah.nongnu.org/cgit
 # Build & install
 
 > [!WARNING]
-> Calling `gmake` w/o arguments always removes existing lwip2 libraries located at `tools/sdk/lib` and headers located at `tools/sdk/lwip2/include`
-> Use specific recipe, modify `PREFIX` of the selected configuration, or change `libdir` and `includedir` respectively to use a different path
+> Arduino `tools/sdk/lwip2` builder `gmake` w/o arguments always removes existing lwip2 libraries located at `tools/sdk/lib` and headers located at `tools/sdk/lwip2/include`
+> Call `gmake static` to skip installation, modify `PREFIX` of the selected configuration, or change `libdir` and `includedir` respectively to use a different path
 
 - with Arduino:
   - Install the [git version](https://arduino-esp8266.readthedocs.io/en/stable/installing.html#using-git-version) of the esp8266 arduino core
