@@ -41,7 +41,7 @@ jobs:
       - name: Get toolchain files
         run: |
           cd esp8266/tools
-          python get.py -q
+          python get.py --quiet --tool xtensa-lx106-elf
 
       - name: Build
         env:
@@ -81,7 +81,7 @@ jobs:
       - name: Get toolchain files
         run: |
           cd esp8266/tools
-          python get.py -q
+          python get.py --quiet --tool xtensa-lx106-elf
 
       - name: Build
         env:
