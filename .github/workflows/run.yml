@@ -48,6 +48,8 @@ jobs:
           ESP8266_ARDUINO_CORE_DIR: ${{ github.workspace }}/esp8266
         run: |
           make -C repo/ -j$(nproc) \
+            CC="${ESP8266_ARDUINO_CORE_DIR}/tools/xtensa-lx106-elf/bin/xtensa-lx106-elf-gcc" \
+            AR="${ESP8266_ARDUINO_CORE_DIR}/tools/xtensa-lx106-elf/bin/xtensa-lx106-elf-ar" \
             PREFIX=${ESP8266_ARDUINO_CORE_DIR} \
             all
 
