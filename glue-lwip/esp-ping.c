@@ -292,9 +292,12 @@ ping_raw_init(struct ping_msg *pingmsg)
 bool ICACHE_FLASH_ATTR
 ping_start(struct ping_option *ping_opt)
 {
+	if (ping_opt == NULL)
+		return false;
+
 	struct ping_msg *pingmsg = NULL;
 	pingmsg = (struct ping_msg *)os_zalloc(sizeof(struct ping_msg));
-	if (pingmsg == NULL || ping_opt == NULL)
+	if (pingmsg == NULL)
 		return false;
 
 	pingmsg->ping_opt = ping_opt;
