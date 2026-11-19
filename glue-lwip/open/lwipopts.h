@@ -3739,17 +3739,4 @@ void tcp_kill_timewait (void);
 } // extern "C"
 #endif
 
-#define TCP_TW_LIMIT(l)                \
-  if (l) do {                          \
-    u32_t count_plus_1 = 1;            \
-    struct tcp_pcb* tmp = tcp_tw_pcbs; \
-    if (tmp)                           \
-      while ((tmp = tmp->next))        \
-        ++count_plus_1;                \
-    while (--count_plus_1 > (l))       \
-      /* kill the oldest */            \
-      /* pcb in TW state */            \
-      tcp_kill_timewait();             \
-  } while (0)
-
 #endif // MYLWIPOPTS_H

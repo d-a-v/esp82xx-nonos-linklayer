@@ -1,12 +1,20 @@
-From 8f41f08ad10476ae23922499f776c9abb248168e Mon Sep 17 00:00:00 2001
-From: esp82xx-nonos-linklayer <>
+From 50a35ab08e56e13d7cf89eab91ba6be663fad3a4 Mon Sep 17 00:00:00 2001
+From: Maxim Prokhorov <prokhorov.max@outlook.com>
 Date: Thu, 19 Nov 2026 01:29:21 +0300
-Subject: [PATCH 10/10]
+Subject: [PATCH 10/10] remove oldest pcbs in time-wait state when max number of them
+ is reached
 
+Original patch d-a-v/esp82xx-nonos-linklayer#17 by david gauchard <gauchard@laas.fr>
+Fixed tcp_abort() d-a-v/esp82xx-nonos-linklayer#69 by Sean Cardus <sean@cardus.com>
+
+replace original macro in lwipopts.h plus tcp.c export with a local func
+keep the export, though
+
+Signed-off-by: Maxim Prokhorov <prokhorov.max@outlook.com>
 ---
- src/core/tcp.c    | 2 +-
- src/core/tcp_in.c | 6 ++++++
- 2 files changed, 7 insertions(+), 1 deletion(-)
+ src/core/tcp.c    |  2 +-
+ src/core/tcp_in.c | 42 ++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 43 insertions(+), 1 deletion(-)
 
 diff --git a/src/core/tcp.c b/src/core/tcp.c
 index 7233fe13..a28db0ef 100644
@@ -22,33 +30,76 @@ index 7233fe13..a28db0ef 100644
  {
    struct tcp_pcb *pcb, *inactive;
 diff --git a/src/core/tcp_in.c b/src/core/tcp_in.c
-index 1b17e40f..970c0cbe 100644
+index 1b17e40f..0b4ea725 100644
 --- a/src/core/tcp_in.c
 +++ b/src/core/tcp_in.c
-@@ -1009,6 +1009,8 @@ tcp_process(struct tcp_pcb *pcb)
+@@ -65,6 +65,45 @@
+ #include LWIP_HOOK_FILENAME
+ #endif
+ 
++/* see tcp.c tcp_kill_timewait (void), c/p to avoid confusing linkage
++ * limit the total number of pcbs in time wait state by killing the oldest ones */
++static void
++tcp_limit_timewait(struct tcp_pcb **pcbs, u32_t limit) {
++  struct tcp_pcb *pcb, *inactive;
++  u32_t inactivity;
++
++  inactivity = 0;
++  inactive = NULL;
++
++  u32_t plus_one_cnt = 1;
++  for (pcb = *pcbs; pcb != NULL; pcb = pcb->next)
++    ++plus_one_cnt;
++
++  /* Go through the list of TIME_WAIT pcbs and get the oldest pcb. */
++  while (--plus_one_cnt > limit) {
++    for (pcb = *pcbs; pcb != NULL; pcb = pcb->next) {
++      if ((u32_t)(tcp_ticks - pcb->tmr) >= inactivity) {
++        inactivity = tcp_ticks - pcb->tmr;
++        inactive = pcb;
++      }
++    }
++
++    if ((*pcbs == NULL) || (inactive == NULL)) {
++      break;
++    }
++
++    tcp_abort(inactive);
++    inactive = NULL;
++  }
++}
++
++/* WARNING! apply limit BEFORE calling TCP_REG, current pcb should be tcp_abort()'ed */
++#if MEMP_NUM_TCP_PCB_TIME_WAIT
++#define TCP_TW_LIMIT(pcbs) tcp_limit_timewait(pcbs, MEMP_NUM_TCP_PCB_TIME_WAIT - 1)
++#else
++#define TCP_TW_LIMIT(pcbs) LWIP_UNUSED_ARG(pcbs);
++#endif
++
+ /** Initial CWND calculation as defined RFC 2581 */
+ #define LWIP_TCP_CALC_INITIAL_CWND(mss) ((tcpwnd_size_t)LWIP_MIN((4U * (mss)), LWIP_MAX((2U * (mss)), 4380U)))
+ 
+@@ -1009,6 +1048,7 @@ tcp_process(struct tcp_pcb *pcb)
            tcp_pcb_purge(pcb);
            TCP_RMV_ACTIVE(pcb);
            pcb->state = TIME_WAIT;
-+          /* limit before TCP_REG, so tcp_kill_timewait() cannot pick this pcb */
-+          TCP_TW_LIMIT(MEMP_NUM_TCP_PCB_TIME_WAIT - 1);
++          TCP_TW_LIMIT(&tcp_tw_pcbs);
            TCP_REG(&tcp_tw_pcbs, pcb);
          } else {
            tcp_ack_now(pcb);
-@@ -1027,6 +1029,8 @@ tcp_process(struct tcp_pcb *pcb)
+@@ -1027,6 +1067,7 @@ tcp_process(struct tcp_pcb *pcb)
          tcp_pcb_purge(pcb);
          TCP_RMV_ACTIVE(pcb);
          pcb->state = TIME_WAIT;
-+        /* limit before TCP_REG, so tcp_kill_timewait() cannot pick this pcb */
-+        TCP_TW_LIMIT(MEMP_NUM_TCP_PCB_TIME_WAIT - 1);
++        TCP_TW_LIMIT(&tcp_tw_pcbs);
          TCP_REG(&tcp_tw_pcbs, pcb);
        }
        break;
-@@ -1037,6 +1041,8 @@ tcp_process(struct tcp_pcb *pcb)
+@@ -1037,6 +1078,7 @@ tcp_process(struct tcp_pcb *pcb)
          tcp_pcb_purge(pcb);
          TCP_RMV_ACTIVE(pcb);
          pcb->state = TIME_WAIT;
-+        /* limit before TCP_REG, so tcp_kill_timewait() cannot pick this pcb */
-+        TCP_TW_LIMIT(MEMP_NUM_TCP_PCB_TIME_WAIT - 1);
++        TCP_TW_LIMIT(&tcp_tw_pcbs);
          TCP_REG(&tcp_tw_pcbs, pcb);
        }
        break;

@@ -9,8 +9,7 @@ sdkincludedir := $(call maybe-prefix,sdkincludedir,tools/sdk/include)
 lwipoptsincludedir := $(ROOT)/glue-lwip/arduino/
 
 GLUE_HEADERS += \
-	$(ROOT)/glue-lwip/arduino/lwipopts.h \
-	$(ROOT)/glue-lwip/arduino/lwip_hooks.h
+	$(ROOT)/glue-lwip/arduino/lwipopts.h
 
 GLUE_STUB_HEADERS += \
 	espconn.h

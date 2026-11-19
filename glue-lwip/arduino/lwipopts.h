@@ -3693,12 +3693,12 @@
  * LWIP_CHKSUM_ALGORITHM==3: Checksum algorithm fastest for ESP8266 */
 #define LWIP_CHKSUM_ALGORITHM           3 // 2
 
-/* see lwip_hooks.h, this one is only included while building lwip */
-#define LWIP_HOOK_FILENAME "lwip_hooks.h" // "path/to/my/lwip_hooks.h"
+/* see lwip-hooks.h, this one is only included while building lwip */
+#define LWIP_HOOK_FILENAME "lwip-hooks.h" // "path/to/my/lwip_hooks.h"
 
 /* local fixes */
 
-/* allow to handle special packets (user redefinable) */
+/* see lwip-git.c, allow to handle special packets (user redefinable) */
 struct pbuf;
 struct netif;
 
@@ -3714,7 +3714,7 @@ extern "C" {
 
 LWIP_ERR_T lwip_unhandled_packet (struct pbuf* pbuf, struct netif* netif);
 
-// called when STA OR AP is set up or down
+/* see lwip-git.c, called when STA OR AP is set up or down */
 void netif_status_changed (struct netif*);
 
 #ifdef __cplusplus
@@ -3743,19 +3743,6 @@ void tcp_kill_timewait (void);
 } // extern "C"
 #endif
 
-#define TCP_TW_LIMIT(l)                \
-  if (l) do {                          \
-    u32_t count_plus_1 = 1;            \
-    struct tcp_pcb* tmp = tcp_tw_pcbs; \
-    if (tmp)                           \
-      while ((tmp = tmp->next))        \
-        ++count_plus_1;                \
-    while (--count_plus_1 > (l))       \
-      /* kill the oldest */            \
-      /* pcb in TW state */            \
-      tcp_kill_timewait();             \
-  } while (0)
-
 /* see lwip/apps/sntp_opts.h. since it includes opts.h, override things here */
 #include <sys/time.h> // settimeofday() + struct timeval
 
@@ -3770,7 +3757,7 @@ void tcp_kill_timewait (void);
 #define SNTP_SET_SYSTEM_TIME_US(t,us)	do { struct timeval tv = { t, us }; settimeofday(&tv, (struct timezone*)0xFeedC0de); } while (0)
 
 #define SNTP_SUPPRESS_DELAY_CHECK 1
-#define SNTP_UPDATE_DELAY_DEFAULT 3600000   // update delay defined by a default weak function
+#define SNTP_UPDATE_DELAY_DEFAULT 3600000   // update delay (ms) defined by a default weak function
 #define SNTP_UPDATE_DELAY sntp_update_delay_MS_rfc_not_less_than_15000()
 
 #if LWIP_FEATURES
@@ -3787,7 +3774,7 @@ void tcp_kill_timewait (void);
  * which must return the delay in milliseconds as u32_t.
  */
 #define SNTP_STARTUP_DELAY 1                // enable startup delay
-#define SNTP_STARTUP_DELAY_FUNC_DEFAULT 0   // to 0 by default via a default weak function
+#define SNTP_STARTUP_DELAY_FUNC_DEFAULT 0   // startup delay (ms) is 0 by default via a default weak function
 #define SNTP_STARTUP_DELAY_FUNC sntp_startup_delay_MS_rfc_not_less_than_60000()
 
 /* both funcs are exportable, make sure set them up as such */
@@ -3795,8 +3782,8 @@ void tcp_kill_timewait (void);
 extern "C" {
 #endif
 
-uint32_t SNTP_UPDATE_DELAY;
-uint32_t SNTP_STARTUP_DELAY_FUNC;
+uint32_t sntp_update_delay_MS_rfc_not_less_than_15000 (void);
+uint32_t sntp_startup_delay_MS_rfc_not_less_than_60000 (void);
 
 #ifdef __cplusplus
 } // extern "C"

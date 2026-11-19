@@ -22,7 +22,7 @@ extern void lwip_hook_dhcp_parse_option(struct netif *netif, struct dhcp *dhcp, 
 }
 
 extern void lwip_hook_dhcp_amend_options(struct netif *netif, struct dhcp *dhcp, int state, struct dhcp_msg *msg,
-                                         int msg_type, u16 *option_len_ptr);
+                                         int msg_type, u16_t *option_len_ptr);
 #endif
 
 
