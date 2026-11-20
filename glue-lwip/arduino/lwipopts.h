@@ -3733,16 +3733,6 @@ void netif_status_changed (struct netif*);
 #define MEMP_NUM_TCP_PCB_TIME_WAIT       5
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void tcp_kill_timewait (void);
-
-#ifdef __cplusplus
-} // extern "C"
-#endif
-
 /* see lwip/apps/sntp_opts.h. since it includes opts.h, override things here */
 #include <sys/time.h> // settimeofday() + struct timeval
 

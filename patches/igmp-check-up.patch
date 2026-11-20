@@ -1,11 +1,6 @@
-From 8f40a9056091b40f47552644b10356b11f557387 Mon Sep 17 00:00:00 2001
 From: David Gauchard <gauchard@laas.fr>
 Date: Wed, 24 Jul 2019 18:19:44 +0200
-Subject: [PATCH 05/10] igmp: check output interface is up
-
----
- src/core/ipv4/igmp.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+Subject: igmp: check output interface is up
 
 diff --git a/src/core/ipv4/igmp.c b/src/core/ipv4/igmp.c
 index a74df16f..0df8770f 100644
@@ -23,6 +18,3 @@ index a74df16f..0df8770f 100644
        err = igmp_joingroup_netif(netif, groupaddr);
        if (err != ERR_OK) {
          /* Return an error even if some network interfaces are joined */
--- 
-2.56.1
-

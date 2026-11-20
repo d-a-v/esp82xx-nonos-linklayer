@@ -1,19 +1,6 @@
-From b8babac53d14e72f099f3d7585997b53a94174f5 Mon Sep 17 00:00:00 2001
-From: Maxim Prokhorov <prokhorov.max@outlook.com>
-Date: Thu, 19 Nov 2026 01:09:57 +0300
-Subject: [PATCH 07/10] napt{,-h}.patch from 2.1.x
+napt{,-h}.patch from 2.1.x (untested)
 
----
- src/core/init.c          |   1 +
- src/core/ipv4/ip4.c      | 757 +++++++++++++++++++++++++++++++++++++++
- src/core/netif.c         |   4 +
- src/include/lwip/ip.h    |   6 +
- src/include/lwip/napt.h  | 153 ++++++++
- src/include/lwip/netif.h |   3 +
- src/include/lwip/opt.h   |  12 +
- 7 files changed, 936 insertions(+)
- create mode 100644 src/include/lwip/napt.h
-
+Signed-off-by: Maxim Prokhorov <prokhorov.max@outlook.com>
 diff --git a/src/core/init.c b/src/core/init.c
 index b906eff4..4feeea6b 100644
 --- a/src/core/init.c
@@ -1064,6 +1051,3 @@ index 2573285f..e60e2bbc 100644
  /**
   * @}
   */
--- 
-2.56.1
-

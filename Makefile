@@ -16,8 +16,11 @@ include makefiles/include/common.mk
 clean:
 	$(RM) -r $(BUILD_ROOT)
 
-PATCHES := $(wildcard $(ROOT)/patches/*.patch)
+# quilt/guilt patch series for the lwip2-src
+# ref. https://github.com/git-guilt/guilt
+PATCHES := $(addprefix $(ROOT)/patches/,$(file < patches/series))
 
+# put extra patches into config dir
 ifneq ($(CONFIG),)
 PATCHES += $(wildcard $(ROOT)/patches/$(CONFIG)/*.patch)
 endif

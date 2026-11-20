@@ -1,8 +1,6 @@
-From 1dd406e18c21039e6a13f7949ec891b642567fe9 Mon Sep 17 00:00:00 2001
 From: "David J. Fiddes" <D.J@fiddes.net>
 Date: Thu, 3 Oct 2019 12:06:06 +0100
-Subject: [PATCH 02/10] dhcp/dhcp6: Ensure that DHCP/DHCPv6 DNS server updates
- don't overlap
+Subject: dhcp/dhcp6: Ensure that DHCP/DHCPv6 DNS server updates don't overlap
 
 This change changes the DHCP and DHCPv6 DNS server option update
 processing so that both IPv4 and IPv6 servers can be held in the
@@ -21,11 +19,6 @@ Tests:
  - On a network with intermittent IPv6 connectivity ensure that DNS
    resolution continues to function as DHCP and DHCPv6 updates are
    received.
----
- src/core/ipv4/dhcp.c  | 14 ++++++++++----
- src/core/ipv6/dhcp6.c | 21 ++++++++++++---------
- 2 files changed, 22 insertions(+), 13 deletions(-)
-
 diff --git a/src/core/ipv4/dhcp.c b/src/core/ipv4/dhcp.c
 index 12e00683..c1db7322 100644
 --- a/src/core/ipv4/dhcp.c
@@ -91,6 +84,3 @@ index e6a7e64d..9df7e24c 100644
      }
    }
    /* @ todo: parse and set Domain Search List */
--- 
-2.56.1
-

@@ -25,5 +25,9 @@ extern void lwip_hook_dhcp_amend_options(struct netif *netif, struct dhcp *dhcp,
                                          int msg_type, u16_t *option_len_ptr);
 #endif
 
+extern unsigned int r_rand (void);
+#define LWIP_HOOK_TCP_NEW_PORT(PORT) \
+    (PORT) = (u16_t)(r_rand() % (TCP_LOCAL_PORT_RANGE_END - TCP_LOCAL_PORT_RANGE_START)) \
+             + TCP_LOCAL_PORT_RANGE_START;
 
 #endif

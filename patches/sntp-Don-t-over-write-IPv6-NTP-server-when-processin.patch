@@ -1,8 +1,6 @@
-From df50dd0f3fa31854daee85c03866af386d969ceb Mon Sep 17 00:00:00 2001
 From: "David J. Fiddes" <D.J@fiddes.net>
 Date: Sun, 29 Sep 2019 17:46:17 +0100
-Subject: [PATCH 01/10] sntp: Don't over-write IPv6 NTP server when processing
- DHCP updates
+Subject: sntp: Don't over-write IPv6 NTP server when processing DHCP updates
 
 Currently when a DHCP or DHCPv6 updates containing NTP
 server addresses is processed all existing NTP server addresses
@@ -23,10 +21,6 @@ Tests:
  - On a network with intermittent IPv6 connectivity ensure that
    with both IPv4 and IPv6 servers configured via DHCP that NTP
    updates are requested over IPv4 even if it is not listed first.
----
- src/apps/sntp/sntp.c | 52 ++++++++++++++++++++++++++++----------------
- 1 file changed, 33 insertions(+), 19 deletions(-)
-
 diff --git a/src/apps/sntp/sntp.c b/src/apps/sntp/sntp.c
 index 36375305..ec74b808 100644
 --- a/src/apps/sntp/sntp.c
@@ -100,6 +94,3 @@ index 36375305..ec74b808 100644
      }
    }
  }
--- 
-2.56.1
-

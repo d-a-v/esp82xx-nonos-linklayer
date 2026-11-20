@@ -1,0 +1,29 @@
+esp8266 Core compat export
+
+Signed-off-by: Maxim Prokhorov <prokhorov.max@outlook.com>
+diff --git a/src/core/tcp.c b/src/core/tcp.c
+index 9596ea1c..0ce7e145 100644
+--- a/src/core/tcp.c
++++ b/src/core/tcp.c
+@@ -1788,7 +1788,7 @@ tcp_kill_state(enum tcp_state state)
+  * Kills the oldest connection that is in TIME_WAIT state.
+  * Called from tcp_alloc() if no more connections are available.
+  */
+-static void
++void
+ tcp_kill_timewait(void)
+ {
+   struct tcp_pcb *pcb, *inactive;
+diff --git a/src/include/lwip/priv/tcp_priv.h b/src/include/lwip/priv/tcp_priv.h
+index a8e87e59..63edc95b 100644
+--- a/src/include/lwip/priv/tcp_priv.h
++++ b/src/include/lwip/priv/tcp_priv.h
+@@ -520,4 +520,8 @@ err_t tcp_ext_arg_invoke_callbacks_passive_open(struct tcp_pcb_listen *lpcb, str
+ 
+ #endif /* LWIP_TCP */
+ 
++/** Internal function (implemented in tcp.c), called in tcp_alloc
++ * esp8266 Core historically exports this */
++void tcp_kill_timewait(void);
++
+ #endif /* LWIP_HDR_TCP_PRIV_H */
