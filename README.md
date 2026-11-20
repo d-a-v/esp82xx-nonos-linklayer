@@ -37,6 +37,7 @@ lwIP version currently used: **STABLE\_2.2.1**
     - `PREFIX=/path/to/.platformio/packages/framework-arduinoespressif8266` (inspect `pio run --verbose` output)
     - `CC=/path/to/.platformio/packages/toolchain-xtensa/bin/xtensa-lx106-elf-gcc`
     - `AR=/path/to/.platformio/packages/toolchain-xtensa/bin/xtensa-lx106-elf-ar`
+    - `OBJCOPY=/path/to/.platformio/packages/toolchain-xtensa/bin/xtensa-lx106-elf-objcopy`
 
 - other build systems:
   - see [`Makefile`](Makefile), [`makefiles/config/arduino.mk`](makefiles/config/arduino.mk) (default) and [`makefiles/config/open.mk`](makefiles/config/open.mk)

@@ -560,18 +560,9 @@ LWIP_ERR_T lwip_unhandled_packet (struct pbuf* pbuf, struct netif* netif)
 #if ARDUINO
 
 /** Arduino Core exposes time func with a generic type
- * safe to cast b/c it is capped at u32, even if sizeof(unsigned long) is 8 */
+ * safe to use directly b/c it is capped at u32, even if sizeof(unsigned long) is 8 */
 extern unsigned long millis (void);
-u32_t sys_now (void)
-{
-    return (u32_t)millis();
-}
-
-void netif_status_changed (struct netif*) __attribute__((weak));
-void netif_status_changed (struct netif* netif)
-{
-    (void)netif;
-}
+extern u32_t sys_now (void);
 
 void lwip_hook_dhcp_parse_option(struct netif *netif, struct dhcp *dhcp, int state, struct dhcp_msg *msg,
                                  int msg_type, int option, int option_len, struct pbuf *pbuf,

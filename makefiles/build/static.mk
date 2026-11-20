@@ -21,8 +21,12 @@ V_GEN1 :=
 V_GEN := $(V_GEN0)
 
 V_AR0 = @echo "AR $(notdir $@)";
-V_AR1 = $(AR)
+V_AR1 :=
 V_AR = $(V_AR0)
+
+V_OBJCOPY0 = @echo "OBJCOPY $(notdir $@)";
+V_OBJCOPY1 :=
+V_OBJCOPY = $(V_OBJCOPY0)
 
 $(LWIP_LIB):
 	mkdir -p $(ARCHIVE_TMP)
@@ -30,6 +34,8 @@ $(LWIP_LIB):
 		for f in $^; do \
 			cp -l $$f $$(realpath --relative-to="$(BUILD)" $$f | tr '/-' '_'); \
 		done)
+	$(V_OBJCOPY$(V)) ( find $(ARCHIVE_TMP)/ -name '*.o' -print0 \
+		| xargs -n 1 -0 $(OBJCOPY) --redefine-sym sys_now=millis )
 	$(V_AR$(V)) ( find $(ARCHIVE_TMP)/ -name '*.o' -print0 \
 		| sort -z \
 		| xargs -0 $(AR) $(ARFLAGS) $@ )
