@@ -7,3 +7,6 @@ export sdkincludedir
 
 export CFLAGS
 export CPPFLAGS
+
+export ARFLAGS
+export OBJCOPYFLAGS

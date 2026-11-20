@@ -29,14 +29,17 @@ V_OBJCOPY1 :=
 V_OBJCOPY = $(V_OBJCOPY0)
 
 $(LWIP_LIB):
+	$(RM) -r $(ARCHIVE_TMP)
 	mkdir -p $(ARCHIVE_TMP)
 	$(V_GEN$(V)) (set -e; cd $(ARCHIVE_TMP); \
 		for f in $^; do \
-			cp -l $$f $$(realpath --relative-to="$(BUILD)" $$f | tr '/-' '_'); \
+			cp $$f $$(realpath --relative-to="$(BUILD)" $$f | tr '/-' '_'); \
 		done)
+ifneq ($(OBJCOPYFLAGS),)
 	$(V_OBJCOPY$(V)) ( find $(ARCHIVE_TMP)/ -name '*.o' -print0 \
-		| xargs -n 1 -0 $(OBJCOPY) --redefine-sym sys_now=millis )
+		| xargs -n 1 -0 $(OBJCOPY) $(OBJCOPYFLAGS) )
+endif
 	$(V_AR$(V)) ( find $(ARCHIVE_TMP)/ -name '*.o' -print0 \
 		| sort -z \
 		| xargs -0 $(AR) $(ARFLAGS) $@ )
-	rm -rf $(ARCHIVE_TMP)
+	$(RM) -r $(ARCHIVE_TMP)

@@ -5,9 +5,7 @@ CONFIG ?= arduino
 
 .PHONY: all
 
-all:
-	$(MAKE) lwip
-	$(MAKE) static
+all: install
 
 .PHONY: clean
 
@@ -18,45 +16,14 @@ clean:
 
 # quilt/guilt patch series for the lwip2-src
 # ref. https://github.com/git-guilt/guilt
-PATCHES := $(addprefix $(ROOT)/patches/,$(file < patches/series))
+export PATCHES := $(addprefix $(ROOT)/patches/,$(file < patches/series))
 
 # put extra patches into config dir
 ifneq ($(CONFIG),)
 PATCHES += $(wildcard $(ROOT)/patches/$(CONFIG)/*.patch)
 endif
 
-.PHONY: lwip/checkout lwip/reset lwip/patch lwip
-
-lwip/checkout:
-	@test -r "$(LWIP_ROOT)"/.git \
-		|| (mkdir -p "$(LWIP_ROOT)" \
-			&& cd "$(LWIP_ROOT)" \
-			&& git init \
-			&& git remote add origin $(LWIP_GIT) )
-	@cd "$(LWIP_ROOT)" \
-		&& if ! git checkout -f $(LWIP_REF) -- ; then \
-			case "$(LWIP_REF)" in \
-			  refs/tags/*) git fetch --no-tags origin $(LWIP_REF):$(LWIP_REF) ;; \
-			  *) git fetch origin $(LWIP_REF) ;; \
-			esac \
-			&& git checkout -f $(LWIP_REF) -- ; \
-		fi
-
-lwip/reset:
-	@test -r "$(LWIP_ROOT)"/.git
-	@cd "$(LWIP_ROOT)" \
-		&& git reset --hard \
-		&& git clean -x -f -d
-
-lwip/patch:
-	@set -e; for p in $(PATCHES) ; do \
-		(set -x; patch -d "$(LWIP_ROOT)" -p1 -i $$p ); \
-	done
-
-lwip:
-	$(MAKE) lwip/checkout
-	$(MAKE) lwip/reset
-	$(MAKE) lwip/patch
+include makefiles/include/lwip.mk
 
 include makefiles/config/$(CONFIG).mk
 include makefiles/targets/*.mk
