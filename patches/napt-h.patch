@@ -1,3 +1,12 @@
+Author: david gauchard <gauchard@laas.fr>
+Date: 2019-08-03 19:09:47 +0200
+Subject: napt.h patch port from 2.0.x, untested
+
+---
+ src/include/lwip/napt.h |  153 +++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 153 insertions(+)
+ create mode 100644 src/include/lwip/napt.h
+
 diff --git a/src/include/lwip/napt.h b/src/include/lwip/napt.h
 new file mode 100644
 index 00000000..aecb43be

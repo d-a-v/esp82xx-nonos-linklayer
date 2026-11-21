@@ -1,5 +1,18 @@
+Author: david gauchard <gauchard@laas.fr>
+Date: 2019-07-30 15:16:51 +0200
+Subject: napt patch port from 2.0.x, untested
+
+---
+ src/core/init.c          |    1 
+ src/core/ipv4/ip4.c      |  757 ++++++++++++++++++++++++++++++++++++++++++++++
+ src/core/netif.c         |    4 
+ src/include/lwip/ip.h    |    6 
+ src/include/lwip/netif.h |    3 
+ src/include/lwip/opt.h   |   12 +
+ 6 files changed, 783 insertions(+)
+
 diff --git a/src/core/init.c b/src/core/init.c
-index b3737a35..9c2d1dcf 100644
+index 3620e1d4..08dd9e0c 100644
 --- a/src/core/init.c
 +++ b/src/core/init.c
 @@ -57,6 +57,7 @@
@@ -11,7 +24,7 @@ index b3737a35..9c2d1dcf 100644
  #include "netif/ppp/ppp_opts.h"
  #include "netif/ppp/ppp_impl.h"
 diff --git a/src/core/ipv4/ip4.c b/src/core/ipv4/ip4.c
-index 26c26a91..c8948b9c 100644
+index 26c26a91..c21400f3 100644
 --- a/src/core/ipv4/ip4.c
 +++ b/src/core/ipv4/ip4.c
 @@ -42,6 +42,7 @@
@@ -814,12 +827,12 @@ index 26c26a91..c8948b9c 100644
        ip4_forward(p, (struct ip_hdr *)p->payload, inp);
      } else
 diff --git a/src/core/netif.c b/src/core/netif.c
-index 15200a27..c52fea26 100644
+index 088b50ed..294f04f6 100644
 --- a/src/core/netif.c
 +++ b/src/core/netif.c
-@@ -363,6 +363,10 @@ netif_add(struct netif *netif,
-   netif->loop_cnt_current = 0;
- #endif /* ENABLE_LOOPBACK && LWIP_LOOPBACK_MAX_PBUFS */
+@@ -366,6 +366,10 @@ netif_add(struct netif *netif,
+ #endif /* LWIP_NETIF_LOOPBACK_MULTITHREADING */
+ #endif /* ENABLE_LOOPBACK */
  
 +#if IP_NAPT
 +  netif->napt = 0;
@@ -846,12 +859,12 @@ index 653c3b2f..230bfdcf 100644
  
  /** Get the IPv6 header of the current packet.
 diff --git a/src/include/lwip/netif.h b/src/include/lwip/netif.h
-index 911196ab..c29a9876 100644
+index 9a16deda..89ab85d2 100644
 --- a/src/include/lwip/netif.h
 +++ b/src/include/lwip/netif.h
-@@ -387,6 +387,9 @@ struct netif {
-   u16_t loop_cnt_current;
- #endif /* LWIP_LOOPBACK_MAX_PBUFS */
+@@ -391,6 +391,9 @@ struct netif {
+   u8_t reschedule_poll;
+ #endif /* LWIP_NETIF_LOOPBACK_MULTITHREADING */
  #endif /* ENABLE_LOOPBACK */
 +#if LWIP_IPV4 && IP_NAPT
 +  u8_t napt;
@@ -860,7 +873,7 @@ index 911196ab..c29a9876 100644
  
  #if LWIP_CHECKSUM_CTRL_PER_NETIF
 diff --git a/src/include/lwip/opt.h b/src/include/lwip/opt.h
-index 82c420c1..371286b6 100644
+index d8c82d15..410e3fff 100644
 --- a/src/include/lwip/opt.h
 +++ b/src/include/lwip/opt.h
 @@ -764,6 +764,10 @@
@@ -874,7 +887,7 @@ index 82c420c1..371286b6 100644
  /**
   * IP_OPTIONS_ALLOWED: Defines the behavior for IP options.
   *      IP_OPTIONS_ALLOWED==0: All packets with IP options are dropped.
-@@ -3484,6 +3488,14 @@
+@@ -3491,6 +3495,14 @@
  #if !defined DHCP6_DEBUG || defined __DOXYGEN__
  #define DHCP6_DEBUG                     LWIP_DBG_OFF
  #endif

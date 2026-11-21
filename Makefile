@@ -16,10 +16,13 @@ include makefiles/include/common.mk
 clean:
 	$(RM) -r $(BUILD_ROOT)
 
-PATCHES := $(wildcard $(ROOT)/patches/*.patch)
+# quilt/guilt patch series for the lwip2-src
+# ref. https://github.com/git-guilt/guilt
+export PATCHES := $(addprefix $(ROOT)/patches/,$(file < patches/series))
 
-ifeq ($(CONFIG),open)
-PATCHES += $(ROOT)/patches/open/sdk-mem-macros.patch
+# put extra patches into config dir
+ifneq ($(CONFIG),)
+PATCHES += $(wildcard $(ROOT)/patches/$(CONFIG)/*.patch)
 endif
 
 .PHONY: lwip/checkout lwip/reset lwip/patch lwip

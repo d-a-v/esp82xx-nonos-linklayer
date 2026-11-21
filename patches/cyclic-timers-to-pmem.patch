@@ -1,3 +1,16 @@
+Author: Earle F. Philhower, III <earlephilhower@yahoo.com>
+Date: 2019-07-28 14:04:18 -0700
+Subject: Move lwip_cyclic_timers to PROGMEM (d-a-v/esp82xx-nonos-linklayer#35)
+
+The two elements are 32-bit only (a pointer and a uint32), and it is
+constant, so move to PROGMEM.
+
+Frees 64 bytes of heap
+
+---
+ src/core/timeouts.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
 diff --git a/src/core/timeouts.c b/src/core/timeouts.c
 index f37acfec..71db3c7d 100644
 --- a/src/core/timeouts.c
