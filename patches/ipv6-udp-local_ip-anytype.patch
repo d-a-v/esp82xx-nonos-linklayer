@@ -1,8 +1,19 @@
+Author: Odd Stråbø <oddstr13@openshell.no>
+Date: 2019-02-11 03:20:05 +0100
+Subject: core/udp.c:udp_new: Initialize `pcb->local_ip.type` depending on whether we have IPv4, IPv4+IPv6 or IPv6 networking stack. (d-a-v/esp82xx-nonos-linklayer#28)
+
+Fixes esp8266/Arduino#5744
+Closes esp8266/Arduino#5745
+
+---
+ src/core/udp.c |    6 ++++++
+ 1 file changed, 6 insertions(+)
+
 diff --git a/src/core/udp.c b/src/core/udp.c
-index 9d2cb4af..40cdf190 100644
+index 0b609d33..2c99ddcb 100644
 --- a/src/core/udp.c
 +++ b/src/core/udp.c
-@@ -1233,6 +1233,12 @@ udp_new(void)
+@@ -1238,6 +1238,12 @@ udp_new(void)
  #if LWIP_MULTICAST_TX_OPTIONS
      udp_set_multicast_ttl(pcb, UDP_TTL);
  #endif /* LWIP_MULTICAST_TX_OPTIONS */

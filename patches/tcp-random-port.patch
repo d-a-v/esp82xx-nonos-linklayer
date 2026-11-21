@@ -1,8 +1,18 @@
+Author: David Gauchard <gauchard@laas.fr>
+Date: 2019-03-22 13:56:13 +0100
+Subject: fix d-a-v/esp82xx-nonos-linklayer#31
+
+Signed-off-by: Maxim Prokhorov <prokhorov.max@outlook.com>
+
+---
+ src/core/tcp.c |    5 +++++
+ 1 file changed, 5 insertions(+)
+
 diff --git a/src/core/tcp.c b/src/core/tcp.c
-index bd7d64ec..402fbd19 100644
+index 371db2b6..34e1ac20 100644
 --- a/src/core/tcp.c
 +++ b/src/core/tcp.c
-@@ -1015,9 +1015,14 @@ tcp_new_port(void)
+@@ -1016,10 +1016,15 @@ tcp_new_port(void)
    struct tcp_pcb *pcb;
  
  again:
@@ -17,3 +27,4 @@ index bd7d64ec..402fbd19 100644
 +#endif
    /* Check all PCB lists. */
    for (i = 0; i < NUM_TCP_PCB_LISTS; i++) {
+     for (pcb = *tcp_pcb_lists[i]; pcb != NULL; pcb = pcb->next) {

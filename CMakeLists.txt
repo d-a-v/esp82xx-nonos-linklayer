@@ -37,8 +37,10 @@ message(STATUS "core dir: " "${ESP8266_ARDUINO_CORE_DIR}")
 
 # fetches lwip2-src into the current build directory, then automatically patches it
 
-file(GLOB LWIP_PATCHES ${CMAKE_SOURCE_DIR}/patches/*.patch)
+file(STRINGS ${CMAKE_SOURCE_DIR}/patches/series LWIP_PATCHES)
 message(STATUS "patches: " "${LWIP_PATCHES}")
+
+list(TRANSFORM LWIP_PATCHES PREPEND ${CMAKE_CURRENT_SOURCE_DIR}/patches/)
 
 # TODO: GIT_CONFIG needed for windows install. lwip.git repo classifies .h as text through .gitattributes, and git-clone will apply native eol conversion
 # by default, git does not attribute .h files as text, so when installing .h into the esp8266 repo it will make them differ when all that's different is eol
