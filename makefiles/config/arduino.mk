@@ -15,3 +15,4 @@ GLUE_STUB_HEADERS += \
 	espconn.h
 
 CPPFLAGS += -DARDUINO=1
+OBJCOPYFLAGS += --redefine-sym sys_now=millis

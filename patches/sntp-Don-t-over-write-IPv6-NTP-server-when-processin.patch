@@ -1,8 +1,6 @@
-From 450bf1739ef0e1bce97ed28c4ed2b74ae6cdb9ca Mon Sep 17 00:00:00 2001
 From: "David J. Fiddes" <D.J@fiddes.net>
 Date: Sun, 29 Sep 2019 17:46:17 +0100
-Subject: [PATCH] sntp: Don't over-write IPv6 NTP server when processing DHCP
- updates
+Subject: sntp: Don't over-write IPv6 NTP server when processing DHCP updates
 
 Currently when a DHCP or DHCPv6 updates containing NTP
 server addresses is processed all existing NTP server addresses
@@ -23,15 +21,11 @@ Tests:
  - On a network with intermittent IPv6 connectivity ensure that
    with both IPv4 and IPv6 servers configured via DHCP that NTP
    updates are requested over IPv4 even if it is not listed first.
----
- src/apps/sntp/sntp.c | 52 ++++++++++++++++++++++++++++----------------
- 1 file changed, 33 insertions(+), 19 deletions(-)
-
 diff --git a/src/apps/sntp/sntp.c b/src/apps/sntp/sntp.c
-index a6c4ff07..494971ca 100644
+index 36375305..ec74b808 100644
 --- a/src/apps/sntp/sntp.c
 +++ b/src/apps/sntp/sntp.c
-@@ -819,20 +819,28 @@ sntp_setserver(u8_t idx, const ip_addr_t *server)
+@@ -825,20 +825,28 @@ sntp_setserver(u8_t idx, const ip_addr_t *server)
   * @param server IP address of the NTP server to set
   */
  void
@@ -71,7 +65,7 @@ index a6c4ff07..494971ca 100644
      }
    }
  }
-@@ -852,14 +860,20 @@ dhcp6_set_ntp_servers(u8_t num_ntp_servers, ip_addr_t* ntp_server_addrs)
+@@ -858,14 +866,20 @@ dhcp6_set_ntp_servers(u8_t num_ntp_servers, ip_addr_t* ntp_server_addrs)
                                   (sntp_set_servers_from_dhcp ? "Got" : "Rejected"),
                                   num_ntp_servers));
    if (sntp_set_servers_from_dhcp && num_ntp_servers) {
@@ -100,6 +94,3 @@ index a6c4ff07..494971ca 100644
      }
    }
  }
--- 
-2.21.0
-

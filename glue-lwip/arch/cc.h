@@ -63,7 +63,7 @@ typedef uint32_t sys_prot_t;
 #define SYS_ARCH_DECL_PROTECT(lev) sys_prot_t lev
 #define SYS_ARCH_PROTECT(lev) lev = lwip_xt_rsil(15)
 #define SYS_ARCH_UNPROTECT(lev) lwip_xt_wsr_ps(lev)
-#define sys_jiffies() (0) // only used for increased randomness in PPP
+#define sys_jiffies sys_now // only used for increased randomness in PPP
 
 #define LWIP_NO_CTYPE_H 1
 
@@ -84,21 +84,6 @@ typedef uint32_t sys_prot_t;
 
 ///////////////////////////////
 //// MISSING 
-
-// Arduino Core exposes time func with a generic type
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-unsigned long millis(void);
-#ifdef __cplusplus
-}
-#endif
-
-// b/c we have conflicting typedefs of u32_t and ulong and can't substitute funcs,
-// forcibly cast the `millis()` result to lwip's version of u32_t
-// (previous version was `#define sys_now millis`)
-#define sys_now() ((u32_t)millis())
 
 #define LWIP_RAND r_rand	// old lwip uses this useful undocumented function
 #define IPSTR "%d.%d.%d.%d"

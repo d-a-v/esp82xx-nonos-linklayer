@@ -1,6 +1,7 @@
 # assume in PATH, override via cmdline or through config .mk
 CC := xtensa-lx106-elf-gcc
 AR := xtensa-lx106-elf-ar
+OBJCOPY := xtensa-lx106-elf-objcopy
 
 # verbose compilation w/ V=1, hide compiler cmdline otherwise
 V_CC0 = @echo "CC $(notdir $@)"; $(CC)

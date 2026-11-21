@@ -75,6 +75,9 @@ const char netif_name[2][8] = { "station", "soft-ap" };
 
 int __attribute__((weak)) doprint_allow = 0; // for doprint()
 
+// generate default versions of sntp timer value 'getters'
+#include "lwip/apps/sntp_opts.h"
+
 uint32_t SNTP_UPDATE_DELAY __attribute__((weak));
 uint32_t SNTP_UPDATE_DELAY
 {
@@ -556,11 +559,10 @@ LWIP_ERR_T lwip_unhandled_packet (struct pbuf* pbuf, struct netif* netif)
 
 #if ARDUINO
 
-void netif_status_changed (struct netif*) __attribute__((weak));
-void netif_status_changed (struct netif* netif)
-{
-    (void)netif;
-}
+/** Arduino Core exposes time func with a generic type
+ * safe to use directly b/c it is capped at u32, even if sizeof(unsigned long) is 8 */
+extern unsigned long millis (void);
+extern u32_t sys_now (void);
 
 void lwip_hook_dhcp_parse_option(struct netif *netif, struct dhcp *dhcp, int state, struct dhcp_msg *msg,
                                  int msg_type, int option, int option_len, struct pbuf *pbuf,
@@ -583,7 +585,7 @@ void lwip_hook_dhcp_parse_option(struct netif *netif, struct dhcp *dhcp, int sta
 }
 
 void lwip_hook_dhcp_amend_options(struct netif *netif, struct dhcp *dhcp, int state, struct dhcp_msg *msg,
-                                  int msg_type, u16 *option_len_ptr)
+                                  int msg_type, u16_t *option_len_ptr)
 {
     (void)dhcp;
     (void)state;

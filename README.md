@@ -5,7 +5,9 @@ This repo offers a link layer for esp82xx-nonos-sdk-2.
 The original goal is to try and use a recent lwIP version for stability reasons.
 Currently lwIP-v2 is implemented, other IP stacks could be tried.
 
-lwIP version currently used: [STABLE\_2.1.3](http://git.savannah.nongnu.org/cgit/lwip.git/tree/?h=STABLE-2_1_3_RELEASE)
+lwIP version currently used: **STABLE\_2.2.1**
+- https://github.com/lwip-tcpip/lwip/tree/STABLE-2_2_1_RELEASE
+- http://git.savannah.nongnu.org/cgit/lwip.git/tree/?h=STABLE-2_2_1_RELEASE
 
 # Status
 
@@ -35,6 +37,7 @@ lwIP version currently used: [STABLE\_2.1.3](http://git.savannah.nongnu.org/cgit
     - `PREFIX=/path/to/.platformio/packages/framework-arduinoespressif8266` (inspect `pio run --verbose` output)
     - `CC=/path/to/.platformio/packages/toolchain-xtensa/bin/xtensa-lx106-elf-gcc`
     - `AR=/path/to/.platformio/packages/toolchain-xtensa/bin/xtensa-lx106-elf-ar`
+    - `OBJCOPY=/path/to/.platformio/packages/toolchain-xtensa/bin/xtensa-lx106-elf-objcopy`
 
 - other build systems:
   - see [`Makefile`](Makefile), [`makefiles/config/arduino.mk`](makefiles/config/arduino.mk) (default) and [`makefiles/config/open.mk`](makefiles/config/open.mk)

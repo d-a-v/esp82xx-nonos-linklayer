@@ -24,7 +24,7 @@ add_compile_options(
     -Os
     -g)
 
-set(UPSTREAM_VERSION "STABLE-2_1_3_RELEASE")
+set(UPSTREAM_VERSION "STABLE-2_2_1_RELEASE")
 set(LWIP_TAG ${UPSTREAM_VERSION})
 
 # TODO: never assume this is in-tree of esp8266/Arduino, force to give some path
