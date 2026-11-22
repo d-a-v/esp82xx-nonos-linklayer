@@ -37,7 +37,7 @@ message(STATUS "core dir: " "${ESP8266_ARDUINO_CORE_DIR}")
 
 # fetches lwip2-src into the current build directory, then automatically patches it
 
-file(STRINGS ${CMAKE_SOURCE_DIR}/patches/series LWIP_PATCH_SERIES)
+file(STRINGS ${CMAKE_SOURCE_DIR}/patches/series LWIP_PATCH_SERIES REGEX "\\.patch$")
 message(STATUS "patches: " "${LWIP_PATCH_SERIES}")
 
 set(LWIP_PATCHES "")
