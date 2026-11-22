@@ -10,14 +10,6 @@ ifndef LWIP_REF
 $(error $$LWIP_REF must be defined)
 endif
 
-# quilt-like patch series for the lwip2-src
-PATCHES := $(addprefix $(ROOT)/patches/,$(file < patches/series))
-
-# put extra patches into config dir
-ifneq ($(CONFIG),)
-PATCHES += $(addprefix $(ROOT)/patches/$(CONFIG)/,$(file < patches/$(CONFIG)/series))
-endif
-
 define lwip-checkout
 	@test -r "$(LWIP_ROOT)"/.git \
 		|| (mkdir -p "$(LWIP_ROOT)" \
@@ -41,10 +33,18 @@ define lwip-reset
 		&& git clean -x -f -d
 endef
 
+define lwip-patch-series
+	@set -e; if test -r $(1) ; then \
+		( while read -r line ; do \
+			p=$$(echo "$$line" | grep '^.*.patch$$' || true) ; \
+			test -z "$$p" || (set -x; patch -d "$(LWIP_ROOT)" -p1 -i $(dir $(1))$$p ); \
+		done < $(1) ) ; \
+	fi
+endef
+
 define lwip-patch
-	@set -e; for p in $(PATCHES) ; do \
-		(set -x; patch -d "$(LWIP_ROOT)" -p1 -i $$p ); \
-	done
+	$(call lwip-patch-series,$(ROOT)/patches/series)
+	$(call lwip-patch-series,$(ROOT)/patches/$(CONFIG)/series)
 endef
 
 define lwip-all
