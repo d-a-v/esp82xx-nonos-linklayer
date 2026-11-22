@@ -26,10 +26,11 @@ Refresh existing patch series, remove from it or add any new patches. See https:
 After everything is done, export patch series files back into the repo.
 ```console
 $ cd lwip2-src/
-$ stg export --dir ../patches/series --template ../patches/series.tmpl
+$ stg export --dir ../patches/ --template ../patches/series.tmpl
 ```
 
 # Other useful links
 
 - https://github.com/git-guilt/guilt for the `guilt` tool, alternative to `stg` which also works on existing git tree
+- https://wiki.debian.org/Cinnamon/Packaging#Patching and https://wiki.debian.org/UsingQuilt for a brief description of Debian packaging process
 - https://honk.sigxcpu.org/projects/git-buildpackage/manual-html/gbp.patches.html for an example of debian buildpackage tool
