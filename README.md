@@ -40,9 +40,13 @@ Alternatively, build with [`CMake`](README-CMake.md)
 
 - Install Arduino [git version](https://docs.platformio.org/en/latest/platforms/espressif8266.html#using-arduino-framework-with-staging-version)
 - Try to build a project using git version platform package at least once.
-  Inspect `pio run --verbose` output to find out the location of `framework-arduinoespressif8266` and `toolchain-xtensa` packages.
+- Inspect `pio run --verbose` output and find out the location of `framework-arduinoespressif8266` and `toolchain-xtensa` packages.
   Update `PATH` environment variable to include `toolchain-xtensa` binaries directory *or* set tools location through environment variables:
-  - `export PATH="/path/to/.platformio/packages/toolchain-xtensa/bin/:${PATH}`
+  - `export PATH="/path/to/.platformio/packages/toolchain-xtensa/bin/:${PATH}"`
+  - `export CC=...`
+  - `export AR=...`
+  Update `PREFIX` environment variable to `framework-arduinoespressif8266` directory:
+  - `export PREFIX="/path/to/.platformio/packages/framework-arduinoespressif8266"`
 - Run `gmake lwip` and `gmake install` from the root of this repo
 
 # MSS
