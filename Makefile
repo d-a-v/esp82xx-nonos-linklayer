@@ -5,7 +5,7 @@ CONFIG ?= arduino
 
 .PHONY: all
 
-all: install
+all: static
 
 .PHONY: clean
 
