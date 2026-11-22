@@ -78,13 +78,13 @@ int __attribute__((weak)) doprint_allow = 0; // for doprint()
 uint32_t SNTP_UPDATE_DELAY __attribute__((weak));
 uint32_t SNTP_UPDATE_DELAY
 {
-    return SNTP_UPDATE_DELAY_DEFAULT;
+	return SNTP_UPDATE_DELAY_DEFAULT;
 }
 
 uint32_t SNTP_STARTUP_DELAY_FUNC __attribute__((weak));
 uint32_t SNTP_STARTUP_DELAY_FUNC
 {
-    return SNTP_STARTUP_DELAY_FUNC_DEFAULT;
+	return SNTP_STARTUP_DELAY_FUNC_DEFAULT;
 }
 
 err_t glue2git_err (err_glue_t err)
@@ -467,8 +467,8 @@ void esp2glue_alloc_for_recv (size_t len, void** pbuf, void** data)
 	if (*pbuf)
 	{
 		*data = ((struct pbuf*)*pbuf)->payload;
-        ((struct pbuf*)*pbuf)->flags |= PBUF_FLAG_GLUED;
-    }
+		((struct pbuf*)*pbuf)->flags |= PBUF_FLAG_GLUED;
+	}
 }
 
 err_glue_t esp2glue_ethernet_input (int netif_idx, void* received)
@@ -539,10 +539,6 @@ void esp2glue_netif_set_up1down0 (int netif_idx, int up1_or_down0)
 	}
 }
 
-#define VALUE_TO_STRING(x) #x
-#define VAR_NAME_VALUE(var) "-------- " #var " = "  VALUE_TO_STRING(var) " --------\n"
-#pragma message "\n\n" VAR_NAME_VALUE(TCP_MSS) VAR_NAME_VALUE(LWIP_FEATURES) VAR_NAME_VALUE(LWIP_IPV6)
-
 LWIP_ERR_T lwip_unhandled_packet (struct pbuf* pbuf, struct netif* netif) __attribute__((weak));
 LWIP_ERR_T lwip_unhandled_packet (struct pbuf* pbuf, struct netif* netif)
 {
@@ -559,50 +555,49 @@ LWIP_ERR_T lwip_unhandled_packet (struct pbuf* pbuf, struct netif* netif)
 void netif_status_changed (struct netif*) __attribute__((weak));
 void netif_status_changed (struct netif* netif)
 {
-    (void)netif;
+	(void)netif;
 }
 
 void lwip_hook_dhcp_parse_option(struct netif *netif, struct dhcp *dhcp, int state, struct dhcp_msg *msg,
-                                 int msg_type, int option, int option_len, struct pbuf *pbuf,
-                                 int option_value_offset) __attribute__((weak));
+								 int msg_type, int option, int option_len, struct pbuf *pbuf,
+								 int option_value_offset) __attribute__((weak));
 
 void lwip_hook_dhcp_parse_option(struct netif *netif, struct dhcp *dhcp, int state, struct dhcp_msg *msg,
-                                 int msg_type, int option, int option_len, struct pbuf *pbuf,
-                                 int option_value_offset)
+								 int msg_type, int option, int option_len, struct pbuf *pbuf,
+								 int option_value_offset)
 {
-    (void)netif;
-    (void)dhcp;
-    (void)state;
-    (void)msg;
-    (void)msg_type;
-    (void)option;
-    (void)option_len;
-    (void)pbuf;
-    (void)option_value_offset;
-    uprint(DBG "unhandled dhcp option in lwip_hook_dhcp_parse_option()\n");
+	(void)netif;
+	(void)dhcp;
+	(void)state;
+	(void)msg;
+	(void)msg_type;
+	(void)option;
+	(void)option_len;
+	(void)pbuf;
+	(void)option_value_offset;
+	uprint(DBG "unhandled dhcp option in lwip_hook_dhcp_parse_option()\n");
 }
 
 void lwip_hook_dhcp_amend_options(struct netif *netif, struct dhcp *dhcp, int state, struct dhcp_msg *msg,
                                   int msg_type, u16 *option_len_ptr)
 {
-    (void)dhcp;
-    (void)state;
-    (void)msg_type;
+	(void)dhcp;
+	(void)state;
+	(void)msg_type;
 
-    // amend default Client-Identifier
-    // {intf.id} {intf.mac} => {01}:{AA:BB:CC:11:22:33}
-    {
-        size_t i;
+	// amend default Client-Identifier
+	// {intf.id} {intf.mac} => {01}:{AA:BB:CC:11:22:33}
+	{
+		size_t i;
 
-        msg->options[(*option_len_ptr)++] = DHCP_OPTION_CLIENT_ID;
-        msg->options[(*option_len_ptr)++] = 1 + netif->hwaddr_len;
-        msg->options[(*option_len_ptr)++] = 0x01;
+		msg->options[(*option_len_ptr)++] = DHCP_OPTION_CLIENT_ID;
+		msg->options[(*option_len_ptr)++] = 1 + netif->hwaddr_len;
+		msg->options[(*option_len_ptr)++] = 0x01;
 
-        for (i = 0; i < netif->hwaddr_len; ++i) {
-            msg->options[(*option_len_ptr)++] = netif->hwaddr[i];
-        }
-    }
+		for (i = 0; i < netif->hwaddr_len; ++i) {
+			msg->options[(*option_len_ptr)++] = netif->hwaddr[i];
+		}
+	}
 }
-
 
 #endif // ARDUINO
