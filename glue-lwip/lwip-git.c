@@ -429,6 +429,11 @@ void esp2glue_netif_update (int netif_idx, uint32_t ip, uint32_t mask, uint32_t 
 	new_display_netif(&netif_git[netif_idx]);
 }
 
+static err_t (*const netif_init_git[2])(struct netif *) = {
+	[STATION_IF] = &netif_init_sta,
+	[SOFTAP_IF] = &netif_init_ap,
+};
+
 void esp2glue_lwip_init (void)
 {
 	uprint(DBG "lwip_init\n");
@@ -439,9 +444,10 @@ void esp2glue_lwip_init (void)
 	ip4_addr_t aip = { 0 }, amask = { 0 }, agw = { 0 };
 	for (int i = 0; i < 2; i++)
 	{
-		netif_add(&netif_git[i], &aip, &amask, &agw, /*state*/NULL,
-		          i == STATION_IF? netif_init_sta: netif_init_ap,
-		          ethernet_input);
+		netif_add(/* netif= */ &netif_git[i],
+			/* ipaddr= */ &aip, /* netmask= */ &amask, /* gw= */ &agw,
+			/* state= */ NULL,
+			/* init_fn= */ netif_init_git[i], /* input_fn= */ ethernet_input);
 		netif_git[i].hwaddr_len = NETIF_MAX_HWADDR_LEN;
 		memset(netif_git[i].hwaddr, 0, NETIF_MAX_HWADDR_LEN);
 	}
