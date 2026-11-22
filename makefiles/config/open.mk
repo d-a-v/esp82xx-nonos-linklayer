@@ -1,13 +1,10 @@
-maybe-prefix = $(if $(PREFIX),$(PREFIX)/$(2),$(error set PREFIX=... or $(1)=/path/to/$(2)))
+ifneq ($(PREFIX),)
 
-lwip14includedir := $(call maybe-prefix,lwip14includedir,../sdk/third_party/include)
+lwip14includedir := $(PREFIX)/../sdk/third_party/include
+libdir := $(PREFIX)/xtensa-lx106-elf/sysroot/usr/lib
+includedir := $(PREFIX)/xtensa-lx106-elf/sysroot/usr/include/lwip2
 
-SDK := $(call maybe-prefix,SDK,xtensa-lx106-elf/sysroot/usr)
-
-maybe-sdk = $(if $(SDK),$(SDK)/$(2),$(error set SDK=/path/to/sdk or $(1)=/path/to/$(2)))
-
-libdir := $(call maybe-sdk,libdir,lib)
-includedir := $(call maybe-sdk,includedir,include/lwip2/)
+endif
 
 lwipoptsincludedir := $(ROOT)/glue-lwip/open/
 
@@ -25,9 +22,11 @@ GLUE_APP_HEADERS += \
 
 CPPFLAGS += -DOPENSDK=1
 
+ifneq ($(lwip14includedir),)
 $(shell scripts/patch-vendor-lwip14.sh \
-	$(LWIP14_INCLUDE_DIR) \
+	$(lwip14includedir) \
 )
+endif
 
 $(shell scripts/patch-non-local-includes.sh \
 	$(PREFIX)/xtensa-lx106-elf/sysroot/usr/include \

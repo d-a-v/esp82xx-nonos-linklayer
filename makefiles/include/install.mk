@@ -83,11 +83,20 @@ include $(foreach target,$(TARGETS),$(BUILD_ROOT)/$(target).mk)
 
 .PHONY: install-targets
 
+ifneq ($(libdir),)
+
 $(libdir):
 	$(MKDIR_P) $@
 
 install-targets: $(BUILD_TARGETS) | $(libdir)
 	$(INSTALL_DATA) $? $(libdir)/
+
+else
+
+install-targets:
+	$(error $$libdir must point to the libraries installation directory)
+
+endif
 
 install: install-targets
 
@@ -105,6 +114,8 @@ GLUE_HEADERS += \
 GLUE_HEADERS += $(GLUE_APP_HEADERS)
 
 .PHONY: install-glue-headers
+
+ifneq ($(includedir),)
 
 $(includedir):
 	$(MKDIR_P) $(includedir)
@@ -160,6 +171,13 @@ install-lwip-headers: $(LWIP_HEADERS) | $(includedir)
 	done
 
 install-headers: install-lwip-headers
+
+else
+
+install-headers:
+	$(error $$libdir must point to the headers installation directory)
+
+endif
 
 .PHONY: uninstall
 
