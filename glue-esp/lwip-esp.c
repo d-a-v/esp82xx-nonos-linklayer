@@ -72,8 +72,6 @@ struct netif *netif_default;
 ///////////////////////////////////////
 // netif
 
-#define netif_sta netif_esp[STATION_IF]
-#define netif_ap  netif_esp[SOFTAP_IF]
 static struct netif* netif_esp[2] = { NULL, NULL };
 
 ///////////////////////////////////////
@@ -378,14 +376,14 @@ void dhcps_start (struct ip_info* info)
 	uprint(DBG "dhcps_start ");
 	display_ip_info(info);
 	uprint("\n");
-	
-	if (netif_ap)
-		///XXX this is mandatory for blobs to be happy
-		// but we should get this info back through glue
-	 	//netif_ap->flags |= NETIF_FLAG_UP | NETIF_FLAG_LINK_UP;
-	 	esp2glue_netif_set_up1down0(netif_ap->num, 1);
 
- 	esp2glue_dhcps_start(info);
+	///XXX this is mandatory for blobs to be happy
+	// but we should get this info back through glue
+	//netif_ap->flags |= NETIF_FLAG_UP | NETIF_FLAG_LINK_UP;
+	if (netif_esp[SOFTAP_IF])
+		esp2glue_netif_set_up1down0(netif_esp[SOFTAP_IF]->num, 1);
+
+	esp2glue_dhcps_start(info);
 }
 
 void espconn_init (void)
@@ -433,11 +431,11 @@ void dhcp_stop (struct netif* netif)
 
 static int netif_is_new (struct netif* netif)
 {
-	struct netif* test_netif_sta = eagle_lwip_getif(STATION_IF);
-	struct netif* test_netif_ap = eagle_lwip_getif(SOFTAP_IF);
-	uprint(DBG "check netif @%p (sta@%p ap@%p)\n", netif, test_netif_sta, test_netif_ap);
-	uassert(netif == test_netif_sta || netif == test_netif_ap);
-	if (netif == test_netif_sta)
+	struct netif* netif_sta = eagle_lwip_getif(STATION_IF);
+	struct netif* netif_ap = eagle_lwip_getif(SOFTAP_IF);
+	uprint(DBG "check netif @%p (sta@%p ap@%p)\n", netif, netif_sta, netif_ap);
+	uassert(netif == netif_sta || netif == netif_ap);
+	if (netif == netif_sta)
 		netif->num = STATION_IF;
 	else
 		netif->num = SOFTAP_IF;
@@ -451,7 +449,11 @@ static int netif_is_new (struct netif* netif)
 	uprint(DBG "NEW netif\n");
 	stub_display_netif(netif);
 
-	netif->next = netif->num == STATION_IF? test_netif_ap: NULL;
+	if (netif->num == STATION_IF)
+		netif->next = netif_ap;
+	else
+		netif->next = NULL;
+
 	netif_esp[netif->num] = netif;
 	
 	return 1; // is new
@@ -475,44 +477,44 @@ struct netif* netif_add (
 	netif->gw.addr = 0;
 	netif->flags = 0;
 
-	#if LWIP_DHCP
+#if LWIP_DHCP
 	// ok
 	netif->dhcp = NULL;
 	netif->dhcps_pcb = NULL;
-	#endif /* LWIP_DHCP */
-		#if LWIP_AUTOIP
-		#error
-		netif->autoip = NULL;
-		#endif /* LWIP_AUTOIP */
-		#if LWIP_NETIF_STATUS_CALLBACK
-		#error
-		netif->status_callback = NULL;
-		#endif /* LWIP_NETIF_STATUS_CALLBACK */
-		#if LWIP_NETIF_LINK_CALLBACK
-		#error
-		netif->link_callback = NULL;
-		#endif /* LWIP_NETIF_LINK_CALLBACK */
-	#if LWIP_IGMP
+#endif /* LWIP_DHCP */
+#if LWIP_AUTOIP
+	#error
+	netif->autoip = NULL;
+#endif /* LWIP_AUTOIP */
+#if LWIP_NETIF_STATUS_CALLBACK
+	#error
+	netif->status_callback = NULL;
+#endif /* LWIP_NETIF_STATUS_CALLBACK */
+#if LWIP_NETIF_LINK_CALLBACK
+	#error
+	netif->link_callback = NULL;
+#endif /* LWIP_NETIF_LINK_CALLBACK */
+#if LWIP_IGMP
 	// ok
 	netif->igmp_mac_filter = NULL;
-	#endif /* LWIP_IGMP */
-		#if ENABLE_LOOPBACK
-		#error
-		netif->loop_first = NULL;
-		netif->loop_last = NULL;
-		#endif /* ENABLE_LOOPBACK */
+#endif /* LWIP_IGMP */
+#if ENABLE_LOOPBACK
+	#error
+	netif->loop_first = NULL;
+	netif->loop_last = NULL;
+#endif /* ENABLE_LOOPBACK */
 	netif->state = state;
 
 	netif->input = packet_incoming;
 
-		#if LWIP_NETIF_HWADDRHINT
-		#error
-		netif->addr_hint = NULL;
-		#endif /* LWIP_NETIF_HWADDRHINT*/
-		#if ENABLE_LOOPBACK && LWIP_LOOPBACK_MAX_PBUFS
-		#error
-		netif->loop_cnt_current = 0;
-		#endif /* ENABLE_LOOPBACK && LWIP_LOOPBACK_MAX_PBUFS */
+#if LWIP_NETIF_HWADDRHINT
+	#error
+	netif->addr_hint = NULL;
+#endif /* LWIP_NETIF_HWADDRHINT*/
+#if ENABLE_LOOPBACK && LWIP_LOOPBACK_MAX_PBUFS
+	#error
+	netif->loop_cnt_current = 0;
+#endif /* ENABLE_LOOPBACK && LWIP_LOOPBACK_MAX_PBUFS */
 
 	// init() is from blobs to call blobs:
 	// update: at least mtu is set by this function
