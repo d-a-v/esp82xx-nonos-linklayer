@@ -1,7 +1,7 @@
 # prerequisite auto-generated files, common between variants
 
 execute_process(
-    COMMAND git describe --tag
+    COMMAND git describe --tag --always
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
     OUTPUT_VARIABLE GLUE_REPO_DESC_STR
     OUTPUT_STRIP_TRAILING_WHITESPACE
