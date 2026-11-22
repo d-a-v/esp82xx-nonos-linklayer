@@ -15,28 +15,27 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           path: repo
 
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
-
-      - uses: actions/cache@v3
-        with:
-          path: |
-            repo/lwip2-src
-            esp8266/tools/dist
-          key: ${{ runner.os }}-make-${{ hashFiles('repo/Makefile', 'repo/makefiles/**/*', 'repo/CMakeLists.txt', 'repo/cmake/**/*') }}
-
-      - name: Fetch ESP8266 Core
-        uses: actions/checkout@v3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           path: esp8266
           repository: esp8266/Arduino
           fetch-depth: 1
           submodules: false
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: '3.x'
+
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: |
+            repo/lwip2-src
+            esp8266/tools/dist
+          key: ${{ runner.os }}-make-${{ hashFiles('repo/Makefile', 'repo/makefiles/**/*', 'repo/CMakeLists.txt', 'repo/cmake/**/*') }}
 
       - name: Get toolchain files
         run: |
