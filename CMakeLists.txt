@@ -37,20 +37,25 @@ message(STATUS "core dir: " "${ESP8266_ARDUINO_CORE_DIR}")
 
 # fetches lwip2-src into the current build directory, then automatically patches it
 
-file(STRINGS ${CMAKE_SOURCE_DIR}/patches/series LWIP_PATCHES)
-message(STATUS "patches: " "${LWIP_PATCHES}")
+file(STRINGS ${CMAKE_SOURCE_DIR}/patches/series LWIP_PATCH_SERIES)
+message(STATUS "patches: " "${LWIP_PATCH_SERIES}")
 
-list(TRANSFORM LWIP_PATCHES PREPEND ${CMAKE_CURRENT_SOURCE_DIR}/patches/)
+set(LWIP_PATCHES "")
+foreach(p IN LISTS LWIP_PATCH_SERIES)
+    cmake_path(APPEND resolved "${CMAKE_CURRENT_SOURCE_DIR}/patches/" "${p}")
+    list(APPEND LWIP_PATCHES "${resolved}")
+endforeach()
 
 # TODO: GIT_CONFIG needed for windows install. lwip.git repo classifies .h as text through .gitattributes, and git-clone will apply native eol conversion
 # by default, git does not attribute .h files as text, so when installing .h into the esp8266 repo it will make them differ when all that's different is eol
 include(FetchContent)
 FetchContent_Declare(
     lwip2
+    SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lwip2-src"
     GIT_REPOSITORY https://github.com/lwip-tcpip/lwip.git
     GIT_TAG ${LWIP_TAG}
     GIT_CONFIG core.autocrlf=false core.eol=lf
-    PATCH_COMMAND git reset --hard && git clean -f && git apply --3way --recount --whitespace=fix ${LWIP_PATCHES}
+    PATCH_COMMAND git reset --hard && git clean -f -d -x && git apply --3way --recount --whitespace=fix ${LWIP_PATCHES}
 )
 
 FetchContent_MakeAvailable(lwip2)
