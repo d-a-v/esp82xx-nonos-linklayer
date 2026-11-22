@@ -4,14 +4,11 @@ set(GLUE_COMMON_DEFINITIONS
     -DARDUINO
     -D__ets__
     -DICACHE_FLASH
+    -DLWIP_BUILD
     -DLWIP_OPEN_SRC
     -DUSE_OPTIMIZE_PRINTF
 )
 
-set(LWIP_DEFINITIONS
-    ${GLUE_COMMON_DEFINITIONS}
-    -DLWIP_BUILD
-)
 set(LWIP_INCLUDE_DIRS
     "${ESP8266_ARDUINO_CORE_DIR}/tools/sdk/include"
     "${ESP8266_ARDUINO_CORE_DIR}/tools/sdk/libc/xtensa-lx106-elf/include"
@@ -75,7 +72,7 @@ function(glue_variant)
 
     target_compile_options(${GLUE_VARIANT_NAME}-core PRIVATE ${LWIP_COMPILER_FLAGS})
     target_compile_definitions(${GLUE_VARIANT_NAME}-core PRIVATE
-        ${LWIP_DEFINITIONS}
+        ${GLUE_DEFINITIONS}
         ${GLUE_VARIANT_DEFINITIONS}
         ${GLUE_COMMON_DEFINITIONS}
     )
