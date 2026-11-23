@@ -159,7 +159,7 @@ static void stub_display_netif (struct netif* netif)
 		netif->name[0], netif->name[1], netif->num,
 		netif->state);
 	if (netif->hwaddr_len == 6)
-		display_mac(netif->hwaddr);
+		uprint_display_mac(netif->hwaddr);
 	else
 		uprint("(no mac?)");
 	stub_display_netif_flags(netif->flags);
@@ -338,7 +338,7 @@ err_t ethernet_input (struct pbuf* p, struct netif* netif)
 	if (   memcmp((const char*)p->payload, netif->hwaddr, 6) == 0
 	    || memcmp((const char*)p->payload, ethbroadcast.addr, 6) == 0)
 	{
-		dump("ethinput", p->payload, p->len);
+		uprint_dump("ethinput", p->payload, p->len);
 	}
 #endif
 	// copy esp pbuf to glue pbuf
@@ -371,10 +371,15 @@ err_t ethernet_input (struct pbuf* p, struct netif* netif)
 	return glue2esp_err(esp2glue_ethernet_input(netif->num, glue_pbuf));
 }
 
+#define uprint_display_ip_info(info) \
+	uprint_display_ip4_addr("ip=", info->ip.addr); \
+	uprint_display_ip4_addr(" mask=", info->netmask.addr); \
+	uprint_display_ip4_addr(" gw=", info->gw.addr)
+
 void dhcps_start (struct ip_info* info)
 {
 	uprint(DBG "dhcps_start ");
-	display_ip_info(info);
+	uprint_display_ip_info(info);
 	uprint("\n");
 
 	///XXX this is mandatory for blobs to be happy
