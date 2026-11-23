@@ -5,20 +5,26 @@ Subject: make `sys_now()` an always inlined function (d-a-v/esp82xx-nonos-linkla
 It was previoulsy a #define as `millis()`
 but its return type `u32` is no longer a long but an int, causing third-party troubles.
 
+Only hides real func when definition is not available
+This repeats the sys_jiffies block above
+
+Signed-off-by: Maxim Prokhorov <prokhorov.max@outlook.com>
+
 ---
- src/include/lwip/sys.h |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ src/include/lwip/sys.h |    2 ++
+ 1 file changed, 2 insertions(+)
 
 diff --git a/src/include/lwip/sys.h b/src/include/lwip/sys.h
-index 168e465b..e03e164a 100644
+index 168e465b..0e9e9af8 100644
 --- a/src/include/lwip/sys.h
 +++ b/src/include/lwip/sys.h
-@@ -443,7 +443,7 @@ u32_t sys_jiffies(void);
+@@ -443,7 +443,9 @@ u32_t sys_jiffies(void);
   * Not implementing this function means you cannot use some modules (e.g. TCP
   * timestamps, internal timeouts for NO_SYS==1).
   */
--u32_t sys_now(void);
-+//u32_t sys_now(void);
++#ifndef sys_now
+ u32_t sys_now(void);
++#endif
  
  /* Critical Region Protection */
  /* These functions must be implemented in the sys_arch.c file.
