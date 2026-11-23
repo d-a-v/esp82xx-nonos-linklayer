@@ -19,5 +19,6 @@ include makefiles/include/lwip.mk
 include makefiles/config/$(CONFIG).mk
 include makefiles/targets/*.mk
 
+include makefiles/include/ci.mk
 include makefiles/include/exports.mk
 include makefiles/include/install.mk
