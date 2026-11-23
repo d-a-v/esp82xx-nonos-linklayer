@@ -42,19 +42,6 @@
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-// packet capture callback from esp side
-#include <stdlib.h>
-
-#define HAS_PHY_CAPTURE 1
-#ifdef __cplusplus
-extern "C" {
-#endif
-extern void (*phy_capture) (int netif_idx, const char* data, size_t len, int out, int success);
-#ifdef __cplusplus
-}
-#endif
-
-/////////////////////////////////////////////////////////////////////////////
 #if ARDUINO
 #include <sys/pgmspace.h> // PSTR_ATTR
 #endif

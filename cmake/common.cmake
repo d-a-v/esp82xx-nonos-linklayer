@@ -75,6 +75,7 @@ install(FILES
     ${CMAKE_SOURCE_DIR}/glue-lwip/lwip/apps-esp/dhcpserver.h
     ${CMAKE_SOURCE_DIR}/glue/glue.h
     ${CMAKE_SOURCE_DIR}/glue/gluedebug.h
+    ${CMAKE_SOURCE_DIR}/glue/gluehal.h
     CONFIGURATIONS Release
     DESTINATION ${ESP8266_ARDUINO_CORE_DIR}/tools/sdk/lwip2/include
 )

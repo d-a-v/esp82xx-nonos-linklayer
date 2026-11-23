@@ -32,7 +32,7 @@ author: d. gauchard
 #ifndef LWIP2_ARCH_CC_H
 #define LWIP2_ARCH_CC_H
 
-#include "stdint.h"
+#include <stdint.h>
 
 #include "lwip-err-t.h"
 
@@ -56,14 +56,17 @@ void sntp_set_system_time (uint32_t t);
 #endif
 #endif // defined(LWIP_BUILD)
 
-#include "mem.h" // useful for os_malloc used in esp-arduino's mDNS
+#include <stdlib.h>
 
-#include "glue.h" // include assembly locking macro used below
+#include "mem.h" // sdk, os_... memory funcs that map to stdlib
+
+#include "glue.h" // ip4 addr definitions
+#include "gluehal.h" // lwip_xt_... definitions
 typedef uint32_t sys_prot_t;
+
 #define SYS_ARCH_DECL_PROTECT(lev) sys_prot_t lev
 #define SYS_ARCH_PROTECT(lev) lev = lwip_xt_rsil(15)
 #define SYS_ARCH_UNPROTECT(lev) lwip_xt_wsr_ps(lev)
-#define sys_jiffies() (0) // only used for increased randomness in PPP
 
 #define LWIP_NO_CTYPE_H 1
 
@@ -84,14 +87,20 @@ typedef uint32_t sys_prot_t;
 #endif
 
 ///////////////////////////////
-//// MISSING 
+//// required definitions
 
-// Arduino Core exposes time func with a generic type
 #ifdef __cplusplus
 extern "C"
 {
 #endif
+
+// packet capture callback from esp side
+#define HAS_PHY_CAPTURE 1
+extern void (*phy_capture) (int netif_idx, const char* data, size_t len, int out, int success);
+
+// Arduino Core exposes time func with a generic type
 unsigned long millis(void);
+
 #ifdef __cplusplus
 }
 #endif
@@ -101,7 +110,14 @@ unsigned long millis(void);
 // (previous version was `#define sys_now millis`)
 #define sys_now() ((u32_t)millis())
 
-#define LWIP_RAND r_rand	// old lwip uses this useful undocumented function
+// currently, only PPP depends on this. technically, allowed to alias sys_now()
+// previous implementations disabled it and always returne 0
+#define sys_jiffies() ((u32_t)lwip_xt_ccount())
+
+// lwip1.4 used this useful undocumented function
+// ref. NONOSDK*/libwpa.a
+#define LWIP_RAND r_rand
+
 #define IPSTR "%d.%d.%d.%d"
 #define IP2STR(ipaddr) ip4_addr1_16(ipaddr), \
     ip4_addr2_16(ipaddr), \

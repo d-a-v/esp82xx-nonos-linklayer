@@ -45,8 +45,13 @@ author: d. gauchard
 
 #include "esp-missing.h"
 
+#include <stdlib.h>
+
 #define DBG	"lwESP: "
 #define STUB(x) do { uerror("STUB: " #x "\n"); } while (0)
+
+// packet capture callback from esp side
+void (*phy_capture) (int netif_idx, const char* data, size_t len, int out, int success) = NULL;
 
 // guessed interface, esp blobs
 void system_pp_recycle_rx_pkt (void*);
@@ -782,5 +787,3 @@ void glue2esp_ifupdown (int netif_idx, uint32_t ip, uint32_t mask, uint32_t gw)
 		// or down
 		netif->flags &= ~NETIF_FLAG_UP;
 }
-
-void (*phy_capture) (int netif_idx, const char* data, size_t len, int out, int success) = NULL;
