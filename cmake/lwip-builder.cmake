@@ -81,6 +81,10 @@ function(glue_variant)
     # Part that is supposed to talk to the lwip2
     add_library(${GLUE_VARIANT_NAME}-glue STATIC
         ${CMAKE_SOURCE_DIR}/glue-lwip/lwip-git.c
+        ${CMAKE_SOURCE_DIR}/glue-lwip/lwip-hook-dhcp.c
+        ${CMAKE_SOURCE_DIR}/glue-lwip/lwip-dns-lookup-local.c
+        ${CMAKE_SOURCE_DIR}/glue-lwip/lwip-unhandled-packet.c
+        ${CMAKE_SOURCE_DIR}/glue-lwip/lwip-netif-status-changed.c
         ${CMAKE_SOURCE_DIR}/glue-lwip/esp-ping.c
         ${CMAKE_SOURCE_DIR}/glue-lwip/espconn.c
         ${CMAKE_SOURCE_DIR}/glue-lwip/espconn_buf.c

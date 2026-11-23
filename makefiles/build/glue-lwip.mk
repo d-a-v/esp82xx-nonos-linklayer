@@ -16,7 +16,7 @@ SRC := \
 	glue-lwip/espconn_tcp.c \
 	glue-lwip/espconn_udp.c
 
-SRC += $(GLUE_LWIP_SRC)
+SRC += $(glue-lwip_SRC)
 
 CPPFLAGS += \
 	-I$(BUILD_ROOT) \

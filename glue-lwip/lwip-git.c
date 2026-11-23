@@ -39,6 +39,7 @@ author: d. gauchard
 #include "lwip/init.h"
 #include "lwip/netif.h"
 #include "lwip/dhcp.h"
+#include "lwip/dns.h"
 #include "lwip/etharp.h"
 #include "netif/ethernet.h"
 #include "lwip/apps/sntp.h"
@@ -544,66 +545,3 @@ void esp2glue_netif_set_up1down0 (int netif_idx, int up1_or_down0)
 #endif
 	}
 }
-
-LWIP_ERR_T lwip_unhandled_packet (struct pbuf* pbuf, struct netif* netif) __attribute__((weak));
-LWIP_ERR_T lwip_unhandled_packet (struct pbuf* pbuf, struct netif* netif)
-{
-	// must pbuf_free(pbuf) if packet recognized and managed then return ERR_OK
-	// default: not recognized
-	// this function may be redefined by user
-	(void)pbuf;
-	(void)netif;
-	return ERR_ARG;
-}
-
-#if ARDUINO
-
-void netif_status_changed (struct netif*) __attribute__((weak));
-void netif_status_changed (struct netif* netif)
-{
-	(void)netif;
-}
-
-void lwip_hook_dhcp_parse_option(struct netif *netif, struct dhcp *dhcp, int state, struct dhcp_msg *msg,
-								 int msg_type, int option, int option_len, struct pbuf *pbuf,
-								 int option_value_offset) __attribute__((weak));
-
-void lwip_hook_dhcp_parse_option(struct netif *netif, struct dhcp *dhcp, int state, struct dhcp_msg *msg,
-								 int msg_type, int option, int option_len, struct pbuf *pbuf,
-								 int option_value_offset)
-{
-	(void)netif;
-	(void)dhcp;
-	(void)state;
-	(void)msg;
-	(void)msg_type;
-	(void)option;
-	(void)option_len;
-	(void)pbuf;
-	(void)option_value_offset;
-	uprint(DBG "unhandled dhcp option in lwip_hook_dhcp_parse_option()\n");
-}
-
-void lwip_hook_dhcp_amend_options(struct netif *netif, struct dhcp *dhcp, int state, struct dhcp_msg *msg,
-                                  int msg_type, u16 *option_len_ptr)
-{
-	(void)dhcp;
-	(void)state;
-	(void)msg_type;
-
-	// amend default Client-Identifier
-	// {intf.id} {intf.mac} => {01}:{AA:BB:CC:11:22:33}
-	{
-		size_t i;
-
-		msg->options[(*option_len_ptr)++] = DHCP_OPTION_CLIENT_ID;
-		msg->options[(*option_len_ptr)++] = 1 + netif->hwaddr_len;
-		msg->options[(*option_len_ptr)++] = 0x01;
-
-		for (i = 0; i < netif->hwaddr_len; ++i) {
-			msg->options[(*option_len_ptr)++] = netif->hwaddr[i];
-		}
-	}
-}
-
-#endif // ARDUINO

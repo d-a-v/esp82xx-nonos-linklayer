@@ -1,4 +1,4 @@
-#ifndef MYLWIPOPTS_H
+#if !defined MYLWIPOPTS_H
 #define MYLWIPOPTS_H
 
 /* opt.h version lwip-2.1.3 for esp8266 */
@@ -46,8 +46,8 @@
  * without this, doxygen does not see the actual #define
  */
 
-//#if !defined LWIP_HDR_OPT_H
-//#define LWIP_HDR_OPT_H
+#if !defined MY_LWIP_HDR_OPT_H
+#define MY_LWIP_HDR_OPT_H
 
 /*
  * Include user defined options first. Anything not defined in these files
@@ -2759,8 +2759,8 @@
  * Declare your hook function prototypes in there, you may also \#include all headers
  * providing data types that are need in this file.
  */
-#ifdef __DOXYGEN__
-#define LWIP_HOOK_FILENAME "path/to/my/lwip_hooks.h"
+#if !defined LWIP_HOOK_FILENAME || defined __DOXYGEN__
+#define LWIP_HOOK_FILENAME "lwip-hooks.h"
 #endif
 
 /**
@@ -3143,7 +3143,7 @@
  *  u8_t *ptr = (u8_t*)pbuf_get_contiguous(p, buf, sizeof(buf), LWIP_MIN(option_len, sizeof(buf)), offset);
  */
 #ifdef __DOXYGEN__
-//#define LWIP_HOOK_DHCP_PARSE_OPTION(netif, dhcp, state, msg, msg_type, option, len, pbuf, offset)
+#define LWIP_HOOK_DHCP_PARSE_OPTION(netif, dhcp, state, msg, msg_type, option, len, pbuf, offset)
 #endif
 
 /**
@@ -3555,6 +3555,7 @@
 #include "lwip/debug.h"
 #include "arch/cc.h"
 #include "lwip-git-hash.h"
+
 #include <sys/time.h> // settimeofday() + struct timeval
 
 #ifndef LWIP_FEATURES
@@ -3579,37 +3580,6 @@ extern "C" {
  * TCP_RANDOM_PORT: randomize port instead of simply increasing
  */
 #define TCP_RANDOM_PORT 1
-
-/*
-   --------------------------------------------------
-   ------------------ DHCP options ------------------
-   --------------------------------------------------
-*/
-
-#define LWIP_HOOK_DHCP_PARSE_OPTION(netif, dhcp, state, msg, msg_type, option, len, pbuf, option_value_offset) \
-    lwip_hook_dhcp_parse_option(netif, dhcp, state, msg, msg_type, option, len, pbuf, option_value_offset)
-
-// search for LWIP_HOOK_DHCP_PARSE_OPTION above for an arguments explanation
-struct netif;
-struct dhcp;
-struct dhcp_msg;
-struct pbuf;
-extern void lwip_hook_dhcp_parse_option(struct netif *netif, struct dhcp *dhcp, int state, struct dhcp_msg *msg,
-                                        int msg_type, int option, int option_len, struct pbuf *pbuf,
-                                        int option_value_offset);
-
-#if LWIP_FEATURES
-#define LWIP_HOOK_DHCP_APPEND_OPTIONS(netif, dhcp, state, msg, msg_type, option_len_ptr) { \
-   /* https://github.com/esp8266/Arduino/issues/8223 */ \
-   lwip_hook_dhcp_amend_options(netif, dhcp, state, msg, msg_type, option_len_ptr); \
-   /* https://github.com/esp8266/Arduino/issues/8247 */ \
-   if ((msg_type) == DHCP_DISCOVER) \
-      *(option_len_ptr) = dhcp_option_hostname(*(option_len_ptr), (msg)->options, netif); \
-}
-
-extern void lwip_hook_dhcp_amend_options(struct netif *netif, struct dhcp *dhcp, int state, struct dhcp_msg *msg,
-                                         int msg_type, u16 *option_len_ptr);
-#endif
 
 /*
    --------------------------------------------------
@@ -3652,21 +3622,46 @@ uint32_t SNTP_STARTUP_DELAY_FUNC;
 
 /*
    --------------------------------------------------
-   ------------------- LOCAL FIXES ------------------
+   ------------------ Local fixes -------------------
    --------------------------------------------------
 */
 
 // allow to handle special packets (user redefinable)
 struct pbuf;
 struct netif;
-#ifndef LWIP_ERR_T
-#error LWIP_ERR_T definition should come from lwip1.4 from espressif
-#endif
-//#define LWIP_ERR_T s8
+
 LWIP_ERR_T lwip_unhandled_packet (struct pbuf* pbuf, struct netif* netif);
 
 // called when STA OR AP is set up or down
 void netif_status_changed (struct netif*);
+
+/*
+   --------------------------------------------------
+   ------------ Public hook functions ---------------
+   --------------------------------------------------
+*/
+
+struct ip_addr;
+struct ip4_addr;
+
+#if LWIP_IPV4 && LWIP_IPV6
+typedef struct ip_addr ip_addr_t;
+#else
+typedef struct ip4_addr ip_addr_t;
+#endif
+
+extern LWIP_ERR_T lwip_dns_lookup_local(const char *name, ip_addr_t *addr, u8_t dns_addrtype);
+#define DNS_LOOKUP_LOCAL_EXTERN lwip_dns_lookup_local
+
+struct dhcp;
+struct dhcp_msg;
+
+/** search for LWIP_HOOK_DHCP_PARSE_OPTION above for an arguments explanation */
+extern void lwip_hook_dhcp_parse_option(struct netif *netif, struct dhcp *dhcp, int state, struct dhcp_msg *msg,
+										int msg_type, int option, int option_len, struct pbuf *pbuf,
+										int option_value_offset);
+
+#define LWIP_HOOK_DHCP_PARSE_OPTION lwip_hook_dhcp_parse_option
 
 /*
    --------------------------------------------------
@@ -3712,4 +3707,5 @@ void tcp_kill_timewait (void);
 } // extern "C"
 #endif
 
+#endif
 #endif /* MYLWIPOPTS_H */
