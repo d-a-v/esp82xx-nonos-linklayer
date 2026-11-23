@@ -179,16 +179,6 @@ static void new_display_netif (struct netif* netif)
 
 #endif // !UDEBUG
 
-int lwiperr_check (const char* what, err_t err)
-{
-	if (err != ERR_OK)
-	{
-		uerror("ERROR: %s (error %d)\n", what, (int)err);
-		return 0;
-	}
-	return 1;
-}
-
 err_glue_t esp2glue_dhcp_start (int netif_idx)
 {
 	uprint(DBG "dhcp_start netif: ");
