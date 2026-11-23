@@ -27,7 +27,7 @@ Tests:
  1 file changed, 33 insertions(+), 19 deletions(-)
 
 diff --git a/src/apps/sntp/sntp.c b/src/apps/sntp/sntp.c
-index 23731e51..d34ffd9e 100644
+index 23731e511..d34ffd9e9 100644
 --- a/src/apps/sntp/sntp.c
 +++ b/src/apps/sntp/sntp.c
 @@ -804,20 +804,28 @@ sntp_setserver(u8_t idx, const ip_addr_t *server)

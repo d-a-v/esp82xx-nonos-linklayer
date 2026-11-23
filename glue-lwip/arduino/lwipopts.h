@@ -3628,6 +3628,10 @@ uint32_t SNTP_UPDATE_DELAY_NAME (void);
    --------------------------------------------------
 */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // allow to handle special packets (user redefinable)
 struct pbuf;
 struct netif;
@@ -3665,30 +3669,13 @@ extern void lwip_hook_dhcp_parse_option(struct netif *netif, struct dhcp *dhcp, 
 
 #define LWIP_HOOK_DHCP_PARSE_OPTION lwip_hook_dhcp_parse_option
 
-/*
-   --------------------------------------------------
-   ----------------- TIME-WAIT tweak ----------------
-   --------------------------------------------------
-   port @me-no-dev time-wait tweak
-   https://github.com/esp8266/Arduino/commit/07f4d4c241df2c552899857f39a4295164f686f2#diff-f8258e71e25fb9985ca3799e3d8b88ecR399
-*/
-
-void tcp_kill_timewait (void);
-#define TCP_TW_LIMIT(l)                \
-  if (l) do {                          \
-    u32_t count_plus_1 = 1;            \
-    struct tcp_pcb* tmp = tcp_tw_pcbs; \
-    if (tmp)                           \
-      while ((tmp = tmp->next))        \
-        ++count_plus_1;                \
-    while (--count_plus_1 > (l))       \
-      /* kill the oldest */            \
-      /* pcb in TW state */            \
-      tcp_kill_timewait();             \
-  } while (0)
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 /**
  * MEMP_NUM_TCP_PCB_TIME_WAIT: the number of TCP pcbs in TIME_WAIT state.
+ * esp82xx compatibility. not really a memp, manually handled when updating tw list
  * (requires the LWIP_TCP option, 0 = disabled)
  */
 #ifndef MEMP_NUM_TCP_PCB_TIME_WAIT
@@ -3704,10 +3691,6 @@ void tcp_kill_timewait (void);
 #define mem_clib_free(p)      vPortFree(p, NULL, -1)
 #define mem_clib_malloc(s)   pvPortMalloc(s, NULL, -1)
 #define mem_clib_calloc(n,s) pvPortZalloc(n*s, NULL, -1)
-
-#ifdef __cplusplus
-} // extern "C"
-#endif
 
 #endif
 #endif /* MYLWIPOPTS_H */

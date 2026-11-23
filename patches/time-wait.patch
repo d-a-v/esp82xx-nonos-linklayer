@@ -1,8 +1,9 @@
 Author: Maxim Prokhorov <prokhorov.max@outlook.com>
 Date: 2026-11-21 08:06:02 +0300
-Subject: remove oldest pcbs in time-wait state when max number of them is reached
+Subject: TCP_TW_LIMIT() before TCP_REG of time-wait pcb
 
-port of time-wait patch from esp8266 Core by Me No Dev <me-no-dev@users.noreply.github.com>
+allow to remove oldest pcbs in time-wait state when max number of them is reached
+partial port of time-wait patch from esp8266 Core by Me No Dev <me-no-dev@users.noreply.github.com>
 https://github.com/esp8266/Arduino/commit/07f4d4c241df2c552899857f39a4295164f686f2#diff-f8258e71e25fb9985ca3799e3d8b88ecR399
 
 Initial patch d-a-v/esp82xx-nonos-linklayer#17 by david gauchard <gauchard@laas.fr>
@@ -11,12 +12,13 @@ Fixed tcp_abort() d-a-v/esp82xx-nonos-linklayer#69 by Sean Cardus <sean@cardus.c
 Signed-off-by: Maxim Prokhorov <prokhorov.max@outlook.com>
 
 ---
- src/core/tcp.c    |    2 +-
- src/core/tcp_in.c |    6 ++++++
- 2 files changed, 7 insertions(+), 1 deletion(-)
+ src/core/tcp.c         |    2 +-
+ src/core/tcp_in.c      |    8 ++++++++
+ src/include/lwip/tcp.h |    4 ++++
+ 3 files changed, 13 insertions(+), 1 deletion(-)
 
 diff --git a/src/core/tcp.c b/src/core/tcp.c
-index 8c252189..7241130d 100644
+index 8c2521895..7241130d2 100644
 --- a/src/core/tcp.c
 +++ b/src/core/tcp.c
 @@ -1784,7 +1784,7 @@ tcp_kill_state(enum tcp_state state)
@@ -29,33 +31,57 @@ index 8c252189..7241130d 100644
  {
    struct tcp_pcb *pcb, *inactive;
 diff --git a/src/core/tcp_in.c b/src/core/tcp_in.c
-index 2202e381..bb021c86 100644
+index 2202e381d..57a2595ad 100644
 --- a/src/core/tcp_in.c
 +++ b/src/core/tcp_in.c
-@@ -997,6 +997,8 @@ tcp_process(struct tcp_pcb *pcb)
+@@ -65,6 +65,11 @@
+ #include LWIP_HOOK_FILENAME
+ #endif
+ 
++/** operate on tcp_tw_pcbs before TCP_REG */
++#ifndef TCP_TW_LIMIT
++#define TCP_TW_LIMIT()
++#endif
++
+ /** Initial CWND calculation as defined RFC 2581 */
+ #define LWIP_TCP_CALC_INITIAL_CWND(mss) ((tcpwnd_size_t)LWIP_MIN((4U * (mss)), LWIP_MAX((2U * (mss)), 4380U)))
+ 
+@@ -997,6 +1002,7 @@ tcp_process(struct tcp_pcb *pcb)
            tcp_pcb_purge(pcb);
            TCP_RMV_ACTIVE(pcb);
            pcb->state = TIME_WAIT;
-+          /* limit before TCP_REG, so tcp_kill_timewait() cannot pick this pcb */
-+          TCP_TW_LIMIT(MEMP_NUM_TCP_PCB_TIME_WAIT - 1);
++          TCP_TW_LIMIT();
            TCP_REG(&tcp_tw_pcbs, pcb);
          } else {
            tcp_ack_now(pcb);
-@@ -1015,6 +1017,8 @@ tcp_process(struct tcp_pcb *pcb)
+@@ -1015,6 +1021,7 @@ tcp_process(struct tcp_pcb *pcb)
          tcp_pcb_purge(pcb);
          TCP_RMV_ACTIVE(pcb);
          pcb->state = TIME_WAIT;
-+        /* limit before TCP_REG, so tcp_kill_timewait() cannot pick this pcb */
-+        TCP_TW_LIMIT(MEMP_NUM_TCP_PCB_TIME_WAIT - 1);
++        TCP_TW_LIMIT();
          TCP_REG(&tcp_tw_pcbs, pcb);
        }
        break;
-@@ -1025,6 +1029,8 @@ tcp_process(struct tcp_pcb *pcb)
+@@ -1025,6 +1032,7 @@ tcp_process(struct tcp_pcb *pcb)
          tcp_pcb_purge(pcb);
          TCP_RMV_ACTIVE(pcb);
          pcb->state = TIME_WAIT;
-+        /* limit before TCP_REG, so tcp_kill_timewait() cannot pick this pcb */
-+        TCP_TW_LIMIT(MEMP_NUM_TCP_PCB_TIME_WAIT - 1);
++        TCP_TW_LIMIT();
          TCP_REG(&tcp_tw_pcbs, pcb);
        }
        break;
+diff --git a/src/include/lwip/tcp.h b/src/include/lwip/tcp.h
+index daf759946..5980efd16 100644
+--- a/src/include/lwip/tcp.h
++++ b/src/include/lwip/tcp.h
+@@ -491,6 +491,10 @@ void tcp_ext_arg_set(struct tcp_pcb *pcb, uint8_t id, void *arg);
+ void *tcp_ext_arg_get(const struct tcp_pcb *pcb, uint8_t id);
+ #endif
+ 
++/** for esp82xx compatibility, this func is public
++ *  see tcp_alloc() and tcp_in.c usage */
++void            tcp_kill_timewait (void);
++
+ #ifdef __cplusplus
+ }
+ #endif

@@ -8,7 +8,7 @@ Subject: igmp: check output interface is up
  1 file changed, 4 insertions(+), 1 deletion(-)
 
 diff --git a/src/core/ipv4/igmp.c b/src/core/ipv4/igmp.c
-index b655aa3a..1f1d9753 100644
+index b655aa3a4..1f1d97533 100644
 --- a/src/core/ipv4/igmp.c
 +++ b/src/core/ipv4/igmp.c
 @@ -460,7 +460,10 @@ igmp_joingroup(const ip4_addr_t *ifaddr, const ip4_addr_t *groupaddr)

@@ -18,7 +18,7 @@ Signed-off-by: Maxim Prokhorov <prokhorov.max@outlook.com>
  1 file changed, 5 insertions(+), 2 deletions(-)
 
 diff --git a/src/core/tcp.c b/src/core/tcp.c
-index 371db2b6..8c252189 100644
+index 371db2b62..8c2521895 100644
 --- a/src/core/tcp.c
 +++ b/src/core/tcp.c
 @@ -1015,9 +1015,12 @@ tcp_new_port(void)

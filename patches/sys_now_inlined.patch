@@ -15,7 +15,7 @@ Signed-off-by: Maxim Prokhorov <prokhorov.max@outlook.com>
  1 file changed, 2 insertions(+)
 
 diff --git a/src/include/lwip/sys.h b/src/include/lwip/sys.h
-index 168e465b..0e9e9af8 100644
+index 168e465ba..0e9e9af8f 100644
 --- a/src/include/lwip/sys.h
 +++ b/src/include/lwip/sys.h
 @@ -443,7 +443,9 @@ u32_t sys_jiffies(void);

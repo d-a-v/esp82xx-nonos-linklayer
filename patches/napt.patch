@@ -12,7 +12,7 @@ Subject: napt patch port from 2.0.x, untested
  6 files changed, 783 insertions(+)
 
 diff --git a/src/core/init.c b/src/core/init.c
-index 3620e1d4..08dd9e0c 100644
+index 3620e1d42..08dd9e0c7 100644
 --- a/src/core/init.c
 +++ b/src/core/init.c
 @@ -57,6 +57,7 @@
@@ -24,7 +24,7 @@ index 3620e1d4..08dd9e0c 100644
  #include "netif/ppp/ppp_opts.h"
  #include "netif/ppp/ppp_impl.h"
 diff --git a/src/core/ipv4/ip4.c b/src/core/ipv4/ip4.c
-index 26c26a91..c21400f3 100644
+index 26c26a91a..c21400f3e 100644
 --- a/src/core/ipv4/ip4.c
 +++ b/src/core/ipv4/ip4.c
 @@ -42,6 +42,7 @@
@@ -827,7 +827,7 @@ index 26c26a91..c21400f3 100644
        ip4_forward(p, (struct ip_hdr *)p->payload, inp);
      } else
 diff --git a/src/core/netif.c b/src/core/netif.c
-index 088b50ed..294f04f6 100644
+index 088b50ed4..294f04f6e 100644
 --- a/src/core/netif.c
 +++ b/src/core/netif.c
 @@ -366,6 +366,10 @@ netif_add(struct netif *netif,
@@ -842,7 +842,7 @@ index 088b50ed..294f04f6 100644
    netif_set_addr(netif, ipaddr, netmask, gw);
  #endif /* LWIP_IPV4 */
 diff --git a/src/include/lwip/ip.h b/src/include/lwip/ip.h
-index 653c3b2f..230bfdcf 100644
+index 653c3b2f4..230bfdcf9 100644
 --- a/src/include/lwip/ip.h
 +++ b/src/include/lwip/ip.h
 @@ -189,6 +189,12 @@ extern struct ip_globals ip_data;
@@ -859,7 +859,7 @@ index 653c3b2f..230bfdcf 100644
  
  /** Get the IPv6 header of the current packet.
 diff --git a/src/include/lwip/netif.h b/src/include/lwip/netif.h
-index 9a16deda..89ab85d2 100644
+index 9a16deda2..89ab85d25 100644
 --- a/src/include/lwip/netif.h
 +++ b/src/include/lwip/netif.h
 @@ -391,6 +391,9 @@ struct netif {
@@ -873,7 +873,7 @@ index 9a16deda..89ab85d2 100644
  
  #if LWIP_CHECKSUM_CTRL_PER_NETIF
 diff --git a/src/include/lwip/opt.h b/src/include/lwip/opt.h
-index d8c82d15..410e3fff 100644
+index d8c82d156..410e3fffd 100644
 --- a/src/include/lwip/opt.h
 +++ b/src/include/lwip/opt.h
 @@ -764,6 +764,10 @@
