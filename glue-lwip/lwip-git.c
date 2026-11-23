@@ -166,9 +166,9 @@ static void new_display_netif (struct netif* netif)
 	if (netif->hwaddr_len == 6)
 		uprint_display_mac(netif->hwaddr);
 	new_display_netif_flags(netif->flags);
-	display_ip32(" ip=", ip_2_ip4(&netif->ip_addr)->addr);
-	display_ip32(" mask=", ip_2_ip4(&netif->netmask)->addr);
-	display_ip32(" gw=", ip_2_ip4(&netif->gw)->addr);
+	uprint_display_ip4_addr(" ip=", ip_2_ip4(&netif->ip_addr)->addr);
+	uprint_display_ip4_addr(" mask=", ip_2_ip4(&netif->netmask)->addr);
+	uprint_display_ip4_addr(" gw=", ip_2_ip4(&netif->gw)->addr);
 	uprint("\n");
 }
 
@@ -483,7 +483,7 @@ err_glue_t esp2glue_ethernet_input (int netif_idx, void* received)
 	// this input is allocated by esp2glue_alloc_for_recv()
 
 	//uprint(DBG "input idx=%d netif-flags=0x%x ", netif_idx, netif_git[netif_idx].flags);
-	//display_ip32(" ip=", netif_git[netif_idx].ip_addr.addr);
+	//uprint_display_ip4_addr(" ip=", netif_git[netif_idx].ip_addr.addr);
 	//nl();
 	
 	struct netif* netif = &netif_git[netif_idx];

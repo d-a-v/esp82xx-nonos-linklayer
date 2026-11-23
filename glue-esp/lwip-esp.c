@@ -135,7 +135,7 @@ err_glue_t esp2glue_err (err_t err)
 
 #if UDEBUG
 
-#define stub_display_ip(pre,ip) display_ip32(pre, (ip).addr)
+#define stub_display_ip(pre,ip) display_ip4_addr(pre, (ip).addr)
 
 static void stub_display_netif_flags (int flags)
 {
@@ -163,9 +163,9 @@ static void stub_display_netif (struct netif* netif)
 	else
 		uprint("(no mac?)");
 	stub_display_netif_flags(netif->flags);
-	display_ip32(" ip=", netif->ip_addr.addr);
-	display_ip32(" mask=", netif->netmask.addr);
-	display_ip32(" gw=", netif->gw.addr);
+	uprint_display_ip4_addr(" ip=", netif->ip_addr.addr);
+	uprint_display_ip4_addr(" mask=", netif->netmask.addr);
+	uprint_display_ip4_addr(" gw=", netif->gw.addr);
 	uprint("\n");
 }
 

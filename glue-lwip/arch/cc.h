@@ -73,8 +73,9 @@ typedef uint32_t sys_prot_t;
 
 #if ULWIPDEBUG // debug 1:on or 0
 #define LWIP_DEBUG 1
-#define LWIP_PLATFORM_DIAG(x) do { os_printf x; } while(0)
-#define LWIP_PLATFORM_ASSERT(x) 	do { os_printf("Assertion \"%s\" failed at line %d in %s\n", x, __LINE__, __FILE__); *(int*)0=0; } while(0)
+#define __uprint_diag uprint
+#define LWIP_PLATFORM_DIAG(x) { __uprint_diag x; } while(0)
+#define LWIP_PLATFORM_ASSERT(x) uassert(x)
 //#define LWIP_PLATFORM_ASSERT(x) 	do { os_printf("Assertion \"%s\" failed at line %d in %s\n", x, __LINE__, __FILE__); while(1); } while(0)
 #endif // ULWIPDEBUG
 
