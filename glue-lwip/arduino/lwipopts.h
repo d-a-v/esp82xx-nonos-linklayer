@@ -3599,8 +3599,8 @@ extern "C" {
 
 #define SNTP_SUPPRESS_DELAY_CHECK 1
 #define SNTP_UPDATE_DELAY_DEFAULT 3600000   // update delay defined by a default weak function
-#define SNTP_UPDATE_DELAY sntp_update_delay_MS_rfc_not_less_than_15000()
-uint32_t SNTP_UPDATE_DELAY;
+#define SNTP_UPDATE_DELAY_NAME sntp_update_delay_MS_rfc_not_less_than_15000
+#define SNTP_UPDATE_DELAY SNTP_UPDATE_DELAY_NAME ()
 
 #if LWIP_FEATURES
 // esp8266/arduino/lwip-1.4 had 3 possible SNTP servers (constant was harcoded)
@@ -3617,8 +3617,19 @@ uint32_t SNTP_UPDATE_DELAY;
  */
 #define SNTP_STARTUP_DELAY 1                // enable startup delay
 #define SNTP_STARTUP_DELAY_FUNC_DEFAULT 0   // to 0 by default via a default weak function
-#define SNTP_STARTUP_DELAY_FUNC sntp_startup_delay_MS_rfc_not_less_than_60000()
-uint32_t SNTP_STARTUP_DELAY_FUNC;
+#define SNTP_STARTUP_DELAY_FUNC_NAME sntp_startup_delay_MS_rfc_not_less_than_60000
+#define SNTP_STARTUP_DELAY_FUNC SNTP_STARTUP_DELAY_FUNC_NAME ()
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+uint32_t SNTP_STARTUP_DELAY_FUNC_NAME (void);
+uint32_t SNTP_UPDATE_DELAY_NAME (void);
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 /*
    --------------------------------------------------

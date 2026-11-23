@@ -10,12 +10,6 @@ endif
 
 lwipoptsincludedir := $(ROOT)/glue-lwip/arduino/
 
-glue-lwip_SRC += \
-	glue-lwip/lwip-dns-lookup-local.c \
-	glue-lwip/lwip-hook-dhcp.c \
-	glue-lwip/lwip-netif-status-changed.c \
-	glue-lwip/lwip-unhandled-packet.c
-
 GLUE_HEADERS += \
 	$(ROOT)/glue-lwip/arduino/lwipopts.h
 

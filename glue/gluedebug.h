@@ -44,6 +44,7 @@
 /////////////////////////////////////////////////////////////////////////////
 #if ARDUINO
 #include <sys/pgmspace.h> // PSTR_ATTR
+#include <stdio.h> // printf
 #endif
 
 #if STRING_IN_FLASH && !defined(USE_OPTIMIZE_PRINTF)
@@ -58,7 +59,6 @@
 // native os_printf() does not understand ("%hhx",0x12345678) => "78") and prints 'h' instead
 // esp-quick-toolchain's newlib ::printf() does, but make sure to use the most recent one (>=4.0.0)
 // apply the same optimization as osapi.h does whenever STRING_IN_FLASH is requested
-#include <stdio.h>
 #if STRING_IN_FLASH
 #define udoprintf(fmt, ...) \
 do { \
