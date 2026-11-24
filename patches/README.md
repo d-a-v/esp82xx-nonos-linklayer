@@ -23,6 +23,17 @@ $ stg import --series ../patches/series  # apply patch series to the working tre
 ```
 
 Refresh existing patch series, remove from it or add any new patches. See https://stacked-git.github.io/guides/tutorial/ for the full `stg` tutorial.
+```console
+$ cd lwip2-src/
+$ stg new my-new-patch.patch
+...
+$ stg goto some-old-patch.patch
+...
+$ git add ...  # stage changes
+$ stg refresh  # apply commit
+$ stg edit -e  # update commit text
+```
+
 After everything is done, export patch series files back into the repo.
 ```console
 $ cd lwip2-src/
