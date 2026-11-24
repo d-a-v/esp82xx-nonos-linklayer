@@ -3572,15 +3572,6 @@
 #define PING_DEBUG          LWIP_DBG_ON
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/**
- * TCP_RANDOM_PORT: randomize port instead of simply increasing
- */
-#define TCP_RANDOM_PORT 1
-
 /*
    --------------------------------------------------
    ------------------ SNTP options ------------------

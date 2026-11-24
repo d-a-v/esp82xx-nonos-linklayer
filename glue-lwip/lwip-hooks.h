@@ -15,3 +15,11 @@ extern void lwip_hook_dhcp_amend_options(struct netif *netif, struct dhcp *dhcp,
    if ((msg_type) == DHCP_DISCOVER) \
       *(option_len_ptr) = dhcp_option_hostname(*(option_len_ptr), (msg)->options, netif); \
 }
+
+/** after tcp_init, randomize port in tcp_new_port yet again instead of
+ * simply incrementing by 1. note of lazy expansion, this gets called
+ * in the middle of tcp.c */
+#if defined LWIP_RAND
+#define LWIP_HOOK_TCP_NEW_PORT(PORT) \
+	(PORT) = TCP_ENSURE_LOCAL_PORT_RANGE(LWIP_RAND())
+#endif

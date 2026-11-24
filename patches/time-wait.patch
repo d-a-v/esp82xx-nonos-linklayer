@@ -16,10 +16,10 @@ Signed-off-by: Maxim Prokhorov <prokhorov.max@outlook.com>
  2 files changed, 7 insertions(+), 1 deletion(-)
 
 diff --git a/src/core/tcp.c b/src/core/tcp.c
-index 34e1ac20..4894c502 100644
+index 8c252189..7241130d 100644
 --- a/src/core/tcp.c
 +++ b/src/core/tcp.c
-@@ -1786,7 +1786,7 @@ tcp_kill_state(enum tcp_state state)
+@@ -1784,7 +1784,7 @@ tcp_kill_state(enum tcp_state state)
   * Kills the oldest connection that is in TIME_WAIT state.
   * Called from tcp_alloc() if no more connections are available.
   */
