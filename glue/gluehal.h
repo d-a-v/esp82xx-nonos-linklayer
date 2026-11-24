@@ -43,6 +43,17 @@ uint32_t lwip_xt_ccount (void)
 	return ccount;
 }
 
+// ref. extern unsigned r_rand (void); from nonos
+// ref. extern unsigned phy_get_rand (void); from nonos
+// ref. extern uint32_t esp_random (void); from rtos
+// follows the function chain and reads the value addresses directly
+static inline
+uint32_t lwip_xt_random (void)
+{
+	extern uint32_t adc_rand_noise;
+	return (*(volatile uint32_t*)(&adc_rand_noise) ^ (*(volatile uint32_t*)(0x3ff20e44)));
+}
+
 #ifdef __cplusplus
 }
 #endif

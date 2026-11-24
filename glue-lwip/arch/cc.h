@@ -114,9 +114,9 @@ unsigned long millis(void);
 // previous implementations disabled it and always returne 0
 #define sys_jiffies() ((u32_t)lwip_xt_ccount())
 
-// lwip1.4 used this useful undocumented function
-// ref. NONOSDK*/libwpa.a
-#define LWIP_RAND r_rand
+// lwip1.4 used r_rand undocumented function, ref. NONOSDK*/libwpa.a
+// see gluehal.h for the r_rand replacement
+#define LWIP_RAND lwip_xt_random
 
 #define IPSTR "%d.%d.%d.%d"
 #define IP2STR(ipaddr) ip4_addr1_16(ipaddr), \
