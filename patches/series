@@ -12,3 +12,4 @@ napt.patch
 sys_now_inlined.patch
 tcp-random-port.patch
 time-wait.patch
+dhcp6-dbg-unused.patch
