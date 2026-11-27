@@ -71,7 +71,6 @@ void dhcps_start(struct ip_info *info);
 //#define netif_ap  (&netif_git[SOFTAP_IF])
 
 struct netif netif_git[2];
-int netif_enabled[2] = { 0, 0 };
 const char netif_name[2][8] = { "station", "soft-ap" };
 
 int __attribute__((weak)) doprint_allow = 0; // for doprint()
@@ -396,7 +395,7 @@ void esp2glue_netif_update (int netif_idx, uint32_t ip, uint32_t mask, uint32_t 
 #endif
 	ip4_addr_t aip = { ip }, amask = { mask }, agw = { gw };
 	netif_set_addr(&netif_git[netif_idx], &aip, &amask, &agw);
-	esp2glue_netif_set_up1down0(netif_idx, 1);
+	esp2glue_netif_set_up(netif_idx);
 
 	netif_git[netif_idx].flags |= NETIF_FLAG_ETHARP;
 	netif_git[netif_idx].flags |= NETIF_FLAG_BROADCAST;
@@ -473,53 +472,39 @@ void esp2glue_dhcps_start (struct ip_info* info)
 	dhcps_start(info);
 }
 
-void esp2glue_netif_set_up1down0 (int netif_idx, int up1_or_down0)
+void esp2glue_netif_set_up (int netif_idx)
 {
-	uprint(DBG "netif %d: set %s\n", netif_idx, up1_or_down0? "up": "down");
+	uprint(DBG "netif %d: set up\n", netif_idx);
 	struct netif* netif = &netif_git[netif_idx];
-	if (up1_or_down0)
-	{
-        // netif is brought UP
 
-		netif_set_link_up(netif);
+	// netif is brought UP
+	netif_set_link_up(netif);
 
-		// We are called more often that it should by FW at boot time,
-		// there is no need to uselessly shake the network interface:
-		// netif_set_up(netif); <-- unwanted call to netif_sta_status_callback()
-		netif->flags |= NETIF_FLAG_UP;
-#if ARDUINO
-		//if (!netif_enabled[netif_idx])
-		{
-		    netif_enabled[netif_idx] = 1;
-		    //netif_status_changed(netif) was here but is now called from lwIP by netif->status_callback()
-		}
-#endif
-	}
-	else
-	{
-        // netif is pulled DOWN
+	// We are called more often that it should by FW at boot time,
+	// there is no need to uselessly shake the network interface:
+	// netif_set_up(netif); <-- unwanted call to netif_sta_status_callback()
+	netif->flags |= NETIF_FLAG_UP;
+}
 
-		// stop dhcp client (if started)
-		dhcp_release_and_stop(netif);
+void esp2glue_netif_set_down (int netif_idx)
+{
+	uprint(DBG "netif %d: set down\n", netif_idx);
+	struct netif* netif = &netif_git[netif_idx];
 
-		// need to do this and pass it to esp
-		// (through netif_sta_status_callback())
-		// to update users's view of state
-		memset(&netif->ip_addr, 0, sizeof(netif->ip_addr));
-		memset(&netif->netmask, 0, sizeof(netif->netmask));
-		memset(&netif->gw, 0, sizeof(netif->gw));
+	// netif is pulled DOWN
+	// stop dhcp client (if started)
+	dhcp_release_and_stop(netif);
 
-		netif_set_link_down(netif);
-		netif_set_down(netif);
+	// need to do this and pass it to esp
+	// (through netif_sta_status_callback())
+	// to update users's view of state
+	memset(&netif->ip_addr, 0, sizeof(netif->ip_addr));
+	memset(&netif->netmask, 0, sizeof(netif->netmask));
+	memset(&netif->gw, 0, sizeof(netif->gw));
 
-		if (netif_default == &netif_git[netif_idx])
-			netif_set_default(NULL);
-#if ARDUINO
-		//if (netif_enabled[netif_idx])
-		{
-		    netif_enabled[netif_idx] = 0;
-		    //netif_status_changed(netif) was here but is now called from lwIP by netif->status_callback()
-		}
-#endif
-	}
+	netif_set_link_down(netif);
+	netif_set_down(netif);
+
+	if (netif_default == &netif_git[netif_idx])
+		netif_set_default(NULL);
 }

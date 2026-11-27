@@ -391,7 +391,7 @@ void dhcps_start (struct ip_info* info)
 	// but we should get this info back through glue
 	//netif_ap->flags |= NETIF_FLAG_UP | NETIF_FLAG_LINK_UP;
 	if (netif_esp[SOFTAP_IF])
-		esp2glue_netif_set_up1down0(netif_esp[SOFTAP_IF]->num, 1);
+		esp2glue_netif_set_up(netif_esp[SOFTAP_IF]->num);
 
 	esp2glue_dhcps_start(info);
 }
@@ -623,7 +623,7 @@ void netif_set_down (struct netif* netif)
 	// * restart dhcp-server _without_ netif_set_up.
 
 	netif->flags &= ~(NETIF_FLAG_UP | NETIF_FLAG_LINK_UP);
-	esp2glue_netif_set_up1down0(netif->num, 0);
+	esp2glue_netif_set_down(netif->num);
 
 	// this seems sufficient
 	//netif_disable(netif);
@@ -635,7 +635,7 @@ void netif_set_up (struct netif* netif)
 	stub_display_netif(netif);
 
 	netif->flags |= (NETIF_FLAG_UP |  NETIF_FLAG_LINK_UP);
-	esp2glue_netif_set_up1down0(netif->num, 1);
+	esp2glue_netif_set_up(netif->num);
 }
 
 struct pbuf* pbuf_alloc (pbuf_layer layer, u16_t length, pbuf_type type)
