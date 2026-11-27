@@ -388,11 +388,11 @@ static void ICACHE_FLASH_ATTR send_offer(struct dhcps_msg *m)
 #endif
             return;
         }
-        if (!lwiperr_check("send_offer", udp_sendto( pcb_dhcps, p, &broadcast_dhcps, DHCPS_CLIENT_PORT ))){
+		if (ERR_OK != udp_sendto( pcb_dhcps, p, &broadcast_dhcps, DHCPS_CLIENT_PORT )){
 #if DHCPS_DEBUG
-            os_printf("dhcps: send_offer>>udp_sendto\n");
+			os_printf("dhcps: send_offer>>udp_sendto\n");
 #endif
-	}
+		}
         if(p->ref != 0){
 #if DHCPS_DEBUG
             os_printf("udhcp: send_offer>>free pbuf\n");
@@ -448,7 +448,11 @@ static void ICACHE_FLASH_ATTR send_nak(struct dhcps_msg *m)
 #endif
             return;
         }
-        lwiperr_check("dhcps send nak", udp_sendto( pcb_dhcps, p, &broadcast_dhcps, DHCPS_CLIENT_PORT ));
+		if (ERR_OK != udp_sendto( pcb_dhcps, p, &broadcast_dhcps, DHCPS_CLIENT_PORT )) {
+#if DHCPS_DEBUG
+            os_printf("udhcp: send_nak>>udp_sendto\n");
+#endif
+		}
         if(p->ref != 0){
 #if DHCPS_DEBUG
             os_printf("udhcp: send_nak>>free pbuf\n");
@@ -505,7 +509,7 @@ static void ICACHE_FLASH_ATTR send_ack(struct dhcps_msg *m)
 #endif
             return;
         }
-        if (!lwiperr_check("dhcps send ack", udp_sendto( pcb_dhcps, p, &broadcast_dhcps, DHCPS_CLIENT_PORT ))){
+        if (ERR_OK != udp_sendto( pcb_dhcps, p, &broadcast_dhcps, DHCPS_CLIENT_PORT )){
 #if DHCPS_DEBUG
             os_printf("dhcps: send_ack>>udp_sendto\n");
 #endif

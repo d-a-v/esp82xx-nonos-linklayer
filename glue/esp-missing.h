@@ -8,8 +8,6 @@
 
 // these declarations are missing from sdk and used by lwip1.4 from sdk2.0.0
 
-uint32_t r_rand (void);
-
 // TODO: Patch these in from SDK
 
 #if ARDUINO

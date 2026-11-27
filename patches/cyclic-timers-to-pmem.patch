@@ -12,7 +12,7 @@ Frees 64 bytes of heap
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/core/timeouts.c b/src/core/timeouts.c
-index f37acfec..71db3c7d 100644
+index f37acfec9..71db3c7d5 100644
 --- a/src/core/timeouts.c
 +++ b/src/core/timeouts.c
 @@ -74,7 +74,7 @@

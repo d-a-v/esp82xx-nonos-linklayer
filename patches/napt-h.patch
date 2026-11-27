@@ -9,7 +9,7 @@ Subject: napt.h patch port from 2.0.x, untested
 
 diff --git a/src/include/lwip/napt.h b/src/include/lwip/napt.h
 new file mode 100644
-index 00000000..aecb43be
+index 000000000..aecb43bed
 --- /dev/null
 +++ b/src/include/lwip/napt.h
 @@ -0,0 +1,153 @@

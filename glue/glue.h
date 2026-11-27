@@ -43,6 +43,7 @@ author: d. gauchard
 #endif
 
 #include "gluedebug.h"
+#include "gluehal.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -63,59 +64,54 @@ extern "C"
 }
 #endif
 
-typedef enum
-{
-	GLUE_ERR_OK         = 0,
-	GLUE_ERR_MEM        = -1,
-	GLUE_ERR_BUF        = -2,
-	GLUE_ERR_TIMEOUT    = -3,
-	GLUE_ERR_RTE        = -4,
+typedef enum {
+	GLUE_ERR_OK = 0,
+	GLUE_ERR_MEM = -1,
+	GLUE_ERR_BUF = -2,
+	GLUE_ERR_TIMEOUT = -3,
+	GLUE_ERR_RTE = -4,
 	GLUE_ERR_INPROGRESS = -5,
-	GLUE_ERR_VAL        = -6,
+	GLUE_ERR_VAL = -6,
 	GLUE_ERR_WOULDBLOCK = -7,
-	GLUE_ERR_USE        = -8,
-	GLUE_ERR_ALREADY    = -9,
-	GLUE_ERR_ISCONN     = -10,
-	GLUE_ERR_CONN       = -11,
-	GLUE_ERR_IF         = -12,
-	GLUE_ERR_ABRT       = -13,
-	GLUE_ERR_RST        = -14,
-	GLUE_ERR_CLSD       = -15,
-	GLUE_ERR_ARG        = -16
+	GLUE_ERR_USE = -8,
+	GLUE_ERR_ALREADY = -9,
+	GLUE_ERR_ISCONN = -10,
+	GLUE_ERR_CONN = -11,
+	GLUE_ERR_IF = -12,
+	GLUE_ERR_ABRT = -13,
+	GLUE_ERR_RST = -14,
+	GLUE_ERR_CLSD = -15,
+	GLUE_ERR_ARG = -16,
 } err_glue_t;
 
-typedef enum
-{
-	GLUE_NETIF_FLAG_BROADCAST	= 1,
-	GLUE_NETIF_FLAG_UP		= 2,
-	GLUE_NETIF_FLAG_ETHARP		= 4,
-	GLUE_NETIF_FLAG_IGMP		= 8,
-	GLUE_NETIF_FLAG_LINK_UP		= 16,
+typedef enum {
+	GLUE_NETIF_FLAG_BROADCAST = 1,
+	GLUE_NETIF_FLAG_UP = 2,
+	GLUE_NETIF_FLAG_ETHARP = 4,
+	GLUE_NETIF_FLAG_IGMP = 8,
+	GLUE_NETIF_FLAG_LINK_UP = 16,
 } glue_netif_flags_t;
 
-void		esp2glue_lwip_init		(void);
-void		esp2glue_espconn_init		(void);
-void		esp2glue_dhcps_start		(struct ip_info* info);
-err_glue_t	esp2glue_dhcp_start		(int netif_idx);
-void		esp2glue_dhcp_stop		(int netif_idx);
-void		esp2glue_netif_updated		(int netif_idx, uint32_t ip, uint32_t mask, uint32_t gw, glue_netif_flags_t flags, size_t hwlen, const uint8_t* hw /*, void* state*/);
-err_glue_t	esp2glue_ethernet_input		(int netif_idx, void* glue_pbuf);
-void		esp2glue_alloc_for_recv		(size_t len, void** glue_pbuf, void** glue_data);
-void		esp2glue_pbuf_freed		(void* ref_saved);
-void		esp2glue_netif_set_default	(int netif_idx);
-void		esp2glue_netif_update		(int netif_idx, uint32_t ip, uint32_t mask, uint32_t gw, size_t hwlen, const uint8_t* hwaddr, uint16_t mtu);
-void		esp2glue_netif_set_up1down0	(int netif_idx, int up1_or_down0);
+void esp2glue_lwip_init(void);
+void esp2glue_espconn_init(void);
 
-void		glue2esp_ifupdown		(int netif_idx, uint32_t ip, uint32_t mask, uint32_t gw);
-err_glue_t	glue2esp_linkoutput		(int netif_idx, void* ref2save, void* data, size_t size);
+void esp2glue_dhcps_start(struct ip_info* info);
+err_glue_t esp2glue_dhcp_start(int netif_idx);
+void esp2glue_dhcp_stop(int netif_idx);
 
-// fixed definitions from esp8266/arduino
-// renamed with lwip_ to avoid name collision
-// reference and credits: https://github.com/esp8266/Arduino/pull/6301
-#ifndef __STRINGIFY
-#define __STRINGIFY(a) #a
-#endif
-#define lwip_xt_rsil(level) (__extension__({uint32_t state; __asm__ __volatile__("rsil %0," __STRINGIFY(level) : "=a" (state) :: "memory"); state;}))
-#define lwip_xt_wsr_ps(state)  __asm__ __volatile__("wsr %0,ps; isync" :: "a" (state) : "memory")
+err_glue_t esp2glue_ethernet_input(int netif_idx, void* glue_pbuf);
+
+void esp2glue_alloc_for_recv(size_t len, void** glue_pbuf, void** glue_data);
+
+void esp2glue_pbuf_freed(void* ref_saved);
+
+void esp2glue_netif_set_default (int netif_idx) __attribute__((warning("do not let sdk control lwip2's default interface")));
+void esp2glue_netif_update(int netif_idx, uint32_t ip, uint32_t mask, uint32_t gw, size_t hwlen, const uint8_t* hwaddr, uint16_t mtu);
+void esp2glue_netif_set_up(int netif_idx);
+void esp2glue_netif_set_down(int netif_idx);
+
+void glue2esp_ifupdown(int netif_idx, uint32_t ip, uint32_t mask, uint32_t gw);
+
+err_glue_t glue2esp_linkoutput(int netif_idx, void* ref2save, void* data, size_t size);
 
 #endif // GLUE_H

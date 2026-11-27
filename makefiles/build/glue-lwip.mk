@@ -10,13 +10,18 @@ endif
 
 SRC := \
 	glue-lwip/lwip-git.c \
+	glue-lwip/lwip-sntp.c \
+	glue-lwip/lwip-dns-lookup-local.c \
+	glue-lwip/lwip-hook-dhcp.c \
+	glue-lwip/lwip-netif-status-changed.c \
+	glue-lwip/lwip-unhandled-packet.c \
 	glue-lwip/esp-ping.c \
 	glue-lwip/espconn.c \
 	glue-lwip/espconn_buf.c \
 	glue-lwip/espconn_tcp.c \
 	glue-lwip/espconn_udp.c
 
-SRC += $(GLUE_LWIP_SRC)
+SRC += $(glue-lwip_SRC)
 
 CPPFLAGS += \
 	-I$(BUILD_ROOT) \

@@ -1,4 +1,4 @@
-#ifndef MYLWIPOPTS_H
+#if !defined MYLWIPOPTS_H
 #define MYLWIPOPTS_H
 
 /* opt.h version lwip-2.1.3 for esp8266 */
@@ -46,8 +46,8 @@
  * without this, doxygen does not see the actual #define
  */
 
-//#if !defined LWIP_HDR_OPT_H
-//#define LWIP_HDR_OPT_H
+#if !defined MY_LWIP_HDR_OPT_H
+#define MY_LWIP_HDR_OPT_H
 
 /*
  * Include user defined options first. Anything not defined in these files
@@ -2759,8 +2759,8 @@
  * Declare your hook function prototypes in there, you may also \#include all headers
  * providing data types that are need in this file.
  */
-#ifdef __DOXYGEN__
-#define LWIP_HOOK_FILENAME "path/to/my/lwip_hooks.h"
+#if !defined LWIP_HOOK_FILENAME || defined __DOXYGEN__
+#define LWIP_HOOK_FILENAME "lwip-hooks.h"
 #endif
 
 /**
@@ -3143,7 +3143,7 @@
  *  u8_t *ptr = (u8_t*)pbuf_get_contiguous(p, buf, sizeof(buf), LWIP_MIN(option_len, sizeof(buf)), offset);
  */
 #ifdef __DOXYGEN__
-//#define LWIP_HOOK_DHCP_PARSE_OPTION(netif, dhcp, state, msg, msg_type, option, len, pbuf, offset)
+#define LWIP_HOOK_DHCP_PARSE_OPTION(netif, dhcp, state, msg, msg_type, option, len, pbuf, offset)
 #endif
 
 /**
@@ -3555,6 +3555,7 @@
 #include "lwip/debug.h"
 #include "arch/cc.h"
 #include "lwip-git-hash.h"
+
 #include <sys/time.h> // settimeofday() + struct timeval
 
 #ifndef LWIP_FEATURES
@@ -3569,46 +3570,6 @@
 #if ULWIPDEBUG
 #define PPP_DEBUG           LWIP_DBG_ON
 #define PING_DEBUG          LWIP_DBG_ON
-#endif
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/**
- * TCP_RANDOM_PORT: randomize port instead of simply increasing
- */
-#define TCP_RANDOM_PORT 1
-
-/*
-   --------------------------------------------------
-   ------------------ DHCP options ------------------
-   --------------------------------------------------
-*/
-
-#define LWIP_HOOK_DHCP_PARSE_OPTION(netif, dhcp, state, msg, msg_type, option, len, pbuf, option_value_offset) \
-    lwip_hook_dhcp_parse_option(netif, dhcp, state, msg, msg_type, option, len, pbuf, option_value_offset)
-
-// search for LWIP_HOOK_DHCP_PARSE_OPTION above for an arguments explanation
-struct netif;
-struct dhcp;
-struct dhcp_msg;
-struct pbuf;
-extern void lwip_hook_dhcp_parse_option(struct netif *netif, struct dhcp *dhcp, int state, struct dhcp_msg *msg,
-                                        int msg_type, int option, int option_len, struct pbuf *pbuf,
-                                        int option_value_offset);
-
-#if LWIP_FEATURES
-#define LWIP_HOOK_DHCP_APPEND_OPTIONS(netif, dhcp, state, msg, msg_type, option_len_ptr) { \
-   /* https://github.com/esp8266/Arduino/issues/8223 */ \
-   lwip_hook_dhcp_amend_options(netif, dhcp, state, msg, msg_type, option_len_ptr); \
-   /* https://github.com/esp8266/Arduino/issues/8247 */ \
-   if ((msg_type) == DHCP_DISCOVER) \
-      *(option_len_ptr) = dhcp_option_hostname(*(option_len_ptr), (msg)->options, netif); \
-}
-
-extern void lwip_hook_dhcp_amend_options(struct netif *netif, struct dhcp *dhcp, int state, struct dhcp_msg *msg,
-                                         int msg_type, u16 *option_len_ptr);
 #endif
 
 /*
@@ -3629,8 +3590,8 @@ extern void lwip_hook_dhcp_amend_options(struct netif *netif, struct dhcp *dhcp,
 
 #define SNTP_SUPPRESS_DELAY_CHECK 1
 #define SNTP_UPDATE_DELAY_DEFAULT 3600000   // update delay defined by a default weak function
-#define SNTP_UPDATE_DELAY sntp_update_delay_MS_rfc_not_less_than_15000()
-uint32_t SNTP_UPDATE_DELAY;
+#define SNTP_UPDATE_DELAY_NAME sntp_update_delay_MS_rfc_not_less_than_15000
+#define SNTP_UPDATE_DELAY SNTP_UPDATE_DELAY_NAME ()
 
 #if LWIP_FEATURES
 // esp8266/arduino/lwip-1.4 had 3 possible SNTP servers (constant was harcoded)
@@ -3647,22 +3608,34 @@ uint32_t SNTP_UPDATE_DELAY;
  */
 #define SNTP_STARTUP_DELAY 1                // enable startup delay
 #define SNTP_STARTUP_DELAY_FUNC_DEFAULT 0   // to 0 by default via a default weak function
-#define SNTP_STARTUP_DELAY_FUNC sntp_startup_delay_MS_rfc_not_less_than_60000()
-uint32_t SNTP_STARTUP_DELAY_FUNC;
+#define SNTP_STARTUP_DELAY_FUNC_NAME sntp_startup_delay_MS_rfc_not_less_than_60000
+#define SNTP_STARTUP_DELAY_FUNC SNTP_STARTUP_DELAY_FUNC_NAME ()
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+uint32_t SNTP_STARTUP_DELAY_FUNC_NAME (void);
+uint32_t SNTP_UPDATE_DELAY_NAME (void);
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 /*
    --------------------------------------------------
-   ------------------- LOCAL FIXES ------------------
+   ------------------ Local fixes -------------------
    --------------------------------------------------
 */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // allow to handle special packets (user redefinable)
 struct pbuf;
 struct netif;
-#ifndef LWIP_ERR_T
-#error LWIP_ERR_T definition should come from lwip1.4 from espressif
-#endif
-//#define LWIP_ERR_T s8
+
 LWIP_ERR_T lwip_unhandled_packet (struct pbuf* pbuf, struct netif* netif);
 
 // called when STA OR AP is set up or down
@@ -3670,28 +3643,39 @@ void netif_status_changed (struct netif*);
 
 /*
    --------------------------------------------------
-   ----------------- TIME-WAIT tweak ----------------
+   ------------ Public hook functions ---------------
    --------------------------------------------------
-   port @me-no-dev time-wait tweak
-   https://github.com/esp8266/Arduino/commit/07f4d4c241df2c552899857f39a4295164f686f2#diff-f8258e71e25fb9985ca3799e3d8b88ecR399
 */
 
-void tcp_kill_timewait (void);
-#define TCP_TW_LIMIT(l)                \
-  if (l) do {                          \
-    u32_t count_plus_1 = 1;            \
-    struct tcp_pcb* tmp = tcp_tw_pcbs; \
-    if (tmp)                           \
-      while ((tmp = tmp->next))        \
-        ++count_plus_1;                \
-    while (--count_plus_1 > (l))       \
-      /* kill the oldest */            \
-      /* pcb in TW state */            \
-      tcp_kill_timewait();             \
-  } while (0)
+struct ip_addr;
+struct ip4_addr;
+
+#if LWIP_IPV4 && LWIP_IPV6
+typedef struct ip_addr ip_addr_t;
+#else
+typedef struct ip4_addr ip_addr_t;
+#endif
+
+extern LWIP_ERR_T lwip_dns_lookup_local(const char *name, ip_addr_t *addr, u8_t dns_addrtype);
+#define DNS_LOOKUP_LOCAL_EXTERN lwip_dns_lookup_local
+
+struct dhcp;
+struct dhcp_msg;
+
+/** search for LWIP_HOOK_DHCP_PARSE_OPTION above for an arguments explanation */
+extern void lwip_hook_dhcp_parse_option(struct netif *netif, struct dhcp *dhcp, int state, struct dhcp_msg *msg,
+										int msg_type, int option, int option_len, struct pbuf *pbuf,
+										int option_value_offset);
+
+#define LWIP_HOOK_DHCP_PARSE_OPTION lwip_hook_dhcp_parse_option
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 /**
  * MEMP_NUM_TCP_PCB_TIME_WAIT: the number of TCP pcbs in TIME_WAIT state.
+ * esp82xx compatibility. not really a memp, manually handled when updating tw list
  * (requires the LWIP_TCP option, 0 = disabled)
  */
 #ifndef MEMP_NUM_TCP_PCB_TIME_WAIT
@@ -3708,8 +3692,5 @@ void tcp_kill_timewait (void);
 #define mem_clib_malloc(s)   pvPortMalloc(s, NULL, -1)
 #define mem_clib_calloc(n,s) pvPortZalloc(n*s, NULL, -1)
 
-#ifdef __cplusplus
-} // extern "C"
 #endif
-
 #endif /* MYLWIPOPTS_H */

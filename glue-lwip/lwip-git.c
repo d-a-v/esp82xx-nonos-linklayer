@@ -39,6 +39,7 @@ author: d. gauchard
 #include "lwip/init.h"
 #include "lwip/netif.h"
 #include "lwip/dhcp.h"
+#include "lwip/dns.h"
 #include "lwip/etharp.h"
 #include "netif/ethernet.h"
 #include "lwip/apps/sntp.h"
@@ -70,22 +71,9 @@ void dhcps_start(struct ip_info *info);
 //#define netif_ap  (&netif_git[SOFTAP_IF])
 
 struct netif netif_git[2];
-int netif_enabled[2] = { 0, 0 };
 const char netif_name[2][8] = { "station", "soft-ap" };
 
 int __attribute__((weak)) doprint_allow = 0; // for doprint()
-
-uint32_t SNTP_UPDATE_DELAY __attribute__((weak));
-uint32_t SNTP_UPDATE_DELAY
-{
-	return SNTP_UPDATE_DELAY_DEFAULT;
-}
-
-uint32_t SNTP_STARTUP_DELAY_FUNC __attribute__((weak));
-uint32_t SNTP_STARTUP_DELAY_FUNC
-{
-	return SNTP_STARTUP_DELAY_FUNC_DEFAULT;
-}
 
 err_t glue2git_err (err_glue_t err)
 {
@@ -163,11 +151,11 @@ static void new_display_netif (struct netif* netif)
 		netif->mtu,
 		netif->state);
 	if (netif->hwaddr_len == 6)
-		display_mac(netif->hwaddr);
+		uprint_display_mac(netif->hwaddr);
 	new_display_netif_flags(netif->flags);
-	display_ip32(" ip=", ip_2_ip4(&netif->ip_addr)->addr);
-	display_ip32(" mask=", ip_2_ip4(&netif->netmask)->addr);
-	display_ip32(" gw=", ip_2_ip4(&netif->gw)->addr);
+	uprint_display_ip4_addr(" ip=", ip_2_ip4(&netif->ip_addr)->addr);
+	uprint_display_ip4_addr(" mask=", ip_2_ip4(&netif->netmask)->addr);
+	uprint_display_ip4_addr(" gw=", ip_2_ip4(&netif->gw)->addr);
 	uprint("\n");
 }
 
@@ -177,16 +165,6 @@ static void new_display_netif (struct netif* netif)
 #define new_display_netif(x) do { (void)0; } while (0)
 
 #endif // !UDEBUG
-
-int lwiperr_check (const char* what, err_t err)
-{
-	if (err != ERR_OK)
-	{
-		uerror("ERROR: %s (error %d)\n", what, (int)err);
-		return 0;
-	}
-	return 1;
-}
 
 err_glue_t esp2glue_dhcp_start (int netif_idx)
 {
@@ -417,7 +395,7 @@ void esp2glue_netif_update (int netif_idx, uint32_t ip, uint32_t mask, uint32_t 
 #endif
 	ip4_addr_t aip = { ip }, amask = { mask }, agw = { gw };
 	netif_set_addr(&netif_git[netif_idx], &aip, &amask, &agw);
-	esp2glue_netif_set_up1down0(netif_idx, 1);
+	esp2glue_netif_set_up(netif_idx);
 
 	netif_git[netif_idx].flags |= NETIF_FLAG_ETHARP;
 	netif_git[netif_idx].flags |= NETIF_FLAG_BROADCAST;
@@ -482,7 +460,7 @@ err_glue_t esp2glue_ethernet_input (int netif_idx, void* received)
 	// this input is allocated by esp2glue_alloc_for_recv()
 
 	//uprint(DBG "input idx=%d netif-flags=0x%x ", netif_idx, netif_git[netif_idx].flags);
-	//display_ip32(" ip=", netif_git[netif_idx].ip_addr.addr);
+	//uprint_display_ip4_addr(" ip=", netif_git[netif_idx].ip_addr.addr);
 	//nl();
 	
 	struct netif* netif = &netif_git[netif_idx];
@@ -494,116 +472,39 @@ void esp2glue_dhcps_start (struct ip_info* info)
 	dhcps_start(info);
 }
 
-void esp2glue_netif_set_up1down0 (int netif_idx, int up1_or_down0)
+void esp2glue_netif_set_up (int netif_idx)
 {
-	uprint(DBG "netif %d: set %s\n", netif_idx, up1_or_down0? "up": "down");
+	uprint(DBG "netif %d: set up\n", netif_idx);
 	struct netif* netif = &netif_git[netif_idx];
-	if (up1_or_down0)
-	{
-        // netif is brought UP
 
-		netif_set_link_up(netif);
+	// netif is brought UP
+	netif_set_link_up(netif);
 
-		// We are called more often that it should by FW at boot time,
-		// there is no need to uselessly shake the network interface:
-		// netif_set_up(netif); <-- unwanted call to netif_sta_status_callback()
-		netif->flags |= NETIF_FLAG_UP;
-#if ARDUINO
-		//if (!netif_enabled[netif_idx])
-		{
-		    netif_enabled[netif_idx] = 1;
-		    //netif_status_changed(netif) was here but is now called from lwIP by netif->status_callback()
-		}
-#endif
-	}
-	else
-	{
-        // netif is pulled DOWN
-
-		// stop dhcp client (if started)
-		dhcp_release_and_stop(netif);
-
-		// need to do this and pass it to esp
-		// (through netif_sta_status_callback())
-		// to update users's view of state
-		memset(&netif->ip_addr, 0, sizeof(netif->ip_addr));
-		memset(&netif->netmask, 0, sizeof(netif->netmask));
-		memset(&netif->gw, 0, sizeof(netif->gw));
-
-		netif_set_link_down(netif);
-		netif_set_down(netif);
-
-		if (netif_default == &netif_git[netif_idx])
-			netif_set_default(NULL);
-#if ARDUINO
-		//if (netif_enabled[netif_idx])
-		{
-		    netif_enabled[netif_idx] = 0;
-		    //netif_status_changed(netif) was here but is now called from lwIP by netif->status_callback()
-		}
-#endif
-	}
+	// We are called more often that it should by FW at boot time,
+	// there is no need to uselessly shake the network interface:
+	// netif_set_up(netif); <-- unwanted call to netif_sta_status_callback()
+	netif->flags |= NETIF_FLAG_UP;
 }
 
-LWIP_ERR_T lwip_unhandled_packet (struct pbuf* pbuf, struct netif* netif) __attribute__((weak));
-LWIP_ERR_T lwip_unhandled_packet (struct pbuf* pbuf, struct netif* netif)
+void esp2glue_netif_set_down (int netif_idx)
 {
-	// must pbuf_free(pbuf) if packet recognized and managed then return ERR_OK
-	// default: not recognized
-	// this function may be redefined by user
-	(void)pbuf;
-	(void)netif;
-	return ERR_ARG;
+	uprint(DBG "netif %d: set down\n", netif_idx);
+	struct netif* netif = &netif_git[netif_idx];
+
+	// netif is pulled DOWN
+	// stop dhcp client (if started)
+	dhcp_release_and_stop(netif);
+
+	// need to do this and pass it to esp
+	// (through netif_sta_status_callback())
+	// to update users's view of state
+	memset(&netif->ip_addr, 0, sizeof(netif->ip_addr));
+	memset(&netif->netmask, 0, sizeof(netif->netmask));
+	memset(&netif->gw, 0, sizeof(netif->gw));
+
+	netif_set_link_down(netif);
+	netif_set_down(netif);
+
+	if (netif_default == &netif_git[netif_idx])
+		netif_set_default(NULL);
 }
-
-#if ARDUINO
-
-void netif_status_changed (struct netif*) __attribute__((weak));
-void netif_status_changed (struct netif* netif)
-{
-	(void)netif;
-}
-
-void lwip_hook_dhcp_parse_option(struct netif *netif, struct dhcp *dhcp, int state, struct dhcp_msg *msg,
-								 int msg_type, int option, int option_len, struct pbuf *pbuf,
-								 int option_value_offset) __attribute__((weak));
-
-void lwip_hook_dhcp_parse_option(struct netif *netif, struct dhcp *dhcp, int state, struct dhcp_msg *msg,
-								 int msg_type, int option, int option_len, struct pbuf *pbuf,
-								 int option_value_offset)
-{
-	(void)netif;
-	(void)dhcp;
-	(void)state;
-	(void)msg;
-	(void)msg_type;
-	(void)option;
-	(void)option_len;
-	(void)pbuf;
-	(void)option_value_offset;
-	uprint(DBG "unhandled dhcp option in lwip_hook_dhcp_parse_option()\n");
-}
-
-void lwip_hook_dhcp_amend_options(struct netif *netif, struct dhcp *dhcp, int state, struct dhcp_msg *msg,
-                                  int msg_type, u16 *option_len_ptr)
-{
-	(void)dhcp;
-	(void)state;
-	(void)msg_type;
-
-	// amend default Client-Identifier
-	// {intf.id} {intf.mac} => {01}:{AA:BB:CC:11:22:33}
-	{
-		size_t i;
-
-		msg->options[(*option_len_ptr)++] = DHCP_OPTION_CLIENT_ID;
-		msg->options[(*option_len_ptr)++] = 1 + netif->hwaddr_len;
-		msg->options[(*option_len_ptr)++] = 0x01;
-
-		for (i = 0; i < netif->hwaddr_len; ++i) {
-			msg->options[(*option_len_ptr)++] = netif->hwaddr[i];
-		}
-	}
-}
-
-#endif // ARDUINO

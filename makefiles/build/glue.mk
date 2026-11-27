@@ -10,6 +10,7 @@ endif
 
 SRC := \
 	glue/uprint.c
+SRC += $(glue_SRC)
 
 CPPFLAGS += \
 	-I$(BUILD_ROOT) \

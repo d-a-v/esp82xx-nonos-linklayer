@@ -26,7 +26,7 @@ Tests:
  2 files changed, 22 insertions(+), 13 deletions(-)
 
 diff --git a/src/core/ipv4/dhcp.c b/src/core/ipv4/dhcp.c
-index 76b9f682..9930eea0 100644
+index 76b9f682c..9930eea0b 100644
 --- a/src/core/ipv4/dhcp.c
 +++ b/src/core/ipv4/dhcp.c
 @@ -607,6 +607,7 @@ dhcp_handle_ack(struct netif *netif, struct dhcp_msg *msg_in)
@@ -58,7 +58,7 @@ index 76b9f682..9930eea0 100644
  #endif /* LWIP_DHCP_PROVIDE_DNS_SERVERS */
  }
 diff --git a/src/core/ipv6/dhcp6.c b/src/core/ipv6/dhcp6.c
-index 41444a4c..ea75e8ba 100644
+index 41444a4c7..ea75e8bac 100644
 --- a/src/core/ipv6/dhcp6.c
 +++ b/src/core/ipv6/dhcp6.c
 @@ -538,16 +538,19 @@ dhcp6_handle_config_reply(struct netif *netif, struct pbuf *p_msg_in)

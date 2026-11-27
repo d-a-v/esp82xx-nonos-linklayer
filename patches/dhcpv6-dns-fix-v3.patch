@@ -6,7 +6,7 @@ Subject:
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/include/lwip/ip_addr.h b/src/include/lwip/ip_addr.h
-index 2f977709..faa9fbcd 100644
+index 2f977709d..faa9fbcd0 100644
 --- a/src/include/lwip/ip_addr.h
 +++ b/src/include/lwip/ip_addr.h
 @@ -169,7 +169,7 @@ extern const ip_addr_t ip_addr_any_type;

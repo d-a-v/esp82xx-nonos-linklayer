@@ -108,7 +108,8 @@ install: install-headers
 GLUE_HEADERS += \
 	$(BUILD_HEADERS) \
 	$(ROOT)/glue/glue.h \
-	$(ROOT)/glue/gluedebug.h
+	$(ROOT)/glue/gluedebug.h \
+	$(ROOT)/glue/gluehal.h
 
 # hierarchy does not matter here, these replace sdk headers
 GLUE_HEADERS += $(GLUE_APP_HEADERS)

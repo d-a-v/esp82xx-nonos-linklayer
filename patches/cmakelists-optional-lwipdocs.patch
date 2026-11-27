@@ -7,7 +7,7 @@ Subject: Try to build documentation on travis, too
  1 file changed, 3 insertions(+), 1 deletion(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index f05c0f61..c2d353bf 100644
+index f05c0f616..c2d353bf6 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -17,4 +17,6 @@ include(CPack)

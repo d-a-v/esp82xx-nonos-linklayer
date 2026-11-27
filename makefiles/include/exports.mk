@@ -9,3 +9,5 @@ export CFLAGS
 export CPPFLAGS
 
 export ARFLAGS
+
+export glue-lwip_SRC

@@ -45,8 +45,13 @@ author: d. gauchard
 
 #include "esp-missing.h"
 
+#include <stdlib.h>
+
 #define DBG	"lwESP: "
 #define STUB(x) do { uerror("STUB: " #x "\n"); } while (0)
+
+// packet capture callback from esp side
+void (*phy_capture) (int netif_idx, const char* data, size_t len, int out, int success) = NULL;
 
 // guessed interface, esp blobs
 void system_pp_recycle_rx_pkt (void*);
@@ -135,7 +140,7 @@ err_glue_t esp2glue_err (err_t err)
 
 #if UDEBUG
 
-#define stub_display_ip(pre,ip) display_ip32(pre, (ip).addr)
+#define stub_display_ip(pre,ip) display_ip4_addr(pre, (ip).addr)
 
 static void stub_display_netif_flags (int flags)
 {
@@ -159,13 +164,13 @@ static void stub_display_netif (struct netif* netif)
 		netif->name[0], netif->name[1], netif->num,
 		netif->state);
 	if (netif->hwaddr_len == 6)
-		display_mac(netif->hwaddr);
+		uprint_display_mac(netif->hwaddr);
 	else
 		uprint("(no mac?)");
 	stub_display_netif_flags(netif->flags);
-	display_ip32(" ip=", netif->ip_addr.addr);
-	display_ip32(" mask=", netif->netmask.addr);
-	display_ip32(" gw=", netif->gw.addr);
+	uprint_display_ip4_addr(" ip=", netif->ip_addr.addr);
+	uprint_display_ip4_addr(" mask=", netif->netmask.addr);
+	uprint_display_ip4_addr(" gw=", netif->gw.addr);
 	uprint("\n");
 }
 
@@ -338,7 +343,7 @@ err_t ethernet_input (struct pbuf* p, struct netif* netif)
 	if (   memcmp((const char*)p->payload, netif->hwaddr, 6) == 0
 	    || memcmp((const char*)p->payload, ethbroadcast.addr, 6) == 0)
 	{
-		dump("ethinput", p->payload, p->len);
+		uprint_dump("ethinput", p->payload, p->len);
 	}
 #endif
 	// copy esp pbuf to glue pbuf
@@ -371,17 +376,22 @@ err_t ethernet_input (struct pbuf* p, struct netif* netif)
 	return glue2esp_err(esp2glue_ethernet_input(netif->num, glue_pbuf));
 }
 
+#define uprint_display_ip_info(info) \
+	uprint_display_ip4_addr("ip=", info->ip.addr); \
+	uprint_display_ip4_addr(" mask=", info->netmask.addr); \
+	uprint_display_ip4_addr(" gw=", info->gw.addr)
+
 void dhcps_start (struct ip_info* info)
 {
 	uprint(DBG "dhcps_start ");
-	display_ip_info(info);
+	uprint_display_ip_info(info);
 	uprint("\n");
 
 	///XXX this is mandatory for blobs to be happy
 	// but we should get this info back through glue
 	//netif_ap->flags |= NETIF_FLAG_UP | NETIF_FLAG_LINK_UP;
 	if (netif_esp[SOFTAP_IF])
-		esp2glue_netif_set_up1down0(netif_esp[SOFTAP_IF]->num, 1);
+		esp2glue_netif_set_up(netif_esp[SOFTAP_IF]->num);
 
 	esp2glue_dhcps_start(info);
 }
@@ -613,7 +623,7 @@ void netif_set_down (struct netif* netif)
 	// * restart dhcp-server _without_ netif_set_up.
 
 	netif->flags &= ~(NETIF_FLAG_UP | NETIF_FLAG_LINK_UP);
-	esp2glue_netif_set_up1down0(netif->num, 0);
+	esp2glue_netif_set_down(netif->num);
 
 	// this seems sufficient
 	//netif_disable(netif);
@@ -625,7 +635,7 @@ void netif_set_up (struct netif* netif)
 	stub_display_netif(netif);
 
 	netif->flags |= (NETIF_FLAG_UP |  NETIF_FLAG_LINK_UP);
-	esp2glue_netif_set_up1down0(netif->num, 1);
+	esp2glue_netif_set_up(netif->num);
 }
 
 struct pbuf* pbuf_alloc (pbuf_layer layer, u16_t length, pbuf_type type)
@@ -777,5 +787,3 @@ void glue2esp_ifupdown (int netif_idx, uint32_t ip, uint32_t mask, uint32_t gw)
 		// or down
 		netif->flags &= ~NETIF_FLAG_UP;
 }
-
-void (*phy_capture) (int netif_idx, const char* data, size_t len, int out, int success) = NULL;

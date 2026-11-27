@@ -6,7 +6,7 @@ Subject:
  1 file changed, 3 insertions(+), 1 deletion(-)
 
 diff --git a/src/core/ipv6/nd6.c b/src/core/ipv6/nd6.c
-index 81992fa3..391cfaff 100644
+index 81992fa30..391cfaffd 100644
 --- a/src/core/ipv6/nd6.c
 +++ b/src/core/ipv6/nd6.c
 @@ -739,7 +739,9 @@ nd6_input(struct pbuf *p, struct netif *inp)

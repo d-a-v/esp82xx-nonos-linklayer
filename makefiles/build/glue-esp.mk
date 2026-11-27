@@ -9,6 +9,7 @@ $(error $$lwip14includedir must point to espressif sdk lwip/include folder)
 endif
 
 SRC := $(wildcard glue-esp/*.c)
+SRC += $(glue-esp_SRC)
 
 CPPFLAGS += \
 	-I$(BUILD_ROOT) \
